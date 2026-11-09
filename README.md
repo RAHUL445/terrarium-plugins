@@ -61,6 +61,9 @@ for p in packages/*/; do ../terrarium/target/debug/terra build "$p"; done
 Open <http://localhost:8767>. Use `terra dev packages/<id>` to rebuild a plugin
 on every change.
 
+To use the plugins in the desktop or Android app, follow the host's
+[install guides](https://github.com/RAHUL445/terrarium/tree/main/docs#user-guide).
+
 ## Checks
 
 These run without a host checkout:
@@ -108,7 +111,7 @@ file digests. Never edit it by hand. To update it, run the host's
 together, rebuild every plugin and run the integration checks.
 
 Writing a new plugin: see the host's
-[plugin authoring guide](https://github.com/RAHUL445/terrarium/blob/main/docs/plugin-authoring.md).
+[plugin authoring guide](https://github.com/RAHUL445/terrarium/blob/main/docs/develop/plugin-authoring.md).
 
 ## Documentation
 

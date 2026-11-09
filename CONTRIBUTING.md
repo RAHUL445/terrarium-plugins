@@ -11,7 +11,7 @@ Changes to the runtime, sync, UI shell or SDK belong in
 
 Follow [Getting started](README.md#getting-started) to build the plugins and
 preview them against a host checkout. The host's
-[plugin authoring guide](https://github.com/RAHUL445/terrarium/blob/main/docs/plugin-authoring.md)
+[plugin authoring guide](https://github.com/RAHUL445/terrarium/blob/main/docs/develop/plugin-authoring.md)
 covers manifests, storage, queries and templates.
 
 ## Guidelines
