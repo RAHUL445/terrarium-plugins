@@ -1,0 +1,41 @@
+{
+  "state": {},
+  "home": {
+    "hidden": true
+  },
+  "rail": {
+    "default": true,
+    "order": 10
+  },
+  "body": {
+    "type": "form",
+    "submit_label": "Save note",
+    "submit": {
+      "op": "create",
+      "args": {
+        "body": "{{form.body}}",
+        "project": "{{$config.project}}",
+        "focus": "{{$page.focus}}"
+      },
+      "success": "Saved to Notes",
+      "reset": true
+    },
+    "children": [
+      {
+        "type": "text-area",
+        "name": "body",
+        "label": "Quick note",
+        "label_hidden": true,
+        "placeholder": "Catch a thought…",
+        "required": true,
+        "rows": 3
+      }
+    ]
+  },
+  "page": {
+    "size": { "default": [4, 3], "min": [3, 3], "max": [8, 6] },
+    "config": {
+      "project": { "type": "choice", "filter": false, "label": "Save to project", "any": "Page focus, or no project", "suggest": "focus_suggestions", "default": "" }
+    }
+  }
+}

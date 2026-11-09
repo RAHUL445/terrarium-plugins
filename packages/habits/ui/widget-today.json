@@ -1,0 +1,102 @@
+{
+  "state": {
+    "open": ""
+  },
+  "body": {
+    "type": "stack",
+    "gap": 8,
+    "children": [
+      {
+        "type": "list",
+        "query": "day_summary",
+        "params": {
+          "today": "{{$today}}"
+        },
+        "item": {
+          "type": "stack",
+          "gap": 6,
+          "if": "{{row.habits}}",
+          "children": [
+            {
+              "type": "text",
+              "text": "{{row.label}}"
+            },
+            {
+              "type": "progress",
+              "value": "{{row.pct}}",
+              "label": "Today's habits done"
+            }
+          ]
+        }
+      },
+      {
+        "type": "list",
+        "query": "due_today",
+        "params": {
+          "today": "{{$today}}"
+        },
+        "empty": "Nothing scheduled today. Open Habits to add a routine.",
+        "item": {
+          "type": "item",
+          "title": "{{row.title}}",
+          "done": "{{row.is_done}}",
+          "check": {
+            "checked": "{{row.is_done}}",
+            "action": {
+              "op": "checkin",
+              "args": {
+                "id": "{{row.id}}",
+                "done": "{{value}}"
+              }
+            }
+          },
+          "chips": [
+            {
+              "text": "{{row.streak_label}}",
+              "icon": "flame",
+              "tone": "accent"
+            },
+            {
+              "text": "{{row.progress_label}}",
+              "icon": "chart"
+            }
+          ],
+          "trailing": [
+            {
+              "type": "button",
+              "if": "{{row.countable}}",
+              "icon": "minus",
+              "variant": "ghost",
+              "aria_label": "One less for {{row.title}}",
+              "action": {
+                "op": "add",
+                "args": {
+                  "id": "{{row.id}}",
+                  "by": -1
+                }
+              }
+            },
+            {
+              "type": "button",
+              "if": "{{row.countable}}",
+              "icon": "plus",
+              "variant": "ghost",
+              "aria_label": "One more for {{row.title}}",
+              "action": {
+                "op": "add",
+                "args": {
+                  "id": "{{row.id}}",
+                  "by": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "home": {"order": 20},
+  "page": {
+    "size": { "default": [6, 3], "min": [3, 2], "max": [12, 6] }
+  }
+}

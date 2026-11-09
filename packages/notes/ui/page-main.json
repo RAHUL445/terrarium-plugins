@@ -1,0 +1,158 @@
+{
+  "creation": {"operation": "create", "bind": "state.creating", "prefill": "state.newText"},
+  "state": {
+    "creating": "",
+    "newText": "", "q": "", "project": "", "open": "" },
+  "body": {
+    "type": "stack", "gap": 16,
+    "children": [
+      { "type": "heading", "text": "Notes" },
+      {
+        "type": "stack", "direction": "row", "gap": 12, "wrap": true, "align": "center",
+        "children": [
+          {
+            "type": "button", "label": "New note", "icon": "plus", "variant": "primary",
+            "action": { "set": { "state.newText": "", "state.creating": "new" } }
+          },
+          { "type": "search-field", "bind": "state.q", "label": "Search notes", "label_hidden": true, "placeholder": "Search notes", "grow": 1, "basis": 220 }
+        ]
+      },
+      {
+        "type": "list", "query": "projects", "layout": "chips", "params": { "project": "{{state.project}}" },
+        "item": {
+          "type": "button", "variant": "chip", "label": "{{row.label}} · {{row.count}}", "pressed": "{{row.selected}}",
+          "action": { "set": { "state.project": "{{row.project}}" } }
+        }
+      },
+      {
+        "type": "list", "query": "list", "group": "section",
+        "params": { "q": "{{state.q}}", "project": "{{state.project}}", "utc_offset_ms": "{{$utc_offset_ms}}", "today": "{{$today}}" },
+        "empty": "No notes here yet. Start one with New note.",
+        "item": {
+          "type": "item", "title": "{{row.title}}", "subtitle": "{{row.snippet}}",
+          "action": { "set": { "state.open": "{{row.id}}" } },
+          "chips": [
+            { "text": "{{row.edited}}" },
+            { "text": "{{row.checklist}}", "icon": "steps" },
+            { "text": "{{row.project}}", "icon": "tag" }
+          ]
+        }
+      },
+      {
+        "type": "section", "title": "Trash", "collapsible": true,
+        "children": [
+          {
+            "type": "list", "query": "trash", "empty": "Trash is empty.",
+            "item": {
+              "type": "stack", "direction": "row", "align": "center", "gap": 12,
+              "children": [
+                { "type": "text", "text": "{{row.title}}", "tone": "muted", "grow": 1 },
+                {
+                  "type": "button", "label": "Restore", "aria_label": "Restore {{row.title}}",
+                  "action": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored" }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "type": "sheet", "bind": "state.open", "size": "large", "title": "Note", "query": "note", "params": { "id": "{{state.open}}" },
+        "on_close": { "op": "tidy", "args": { "id": "{{row.id}}" } },
+        "children": [
+          {
+            "type": "form", "autosave": true,
+            "submit": {
+              "op": "update",
+              "args": { "id": "{{row.id}}", "title": "{{form.title}}", "project": "{{form.project}}", "body": "{{form.body}}", "pinned": "{{form.pinned}}" }
+            },
+            "children": [
+              { "type": "text-field", "name": "title", "label": "Title", "label_hidden": true, "placeholder": "Title (or the first line)", "value": "{{row.title}}" },
+              {
+                "type": "stack", "direction": "row", "gap": 12, "wrap": true, "align": "end",
+                "children": [
+                  {
+                    "type": "text-field", "name": "project", "label": "Project", "placeholder": "None", "value": "{{row.project}}",
+                    "grow": 1, "basis": 180, "suggestions": { "query": "project_names", "column": "project" }
+                  },
+                  { "type": "toggle", "name": "pinned", "label": "Pinned", "value": "{{row.pinned}}" }
+                ]
+              },
+              {
+                "type": "markdown-editor", "name": "body", "label": "Note", "value": "{{row.body}}", "start": "preview",
+                "placeholder": "Write in Markdown. - [ ] makes a checklist.",
+                "actions": [ { "label": "To-do", "icon": "check", "op": "to_task", "arg": "text", "success": "Added to To-do" } ]
+              }
+            ]
+          },
+          {
+            "type": "stack", "direction": "row", "gap": 8,
+            "children": [
+              {
+                "type": "button", "label": "Delete note", "icon": "trash", "variant": "danger",
+                "action": { "op": "delete", "args": { "id": "{{row.id}}" }, "success": "Moved to trash", "undo": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored from trash" }, "then": { "state.open": "" } }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "sheet",
+        "bind": "state.creating",
+        "title": "Quick note",
+        "presentation": "modal",
+        "children": [
+          {
+            "type": "form",
+            "children": [
+              {
+                "type": "text-field",
+                "name": "title",
+                "label": "Title",
+                "placeholder": "Optional title"
+              },
+              {
+                "type": "text-field",
+                "name": "project",
+                "label": "Project",
+                "placeholder": "Optional project"
+              },
+              {
+                "type": "text-area",
+                "name": "body",
+                "label": "Note",
+                "rows": 8,
+                "required": true,
+                "value": "{{state.newText}}",
+                "placeholder": "Write your note\u2026"
+              }
+            ],
+            "submit": {
+              "args": {
+                "title": "{{form.title}}",
+                "project": "{{form.project}}",
+                "body": "{{form.body}}"
+              },
+              "op": "create",
+              "success": "Note saved",
+              "then": {
+                "state.creating": ""
+              }
+            },
+            "submit_label": "Save note"
+          },
+          {
+            "type": "button",
+            "label": "Cancel",
+            "action": {
+              "set": {
+                "state.creating": ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "entry": {"bind": "state.open"}
+}

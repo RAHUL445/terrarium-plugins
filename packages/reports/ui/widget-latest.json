@@ -1,0 +1,35 @@
+{
+  "state": {},
+  "body": {
+    "type": "list", "query": "latest", "params": { "today": "{{$today}}" },
+    "empty": "No reports yet. Open Reports to make your first review. Scheduled work runs while an eligible device has the app open.",
+    "item": {
+      "type": "stack", "gap": 10,
+      "children": [
+        {
+          "type": "stack", "gap": 0,
+          "children": [
+            { "type": "text", "text": "{{row.title}}" },
+            { "type": "text", "tone": "muted", "text": "{{row.label}}" }
+          ]
+        },
+        {
+          "type": "stack", "direction": "row", "gap": 24, "wrap": true,
+          "children": [
+            { "type": "stat", "label": "Tasks done", "value": "{{row.tasks_done}}", "note": "{{row.tasks_note}}", "tone": "{{row.tasks_tone}}" },
+            { "type": "stat", "if": "{{row.has_habits}}", "label": "Habits kept", "value": "{{row.habits_value}}", "note": "{{row.habits_note}}", "tone": "{{row.habits_tone}}" },
+            { "type": "stat", "label": "New notes", "value": "{{row.notes_count}}" }
+          ]
+        },
+        {
+          "type": "bar", "if": "{{row.detailed}}", "layout": "columns", "query": "daily", "params": { "id": "{{row.id}}" },
+          "label": "label", "value": "count", "title": "title"
+        }
+      ]
+    }
+  },
+  "home": {"order": 60, "collapsed": true},
+  "page": {
+    "size": { "default": [6, 4], "min": [4, 3], "max": [12, 10] }
+  }
+}

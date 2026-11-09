@@ -1,0 +1,1990 @@
+{
+ "state": {
+  "open": "",
+  "tab": "reports",
+  "create": "",
+  "skill": "",
+  "newskill": "",
+  "schedule": "",
+  "newschedule": ""
+ },
+ "body": {
+  "type": "stack",
+  "gap": 16,
+  "children": [
+   {
+    "type": "heading",
+    "text": "Reports"
+   },
+   {
+    "type": "tabs",
+    "bind": "state.tab",
+    "label": "Show",
+    "options": [
+     {
+      "value": "reports",
+      "label": "Reports"
+     },
+     {
+      "value": "skills",
+      "label": "Skills"
+     },
+     {
+      "value": "schedules",
+      "label": "Schedules"
+     }
+    ]
+   },
+   {
+    "type": "stack",
+    "if": "{{state.tab == reports}}",
+    "direction": "row",
+    "wrap": true,
+    "gap": 20,
+    "align": "start",
+    "children": [
+     {
+      "type": "stack",
+      "grow": 3,
+      "basis": 420,
+      "gap": 16,
+      "children": [
+       {
+        "type": "stack",
+        "gap": 2,
+        "children": [
+         {
+          "type": "heading",
+          "level": 2,
+          "text": "Your reports"
+         },
+         {
+          "type": "list",
+          "query": "summary",
+          "item": {
+           "type": "text",
+           "text": "{{row.label}}",
+           "tone": "muted"
+          }
+         }
+        ]
+       },
+       {
+        "type": "list",
+        "query": "latest",
+        "layout": "plain",
+        "params": {
+         "today": "{{$today}}"
+        },
+        "empty": "No reports yet. Make one for this week to see how it’s going; a new one is made every Sunday at 18:00.",
+        "item": {
+         "type": "card",
+         "children": [
+          {
+           "type": "stack",
+           "direction": "row",
+           "align": "center",
+           "gap": 12,
+           "wrap": true,
+           "children": [
+            {
+             "type": "stack",
+             "gap": 2,
+             "grow": 1,
+             "children": [
+              {
+               "type": "heading",
+               "level": 2,
+               "text": "{{row.title}}"
+              },
+              {
+               "type": "text",
+               "tone": "muted",
+               "text": "{{row.label}}"
+              }
+             ]
+            },
+            {
+             "type": "button",
+             "label": "Refresh",
+             "icon": "repeat",
+             "variant": "ghost",
+             "if": "{{row.stale}}",
+             "aria_label": "Refresh {{row.title}}",
+             "action": {
+              "op": "generate",
+              "args": {
+               "id": "{{row.id}}"
+              },
+              "success": "{{result.message}}"
+             }
+            },
+            {
+             "type": "button",
+             "label": "Open",
+             "aria_label": "Open {{row.title}}",
+             "action": {
+              "set": {
+               "state.open": "{{row.id}}"
+              }
+             }
+            }
+           ]
+          },
+          {
+           "type": "text",
+           "if": "{{row.has_ai}}",
+           "tone": "muted",
+           "text": "{{row.draft_note}}"
+          },
+          {
+           "type": "stack",
+           "direction": "row",
+           "gap": 20,
+           "wrap": true,
+           "children": [
+            {
+             "type": "stat",
+             "label": "Tasks done",
+             "value": "{{row.tasks_done}}",
+             "note": "{{row.tasks_note}}",
+             "tone": "{{row.tasks_tone}}"
+            },
+            {
+             "type": "stat",
+             "if": "{{row.has_habits}}",
+             "label": "Habits kept",
+             "value": "{{row.habits_value}}",
+             "note": "{{row.habits_note}}",
+             "tone": "{{row.habits_tone}}"
+            },
+            {
+             "type": "stat",
+             "label": "New notes",
+             "value": "{{row.notes_count}}",
+             "note": "{{row.notes_note}}",
+             "tone": "{{row.notes_tone}}"
+            }
+           ]
+          },
+          {
+           "type": "bar",
+           "if": "{{row.detailed}}",
+           "layout": "columns",
+           "query": "daily",
+           "params": {
+            "id": "{{row.id}}"
+           },
+           "label": "label",
+           "value": "count",
+           "title": "title"
+          },
+          {
+           "type": "list",
+           "query": "highlights",
+           "layout": "plain",
+           "params": {
+            "id": "{{row.id}}"
+           },
+           "item": {
+            "type": "text",
+            "text": "{{row.text}}",
+            "tone": "muted"
+           }
+          }
+         ]
+        }
+       },
+       {
+        "type": "section",
+        "title": "All reports",
+        "children": [
+         {
+          "type": "list",
+          "query": "list",
+          "params": {
+           "today": "{{$today}}"
+          },
+          "empty": "Reports you make show up here.",
+          "item": {
+           "type": "item",
+           "title": "{{row.title}}",
+           "subtitle": "{{row.label}}",
+           "action": {
+            "set": {
+             "state.open": "{{row.id}}"
+            }
+           },
+           "chips": [
+            {
+             "text": "{{row.draft_chip}}",
+             "icon": "sparkle",
+             "tone": "{{row.draft_tone}}"
+            },
+            {
+             "text": "{{row.tasks_chip}}",
+             "icon": "check"
+            },
+            {
+             "text": "{{row.habits_chip}}",
+             "icon": "flame"
+            },
+            {
+             "text": "{{row.notes_chip}}",
+             "icon": "note"
+            },
+            {
+             "text": "{{row.reflected_chip}}",
+             "icon": "edit",
+             "tone": "accent"
+            },
+            {
+             "text": "{{row.stale_chip}}",
+             "icon": "clock"
+            }
+           ]
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "stack",
+      "grow": 1,
+      "basis": 260,
+      "gap": 16,
+      "children": [
+       {
+        "type": "card",
+        "children": [
+         {
+          "type": "heading",
+          "level": 2,
+          "text": "New report"
+         },
+         {
+          "type": "button",
+          "label": "Create report…",
+          "icon": "plus",
+          "variant": "primary",
+          "action": {
+           "set": {
+            "state.create": "builtin:manager"
+           }
+          }
+         },
+         {
+          "type": "text",
+          "tone": "muted",
+          "text": "Pick dates, what data to use, and a skill for how AI should write it: for your manager, a junior, or yourself."
+         },
+         {
+          "type": "section",
+          "title": "Quick, without AI",
+          "collapsible": true,
+          "children": [
+           {
+            "type": "stack",
+            "direction": "row",
+            "gap": 8,
+            "wrap": true,
+            "children": [
+             {
+              "type": "button",
+              "variant": "chip",
+              "label": "This week",
+              "action": {
+               "op": "generate",
+               "args": {
+                "period": "week"
+               },
+               "success": "{{result.message}}",
+               "then": {
+                "state.open": "{{result.id}}"
+               }
+              }
+             },
+             {
+              "type": "button",
+              "variant": "chip",
+              "label": "Last week",
+              "action": {
+               "op": "generate",
+               "args": {
+                "period": "last_week"
+               },
+               "success": "{{result.message}}",
+               "then": {
+                "state.open": "{{result.id}}"
+               }
+              }
+             },
+             {
+              "type": "button",
+              "variant": "chip",
+              "label": "Last 7 days",
+              "action": {
+               "op": "generate",
+               "args": {
+                "period": "7d"
+               },
+               "success": "{{result.message}}",
+               "then": {
+                "state.open": "{{result.id}}"
+               }
+              }
+             },
+             {
+              "type": "button",
+              "variant": "chip",
+              "label": "This month",
+              "action": {
+               "op": "generate",
+               "args": {
+                "period": "month"
+               },
+               "success": "{{result.message}}",
+               "then": {
+                "state.open": "{{result.id}}"
+               }
+              }
+             },
+             {
+              "type": "button",
+              "variant": "chip",
+              "label": "Last month",
+              "action": {
+               "op": "generate",
+               "args": {
+                "period": "last_month"
+               },
+               "success": "{{result.message}}",
+               "then": {
+                "state.open": "{{result.id}}"
+               }
+              }
+             }
+            ]
+           },
+           {
+            "type": "section",
+            "title": "Pick dates",
+            "collapsible": true,
+            "children": [
+             {
+              "type": "form",
+              "submit": {
+               "op": "generate",
+               "args": {
+                "period": "custom",
+                "start": "{{form.start}}",
+                "end": "{{form.end}}"
+               },
+               "success": "{{result.message}}",
+               "then": {
+                "state.open": "{{result.id}}"
+               }
+              },
+              "submit_label": "Make report",
+              "children": [
+               {
+                "type": "date",
+                "name": "start",
+                "label": "From",
+                "required": true
+               },
+               {
+                "type": "date",
+                "name": "end",
+                "label": "To",
+                "required": true
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "type": "text",
+          "tone": "muted",
+          "text": "Making a report for the same dates again refreshes it and keeps what you wrote."
+         }
+        ]
+       },
+       {
+        "type": "card",
+        "children": [
+         {
+          "type": "heading",
+          "level": 2,
+          "text": "Tasks done per week"
+         },
+         {
+          "type": "bar",
+          "layout": "columns",
+          "query": "trend",
+          "label": "label",
+          "value": "tasks_done",
+          "title": "title",
+          "empty": "Weekly reports build this chart."
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "stack",
+    "if": "{{state.tab == skills}}",
+    "gap": 16,
+    "children": [
+     {
+      "type": "stack",
+      "direction": "row",
+      "align": "center",
+      "justify": "between",
+      "wrap": true,
+      "gap": 12,
+      "children": [
+       {
+        "type": "text",
+        "tone": "muted",
+        "text": "A skill tells AI how to write a report and for whom. Starters come with the plugin; edit them or add your own.",
+        "grow": 1,
+        "basis": 260
+       },
+       {
+        "type": "button",
+        "label": "New skill",
+        "icon": "plus",
+        "variant": "primary",
+        "action": {
+         "set": {
+          "state.newskill": "1"
+         }
+        }
+       }
+      ]
+     },
+     {
+      "type": "list",
+      "query": "skills",
+      "layout": "plain",
+      "empty": "No skills. Add one.",
+      "item": {
+       "type": "card",
+       "children": [
+        {
+         "type": "stack",
+         "direction": "row",
+         "align": "center",
+         "gap": 12,
+         "wrap": true,
+         "children": [
+          {
+           "type": "stack",
+           "gap": 2,
+           "grow": 1,
+           "children": [
+            {
+             "type": "heading",
+             "level": 2,
+             "text": "{{row.name}}"
+            },
+            {
+             "type": "text",
+             "tone": "muted",
+             "text": "{{row.kind}} · {{row.period_label}} · {{row.sources_label}}"
+            }
+           ]
+          },
+          {
+           "type": "button",
+           "label": "Use",
+           "icon": "sparkle",
+           "aria_label": "Create a report with {{row.name}}",
+           "action": {
+            "set": {
+             "state.create": "{{row.id}}"
+            }
+           }
+          },
+          {
+           "type": "button",
+           "label": "Edit",
+           "aria_label": "Edit {{row.name}}",
+           "action": {
+            "set": {
+             "state.skill": "{{row.id}}"
+            }
+           }
+          }
+         ]
+        },
+        {
+         "type": "text",
+         "tone": "muted",
+         "text": "{{row.prompt}}"
+        }
+       ]
+      }
+     },
+     {
+      "type": "sheet",
+      "bind": "state.skill",
+      "size": "large",
+      "title": "Edit skill",
+      "query": "skill",
+      "params": {
+       "id": "{{state.skill}}"
+      },
+      "children": [
+       {
+        "type": "form",
+        "submit_label": "Save skill",
+        "submit": {
+         "op": "save_skill",
+         "args": {
+          "id": "{{row.id}}",
+          "name": "{{form.name}}",
+          "prompt": "{{form.prompt}}",
+          "period": "{{form.period}}",
+          "sources": "{{form.sources}}",
+          "tags": "{{form.tags}}",
+          "model": "{{form.model}}"
+         },
+         "success": "{{result.message}}",
+         "then": {
+          "state.skill": ""
+         }
+        },
+        "children": [
+         {
+          "type": "text-field",
+          "name": "name",
+          "label": "Name",
+          "required": true,
+          "value": "{{row.name}}",
+          "placeholder": "e.g. Update for my manager"
+         },
+         {
+          "type": "text-area",
+          "name": "prompt",
+          "label": "What the AI should write",
+          "rows": 9,
+          "required": true,
+          "value": "{{row.prompt}}",
+          "placeholder": "Who it is for, the sections, tone and length. The data comes from the report; the AI is told never to invent anything."
+         },
+         {
+          "type": "stack",
+          "direction": "row",
+          "gap": 12,
+          "wrap": true,
+          "children": [
+           {
+            "type": "select",
+            "name": "period",
+            "label": "Usual range",
+            "value": "{{row.period}}",
+            "options": [
+             {
+              "value": "",
+              "label": "This week so far"
+             },
+             {
+              "value": "last_week",
+              "label": "Last week"
+             },
+             {
+              "value": "7d",
+              "label": "Last 7 days"
+             },
+             {
+              "value": "month",
+              "label": "This month so far"
+             },
+             {
+              "value": "last_month",
+              "label": "Last month"
+             }
+            ],
+            "grow": 1,
+            "basis": 180
+           },
+           {
+            "type": "text-field",
+            "name": "tags",
+            "label": "Only tasks tagged",
+            "value": "{{row.tags}}",
+            "placeholder": "Blank: all",
+            "grow": 1,
+            "basis": 180
+           }
+          ]
+         },
+         {
+          "type": "choice",
+          "name": "sources",
+          "label": "Data it uses",
+          "multiple": true,
+          "value": "{{row.sources}}",
+          "options": [
+           {
+            "value": "tasks",
+            "label": "Done tasks"
+           },
+           {
+            "value": "task_notes",
+            "label": "Task notes"
+           },
+           {
+            "value": "open_tasks",
+            "label": "Open tasks"
+           },
+           {
+            "value": "notes",
+            "label": "Notes"
+           },
+           {
+            "value": "habits",
+            "label": "Habits"
+           }
+          ]
+         },
+         {
+          "type": "text-field",
+          "name": "model",
+          "label": "Model",
+          "value": "{{row.model}}",
+          "placeholder": "Blank: the one in Settings → AI"
+         }
+        ]
+       },
+       {
+        "type": "stack",
+        "direction": "row",
+        "gap": 8,
+        "wrap": true,
+        "children": [
+         {
+          "type": "button",
+          "if": "{{row.edited_builtin}}",
+          "label": "Restore the starter",
+          "icon": "repeat",
+          "action": {
+           "op": "delete_skill",
+           "args": {
+            "id": "{{row.id}}",
+            "reset": true
+           },
+           "confirm": "Undo your changes to this starter?",
+           "success": "{{result.message}}",
+           "then": {
+            "state.skill": ""
+           }
+          }
+         },
+         {
+          "type": "button",
+          "label": "{{row.delete_label}}",
+          "icon": "trash",
+          "variant": "danger",
+          "action": {
+           "op": "delete_skill",
+           "args": {
+            "id": "{{row.id}}"
+           },
+           "confirm": "Remove this skill? Reports made with it keep their text.",
+           "success": "{{result.message}}",
+           "then": {
+            "state.skill": ""
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "sheet",
+      "bind": "state.newskill",
+      "size": "large",
+      "title": "New skill",
+      "children": [
+       {
+        "type": "form",
+        "submit_label": "Add skill",
+        "submit": {
+         "op": "save_skill",
+         "args": {
+          "id": "",
+          "name": "{{form.name}}",
+          "prompt": "{{form.prompt}}",
+          "period": "{{form.period}}",
+          "sources": "{{form.sources}}",
+          "tags": "{{form.tags}}",
+          "model": "{{form.model}}"
+         },
+         "success": "{{result.message}}",
+         "then": {
+          "state.newskill": ""
+         }
+        },
+        "children": [
+         {
+          "type": "text-field",
+          "name": "name",
+          "label": "Name",
+          "required": true,
+          "value": "",
+          "placeholder": "e.g. Update for my manager"
+         },
+         {
+          "type": "text-area",
+          "name": "prompt",
+          "label": "What the AI should write",
+          "rows": 9,
+          "required": true,
+          "value": "",
+          "placeholder": "Who it is for, the sections, tone and length. The data comes from the report; the AI is told never to invent anything."
+         },
+         {
+          "type": "stack",
+          "direction": "row",
+          "gap": 12,
+          "wrap": true,
+          "children": [
+           {
+            "type": "select",
+            "name": "period",
+            "label": "Usual range",
+            "value": "",
+            "options": [
+             {
+              "value": "",
+              "label": "This week so far"
+             },
+             {
+              "value": "last_week",
+              "label": "Last week"
+             },
+             {
+              "value": "7d",
+              "label": "Last 7 days"
+             },
+             {
+              "value": "month",
+              "label": "This month so far"
+             },
+             {
+              "value": "last_month",
+              "label": "Last month"
+             }
+            ],
+            "grow": 1,
+            "basis": 180
+           },
+           {
+            "type": "text-field",
+            "name": "tags",
+            "label": "Only tasks tagged",
+            "value": "",
+            "placeholder": "Blank: all",
+            "grow": 1,
+            "basis": 180
+           }
+          ]
+         },
+         {
+          "type": "choice",
+          "name": "sources",
+          "label": "Data it uses",
+          "multiple": true,
+          "value": "tasks,task_notes",
+          "options": [
+           {
+            "value": "tasks",
+            "label": "Done tasks"
+           },
+           {
+            "value": "task_notes",
+            "label": "Task notes"
+           },
+           {
+            "value": "open_tasks",
+            "label": "Open tasks"
+           },
+           {
+            "value": "notes",
+            "label": "Notes"
+           },
+           {
+            "value": "habits",
+            "label": "Habits"
+           }
+          ]
+         },
+         {
+          "type": "text-field",
+          "name": "model",
+          "label": "Model",
+          "value": "",
+          "placeholder": "Blank: the one in Settings → AI"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "stack",
+    "if": "{{state.tab == schedules}}",
+    "gap": 16,
+    "children": [
+     {
+      "type": "stack",
+      "direction": "row",
+      "align": "center",
+      "justify": "between",
+      "wrap": true,
+      "gap": 12,
+      "children": [
+       {
+        "type": "text",
+        "tone": "muted",
+        "text": "Reports made on a schedule, on whichever of your devices is open then (phones only while the app is open). Run history and retries are in Settings → Scheduled; the weekly review without AI runs Sundays at 18:00 and can be changed there.",
+        "grow": 1,
+        "basis": 260
+       },
+       {
+        "type": "button",
+        "label": "New schedule",
+        "icon": "plus",
+        "variant": "primary",
+        "action": {
+         "set": {
+          "state.newschedule": "1"
+         }
+        }
+       }
+      ]
+     },
+     {
+      "type": "list",
+      "query": "schedules",
+      "empty": "No schedules yet.",
+      "item": {
+       "type": "item",
+       "title": "{{row.name}}",
+       "subtitle": "{{row.subtitle}}",
+       "action": {
+        "set": {
+         "state.schedule": "{{row.id}}"
+        }
+       },
+       "chips": [
+        {
+         "text": "{{row.status_chip}}",
+         "tone": "{{row.status_tone}}",
+         "icon": "clock"
+        }
+       ],
+       "trailing": [
+        {
+         "type": "button",
+         "label": "Run now",
+         "variant": "ghost",
+         "aria_label": "Run {{row.name}} now",
+         "action": {
+          "op": "run_schedule",
+          "args": {
+           "id": "{{row.id}}"
+          },
+          "success": "{{result.message}}"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "sheet",
+      "bind": "state.schedule",
+      "title": "Schedule",
+      "query": "schedule",
+      "params": {
+       "id": "{{state.schedule}}"
+      },
+      "refresh": true,
+      "children": [
+       {
+        "type": "text",
+        "if": "{{row.last_error}}",
+        "tone": "danger",
+        "text": "Last run: {{row.last_error}}"
+       },
+       {
+        "type": "form",
+        "submit_label": "Save",
+        "submit": {
+         "op": "save_schedule",
+         "args": {
+          "id": "{{row.id}}",
+          "name": "{{form.name}}",
+          "skill": "{{form.skill}}",
+          "period": "{{form.period}}",
+          "every": "{{form.every}}",
+          "at": "{{form.at}}",
+          "day": "{{form.day}}",
+          "days": "{{form.days}}",
+          "sources": "{{form.sources}}",
+          "tags": "{{form.tags}}"
+         },
+         "success": "{{result.message}}",
+         "then": {
+          "state.schedule": ""
+         }
+        },
+        "children": [
+         {
+          "type": "text-field",
+          "name": "name",
+          "label": "Name",
+          "required": true,
+          "value": "{{row.name}}",
+          "placeholder": "e.g. Friday update for my manager"
+         },
+         {
+          "type": "select",
+          "name": "skill",
+          "label": "Report template",
+          "value": "{{row.skill}}",
+          "options": [
+           {
+            "value": "none",
+            "label": "No AI: numbers only"
+           },
+           {
+            "value": "custom",
+            "label": "AI, with one-off instructions"
+           }
+          ],
+          "options_query": {
+           "query": "skill_options",
+           "value": "id",
+           "label": "name"
+          }
+         },
+         {
+          "type": "select",
+          "name": "period",
+          "label": "Dates",
+          "value": "{{row.period}}",
+          "options": [
+           {
+            "value": "week",
+            "label": "This week so far"
+           },
+           {
+            "value": "last_week",
+            "label": "Last week"
+           },
+           {
+            "value": "7d",
+            "label": "Last 7 days"
+           },
+           {
+            "value": "month",
+            "label": "This month so far"
+           },
+           {
+            "value": "last_month",
+            "label": "Last month"
+           }
+          ]
+         },
+         {
+          "type": "stack",
+          "direction": "row",
+          "gap": 12,
+          "wrap": true,
+          "children": [
+           {
+            "type": "select",
+            "name": "every",
+            "label": "Repeat",
+            "value": "{{row.every}}",
+            "options": [
+             {
+              "value": "week",
+              "label": "Weekly"
+             },
+             {
+              "value": "day",
+              "label": "Every day"
+             },
+             {
+              "value": "month",
+              "label": "Monthly"
+             }
+            ],
+            "grow": 1,
+            "basis": 150
+           },
+           {
+            "type": "time",
+            "name": "at",
+            "label": "At",
+            "value": "{{row.at}}",
+            "grow": 1,
+            "basis": 120
+           },
+           {
+            "type": "text-field",
+            "name": "day",
+            "label": "Day of month (monthly)",
+            "value": "{{row.day}}",
+            "placeholder": "1–31 or last",
+            "grow": 1,
+            "basis": 150
+           }
+          ]
+         },
+         {
+          "type": "choice",
+          "name": "days",
+          "label": "On (weekly)",
+          "multiple": true,
+          "value": "{{row.days}}",
+          "options": [
+           {
+            "value": "mon",
+            "label": "Mon"
+           },
+           {
+            "value": "tue",
+            "label": "Tue"
+           },
+           {
+            "value": "wed",
+            "label": "Wed"
+           },
+           {
+            "value": "thu",
+            "label": "Thu"
+           },
+           {
+            "value": "fri",
+            "label": "Fri"
+           },
+           {
+            "value": "sat",
+            "label": "Sat"
+           },
+           {
+            "value": "sun",
+            "label": "Sun"
+           }
+          ]
+         },
+         {
+          "type": "choice",
+          "name": "sources",
+          "label": "Data to send (none picked: the skill’s choice)",
+          "multiple": true,
+          "value": "{{row.sources}}",
+          "options": [
+           {
+            "value": "tasks",
+            "label": "Done tasks"
+           },
+           {
+            "value": "task_notes",
+            "label": "Task notes"
+           },
+           {
+            "value": "open_tasks",
+            "label": "Open tasks"
+           },
+           {
+            "value": "notes",
+            "label": "Notes"
+           },
+           {
+            "value": "habits",
+            "label": "Habits"
+           }
+          ]
+         },
+         {
+          "type": "text-field",
+          "name": "tags",
+          "label": "Only tasks tagged",
+          "value": "{{row.tags}}",
+          "placeholder": "Blank: all"
+         }
+        ]
+       },
+       {
+        "type": "stack",
+        "direction": "row",
+        "gap": 8,
+        "wrap": true,
+        "children": [
+         {
+          "type": "button",
+          "if": "{{row.last_report}}",
+          "label": "Open last report",
+          "action": {
+           "set": {
+            "state.schedule": "",
+            "state.tab": "reports",
+            "state.open": "{{row.last_report}}"
+           }
+          }
+         },
+         {
+          "type": "button",
+          "label": "{{row.toggle_label}}",
+          "action": {
+           "op": "toggle_schedule",
+           "args": {
+            "id": "{{row.id}}",
+            "enabled": "{{!row.enabled}}"
+           },
+           "success": "{{result.message}}"
+          }
+         },
+         {
+          "type": "button",
+          "label": "Delete",
+          "icon": "trash",
+          "variant": "danger",
+          "action": {
+           "op": "delete_schedule",
+           "args": {
+            "id": "{{row.id}}"
+           },
+           "confirm": "Remove this schedule? Reports it made stay.",
+           "success": "{{result.message}}",
+           "then": {
+            "state.schedule": ""
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "sheet",
+      "bind": "state.newschedule",
+      "title": "New schedule",
+      "children": [
+       {
+        "type": "form",
+        "submit_label": "Add schedule",
+        "submit": {
+         "op": "save_schedule",
+         "args": {
+          "id": "",
+          "name": "{{form.name}}",
+          "skill": "{{form.skill}}",
+          "period": "{{form.period}}",
+          "every": "{{form.every}}",
+          "at": "{{form.at}}",
+          "day": "{{form.day}}",
+          "days": "{{form.days}}",
+          "sources": "{{form.sources}}",
+          "tags": "{{form.tags}}"
+         },
+         "success": "{{result.message}}",
+         "then": {
+          "state.newschedule": ""
+         }
+        },
+        "children": [
+         {
+          "type": "text-field",
+          "name": "name",
+          "label": "Name",
+          "required": true,
+          "value": "",
+          "placeholder": "e.g. Friday update for my manager"
+         },
+         {
+          "type": "select",
+          "name": "skill",
+          "label": "Report template",
+          "value": "builtin:manager",
+          "options": [
+           {
+            "value": "none",
+            "label": "No AI: numbers only"
+           },
+           {
+            "value": "custom",
+            "label": "AI, with one-off instructions"
+           }
+          ],
+          "options_query": {
+           "query": "skill_options",
+           "value": "id",
+           "label": "name"
+          }
+         },
+         {
+          "type": "select",
+          "name": "period",
+          "label": "Dates",
+          "value": "last_week",
+          "options": [
+           {
+            "value": "week",
+            "label": "This week so far"
+           },
+           {
+            "value": "last_week",
+            "label": "Last week"
+           },
+           {
+            "value": "7d",
+            "label": "Last 7 days"
+           },
+           {
+            "value": "month",
+            "label": "This month so far"
+           },
+           {
+            "value": "last_month",
+            "label": "Last month"
+           }
+          ]
+         },
+         {
+          "type": "stack",
+          "direction": "row",
+          "gap": 12,
+          "wrap": true,
+          "children": [
+           {
+            "type": "select",
+            "name": "every",
+            "label": "Repeat",
+            "value": "week",
+            "options": [
+             {
+              "value": "week",
+              "label": "Weekly"
+             },
+             {
+              "value": "day",
+              "label": "Every day"
+             },
+             {
+              "value": "month",
+              "label": "Monthly"
+             }
+            ],
+            "grow": 1,
+            "basis": 150
+           },
+           {
+            "type": "time",
+            "name": "at",
+            "label": "At",
+            "value": "17:00",
+            "grow": 1,
+            "basis": 120
+           },
+           {
+            "type": "text-field",
+            "name": "day",
+            "label": "Day of month (monthly)",
+            "value": "1",
+            "placeholder": "1–31 or last",
+            "grow": 1,
+            "basis": 150
+           }
+          ]
+         },
+         {
+          "type": "choice",
+          "name": "days",
+          "label": "On (weekly)",
+          "multiple": true,
+          "value": "fri",
+          "options": [
+           {
+            "value": "mon",
+            "label": "Mon"
+           },
+           {
+            "value": "tue",
+            "label": "Tue"
+           },
+           {
+            "value": "wed",
+            "label": "Wed"
+           },
+           {
+            "value": "thu",
+            "label": "Thu"
+           },
+           {
+            "value": "fri",
+            "label": "Fri"
+           },
+           {
+            "value": "sat",
+            "label": "Sat"
+           },
+           {
+            "value": "sun",
+            "label": "Sun"
+           }
+          ]
+         },
+         {
+          "type": "choice",
+          "name": "sources",
+          "label": "Data to send (none picked: the skill’s choice)",
+          "multiple": true,
+          "value": "",
+          "options": [
+           {
+            "value": "tasks",
+            "label": "Done tasks"
+           },
+           {
+            "value": "task_notes",
+            "label": "Task notes"
+           },
+           {
+            "value": "open_tasks",
+            "label": "Open tasks"
+           },
+           {
+            "value": "notes",
+            "label": "Notes"
+           },
+           {
+            "value": "habits",
+            "label": "Habits"
+           }
+          ]
+         },
+         {
+          "type": "text-field",
+          "name": "tags",
+          "label": "Only tasks tagged",
+          "value": "",
+          "placeholder": "Blank: all"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "sheet",
+    "bind": "state.open",
+    "size": "large",
+    "refresh": true,
+    "title": "{{row.title}}",
+    "query": "report",
+    "params": {
+     "id": "{{state.open}}",
+     "today": "{{$today}}"
+    },
+    "children": [
+     {
+      "type": "text",
+      "tone": "muted",
+      "text": "{{row.info}}"
+     },
+     {
+      "type": "text",
+      "if": "{{row.has_ai}}",
+      "tone": "muted",
+      "text": "{{row.draft_note}}"
+     },
+     {
+      "type": "ai-status",
+      "if": "{{row.has_ai}}",
+      "model": "{{row.model}}"
+     },
+     {
+      "type": "markdown",
+      "if": "{{row.has_draft}}",
+      "text": "{{row.draft}}"
+     },
+     {
+      "type": "stack",
+      "if": "{{row.has_ai}}",
+      "direction": "row",
+      "gap": 8,
+      "wrap": true,
+      "children": [
+       {
+        "type": "button",
+        "if": "{{row.can_send}}",
+        "label": "{{row.send_label}}",
+        "icon": "sparkle",
+        "variant": "primary",
+        "action": {
+         "op": "send",
+         "args": {
+          "id": "{{row.id}}"
+         },
+         "success": "{{result.message}}"
+        }
+       },
+       {
+        "type": "button",
+        "if": "{{row.can_rewrite}}",
+        "label": "Write again",
+        "icon": "repeat",
+        "action": {
+         "op": "send",
+         "args": {
+          "id": "{{row.id}}"
+         },
+         "confirm": "Write it again? The current text is replaced.",
+         "success": "{{result.message}}"
+        }
+       }
+      ]
+     },
+     {
+      "type": "section",
+      "title": "Ask for changes",
+      "collapsible": true,
+      "if": "{{row.has_draft}}",
+      "children": [
+       {
+        "type": "form",
+        "submit_label": "Rewrite with changes",
+        "submit": {
+         "op": "send",
+         "args": {
+          "id": "{{row.id}}",
+          "feedback": "{{form.feedback}}"
+         },
+         "success": "{{result.message}}"
+        },
+        "children": [
+         {
+          "type": "text-area",
+          "name": "feedback",
+          "label": "What should change?",
+          "rows": 3,
+          "placeholder": "e.g. Shorter. Lead with blockers. Drop the habits part."
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "section",
+      "title": "Edit the text",
+      "collapsible": true,
+      "if": "{{row.has_draft}}",
+      "children": [
+       {
+        "type": "form",
+        "submit_label": "Save text",
+        "submit": {
+         "op": "edit_draft",
+         "args": {
+          "id": "{{row.id}}",
+          "draft": "{{form.draft}}"
+         },
+         "success": "Saved"
+        },
+        "children": [
+         {
+          "type": "text-area",
+          "name": "draft",
+          "label": "Report",
+          "label_hidden": true,
+          "rows": 14,
+          "value": "{{row.draft}}"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "section",
+      "title": "What is sent to AI",
+      "collapsible": true,
+      "if": "{{row.has_ai}}",
+      "open": "{{row.draft_status == ready}}",
+      "children": [
+       {
+        "type": "text",
+        "tone": "muted",
+        "text": "Data: {{row.sources_label}}. Tasks tagged #private are never sent."
+       },
+       {
+        "type": "markdown",
+        "text": "{{row.facts}}"
+       },
+       {
+        "type": "section",
+        "title": "Instructions",
+        "collapsible": true,
+        "children": [
+         {
+          "type": "text",
+          "text": "{{row.prompt}}"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "stack",
+      "direction": "row",
+      "gap": 20,
+      "wrap": true,
+      "children": [
+       {
+        "type": "stat",
+        "label": "Tasks done",
+        "value": "{{row.tasks_done}}",
+        "note": "{{row.tasks_note}}",
+        "tone": "{{row.tasks_tone}}"
+       },
+       {
+        "type": "stat",
+        "if": "{{row.has_habits}}",
+        "label": "Habits kept",
+        "value": "{{row.habits_value}}",
+        "note": "{{row.habits_note}}",
+        "tone": "{{row.habits_tone}}"
+       },
+       {
+        "type": "stat",
+        "label": "New notes",
+        "value": "{{row.notes_count}}",
+        "note": "{{row.notes_note}}",
+        "tone": "{{row.notes_tone}}"
+       },
+       {
+        "type": "stat",
+        "label": "Notes edited",
+        "value": "{{row.notes_edited}}"
+       }
+      ]
+     },
+     {
+      "type": "markdown",
+      "if": "{{!row.detailed}}",
+      "text": "{{row.summary}}"
+     },
+     {
+      "type": "section",
+      "title": "Tasks per day",
+      "if": "{{row.detailed}}",
+      "children": [
+       {
+        "type": "bar",
+        "layout": "columns",
+        "query": "daily",
+        "params": {
+         "id": "{{state.open}}"
+        },
+        "label": "label",
+        "value": "count",
+        "title": "title"
+       }
+      ]
+     },
+     {
+      "type": "list",
+      "query": "highlights",
+      "layout": "plain",
+      "params": {
+       "id": "{{state.open}}"
+      },
+      "item": {
+       "type": "text",
+       "text": "{{row.text}}"
+      }
+     },
+     {
+      "type": "section",
+      "title": "Habits",
+      "if": "{{row.has_habits}}",
+      "children": [
+       {
+        "type": "bar",
+        "query": "habits",
+        "params": {
+         "id": "{{state.open}}"
+        },
+        "label": "title",
+        "value": "rate",
+        "max": 100,
+        "value_label": "label"
+       }
+      ]
+     },
+     {
+      "type": "section",
+      "title": "Tags",
+      "if": "{{row.has_tags}}",
+      "children": [
+       {
+        "type": "list",
+        "query": "tags",
+        "layout": "chips",
+        "params": {
+         "id": "{{state.open}}"
+        },
+        "item": {
+         "type": "badge",
+         "text": "{{row.label}}"
+        }
+       }
+      ]
+     },
+     {
+      "type": "section",
+      "title": "Completed tasks",
+      "collapsible": true,
+      "if": "{{row.detailed}}",
+      "children": [
+       {
+        "type": "list",
+        "query": "tasks",
+        "group": "day",
+        "params": {
+         "id": "{{state.open}}"
+        },
+        "empty": "Nothing finished in this range.",
+        "item": {
+         "type": "item",
+         "title": "{{row.title}}"
+        }
+       }
+      ]
+     },
+     {
+      "type": "section",
+      "title": "New notes",
+      "collapsible": true,
+      "if": "{{row.notes_count}}",
+      "children": [
+       {
+        "type": "list",
+        "query": "notes",
+        "params": {
+         "id": "{{state.open}}"
+        },
+        "item": {
+         "type": "item",
+         "title": "{{row.title}}"
+        }
+       }
+      ]
+     },
+     {
+      "type": "section",
+      "title": "Reflection",
+      "children": [
+       {
+        "type": "form",
+        "autosave": true,
+        "submit": {
+         "op": "reflect",
+         "args": {
+          "id": "{{row.id}}",
+          "wins": "{{form.wins}}",
+          "focus": "{{form.focus}}"
+         }
+        },
+        "children": [
+         {
+          "type": "text-area",
+          "name": "wins",
+          "label": "What went well?",
+          "rows": 3,
+          "value": "{{row.wins}}",
+          "placeholder": "Wins, small or big…"
+         },
+         {
+          "type": "text-area",
+          "name": "focus",
+          "label": "What to focus on next?",
+          "rows": 3,
+          "value": "{{row.focus}}",
+          "placeholder": "One or two things that matter most…"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "stack",
+      "direction": "row",
+      "gap": 8,
+      "wrap": true,
+      "children": [
+       {
+        "type": "button",
+        "label": "Refresh data",
+        "icon": "repeat",
+        "variant": "primary",
+        "action": {
+         "op": "generate",
+         "args": {
+          "id": "{{row.id}}"
+         },
+         "success": "{{result.message}}"
+        }
+       },
+       {
+        "type": "button",
+        "label": "Copy as Markdown",
+        "icon": "note",
+        "action": {
+         "copy": "{{row.copy_text}}",
+         "success": "Copied"
+        }
+       },
+       {
+        "type": "button",
+        "label": "Delete",
+        "icon": "trash",
+        "variant": "danger",
+        "action": {
+         "op": "delete",
+         "args": {
+          "id": "{{row.id}}"
+         },
+         "confirm": "Delete this report? What you wrote in it goes too.",
+         "success": "Deleted",
+         "then": {
+          "state.open": ""
+         }
+        }
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "sheet",
+    "bind": "state.create",
+    "size": "large",
+    "title": "Create report",
+    "children": [
+     {
+      "type": "form",
+      "submit_label": "Create report",
+      "submit": {
+       "op": "generate",
+       "args": {
+        "skill": "{{form.skill}}",
+        "period": "{{form.period}}",
+        "start": "{{form.start}}",
+        "end": "{{form.end}}",
+        "sources": "{{form.sources}}",
+        "tags": "{{form.tags}}",
+        "prompt": "{{form.prompt}}",
+        "save_as": "{{form.save_as}}",
+        "review": "{{form.review}}"
+       },
+       "success": "{{result.message}}",
+       "then": {
+        "state.create": "",
+        "state.open": "{{result.id}}",
+        "state.tab": "reports"
+       }
+      },
+      "children": [
+       {
+        "type": "select",
+        "name": "skill",
+        "label": "Report template",
+        "value": "{{state.create}}",
+        "options": [
+         {
+          "value": "none",
+          "label": "No AI: numbers only"
+         },
+         {
+          "value": "custom",
+          "label": "AI, with one-off instructions"
+         }
+        ],
+        "options_query": {
+         "query": "skill_options",
+         "value": "id",
+         "label": "name"
+        }
+       },
+       {
+        "type": "text",
+        "if": "{{form.skill == none}}",
+        "text": "Creates the usual task, note and habit statistics on this device. Nothing is sent to AI.",
+        "muted": true
+       },
+       {
+        "type": "stack",
+        "direction": "row",
+        "gap": 12,
+        "wrap": true,
+        "children": [
+         {
+          "type": "select",
+          "name": "period",
+          "label": "Dates",
+          "value": "week",
+          "options": [
+           {
+            "value": "week",
+            "label": "This week so far"
+           },
+           {
+            "value": "last_week",
+            "label": "Last week"
+           },
+           {
+            "value": "7d",
+            "label": "Last 7 days"
+           },
+           {
+            "value": "month",
+            "label": "This month so far"
+           },
+           {
+            "value": "last_month",
+            "label": "Last month"
+           },
+           {
+            "value": "custom",
+            "label": "Custom dates"
+           }
+          ],
+          "grow": 1,
+          "basis": 200
+         },
+         {
+          "type": "date",
+          "name": "start",
+          "label": "From",
+          "grow": 1,
+          "basis": 150,
+          "if": "{{form.period == custom}}",
+          "value": "{{$today}}"
+         },
+         {
+          "type": "date",
+          "name": "end",
+          "label": "To",
+          "grow": 1,
+          "basis": 150,
+          "if": "{{form.period == custom}}",
+          "value": "{{$today}}"
+         }
+        ]
+       },
+       {
+        "type": "choice",
+        "name": "sources",
+        "label": "Data to send",
+        "multiple": true,
+        "value": "tasks,task_notes,open_tasks,notes,habits",
+        "options": [
+         {
+          "value": "tasks",
+          "label": "Done tasks"
+         },
+         {
+          "value": "task_notes",
+          "label": "Task notes"
+         },
+         {
+          "value": "open_tasks",
+          "label": "Open tasks"
+         },
+         {
+          "value": "notes",
+          "label": "Notes"
+         },
+         {
+          "value": "habits",
+          "label": "Habits"
+         }
+        ],
+        "if": "{{form.skill != none}}",
+        "required": true
+       },
+       {
+        "type": "text-field",
+        "name": "tags",
+        "label": "Only tasks tagged",
+        "placeholder": "e.g. work, client (blank: all; #private is never sent)",
+        "if": "{{form.skill != none}}"
+       },
+       {
+        "type": "text-area",
+        "name": "prompt",
+        "label": "Writing instructions (optional with a template)",
+        "rows": 4,
+        "placeholder": "Needed for one-off instructions; with a skill, added to its prompt (e.g. “mention the launch first”)",
+        "if": "{{form.skill != none}}"
+       },
+       {
+        "type": "text-field",
+        "name": "save_as",
+        "label": "Save as a reusable template (optional)",
+        "placeholder": "Optional",
+        "if": "{{form.skill == custom}}"
+       },
+       {
+        "type": "toggle",
+        "name": "review",
+        "label": "Let me check the data before it’s sent",
+        "value": true,
+        "if": "{{form.skill != none}}"
+       },
+       {
+        "type": "text",
+        "if": "{{form.skill != none}}",
+        "text": "Only selected sources are sent. Tasks tagged #private are excluded. Check the exact data in the report before sending it. Configure your provider in Settings → AI.",
+        "muted": true
+       }
+      ],
+      "defaults": {
+       "field": "skill",
+       "query": "skill",
+       "params": {
+        "id": "{{form.skill}}"
+       },
+       "fields": {
+        "period": "period",
+        "sources": "sources",
+        "tags": "tags"
+       },
+       "fallback": {
+        "period": "week",
+        "sources": "tasks,task_notes,open_tasks,notes,habits",
+        "tags": ""
+       }
+      }
+     }
+    ]
+   }
+  ]
+ }
+}

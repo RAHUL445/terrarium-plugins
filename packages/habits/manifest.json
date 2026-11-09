@@ -1,0 +1,268 @@
+{
+  "id": "habits",
+  "name": "Habits",
+  "version": "0.2.0",
+  "api": "terrarium:plugin@0.1.0",
+  "description": "Scheduled habits with check-ins, reminders and sleep logs.",
+  "storage": {
+    "version": 2,
+    "tables": [
+      {
+        "name": "habits",
+        "columns": [
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "category",
+            "type": "text"
+          },
+          {
+            "name": "weekdays",
+            "type": "text"
+          },
+          {
+            "name": "reminder",
+            "type": "text"
+          },
+          {
+            "name": "notify_on",
+            "type": "text"
+          },
+          {
+            "name": "paused",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "target",
+            "type": "integer",
+            "default": 1
+          },
+          {
+            "name": "unit",
+            "type": "text"
+          },
+          {
+            "name": "started",
+            "type": "text"
+          },
+          {
+            "name": "notes",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "name": "checkins",
+        "kind": "append",
+        "columns": [
+          {
+            "name": "habit_id",
+            "type": "text"
+          },
+          {
+            "name": "day",
+            "type": "text"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "note",
+            "type": "text"
+          },
+          {
+            "name": "count",
+            "type": "integer"
+          }
+        ]
+      },
+      {
+        "name": "sleep",
+        "kind": "append",
+        "columns": [
+          {
+            "name": "day",
+            "type": "text"
+          },
+          {
+            "name": "minutes",
+            "type": "integer"
+          },
+          {
+            "name": "note",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "name": "reminders",
+        "delete_policy": "delete-wins",
+        "columns": [
+          {
+            "name": "habit_id",
+            "type": "text"
+          },
+          {
+            "name": "day",
+            "type": "text"
+          },
+          {
+            "name": "at_ms",
+            "type": "integer"
+          }
+        ]
+      }
+    ]
+  },
+  "operations": {
+    "save": {
+      "description": "Create or change a habit: title, category, weekdays (0 = Monday), target per day and unit, notes, reminder HH:MM, notify_on, paused."
+    },
+    "delete": {
+      "description": "Move a habit to trash."
+    },
+    "restore": {
+      "description": "Bring a habit back from trash."
+    },
+    "checkin": {
+      "description": "Record done, skipped or cleared for a habit on a day (default today); count sets progress toward the daily target."
+    },
+    "add": {
+      "description": "Add `by` (default 1, may be negative) to a counted habit's progress for a day (default today)."
+    },
+    "sleep_save": {
+      "description": "Log hours or minutes of sleep for a day (default today)."
+    },
+    "plan_reminders": {
+      "description": "Plan reminder notifications for the next week."
+    },
+    "summary": {
+      "description": "Completion per habit between local dates start and end."
+    }
+  },
+  "provides": {
+    "habits": {
+      "operations": [
+        "summary"
+      ]
+    }
+  },
+  "queries": {
+    "today": {
+      "sql": "WITH RECURSIVE h AS (SELECT id, weekdays, MIN(COALESCE(started, ?1), COALESCE((SELECT MIN(day) FROM checkins c WHERE c.habit_id = habits.id), ?1)) AS born FROM habits WHERE _deleted IS NULL ), walk(id, weekdays, born, day, run, mark) AS ( SELECT id, weekdays, born, date(MAX(date(?1, '-366 days'), MIN(born, date(?1, '-6 days'))), '-1 day'), 0, '' FROM h UNION ALL SELECT w.id, w.weekdays, w.born, date(w.day, '+1 day'), CASE WHEN c.status = 'done' THEN w.run + 1 WHEN date(w.day, '+1 day') < w.born THEN 0 WHEN c.status = 'skipped' OR date(w.day, '+1 day') = ?1 OR NOT instr(',' || w.weekdays || ',', ',' || ((CAST(strftime('%w', w.day, '+1 day') AS INTEGER) + 6) % 7) || ',') > 0 THEN w.run ELSE 0 END, CASE WHEN c.status = 'done' THEN 'd' WHEN c.status = 'partial' THEN 'p' WHEN c.status = 'skipped' THEN 's' WHEN date(w.day, '+1 day') < w.born OR NOT instr(',' || w.weekdays || ',', ',' || ((CAST(strftime('%w', w.day, '+1 day') AS INTEGER) + 6) % 7) || ',') > 0 THEN '-' WHEN date(w.day, '+1 day') = ?1 THEN 'o' ELSE 'm' END FROM walk w LEFT JOIN checkins c ON c.habit_id = w.id AND c.day = date(w.day, '+1 day') AND c.id = (SELECT MAX(c2.id) FROM checkins c2 WHERE c2.habit_id = w.id AND c2.day = date(w.day, '+1 day')) WHERE w.day < ?1 ), s AS (SELECT id, MAX(run) AS best, MAX(CASE WHEN day = ?1 THEN run END) AS streak, group_concat(CASE WHEN day > date(?1, '-7 days') THEN mark END, '') AS week, SUM(day > date(?1, '-30 days') AND mark = 'd') AS done30, SUM(day > date(?1, '-30 days') AND (mark IN ('d', 'm') OR (mark = 'p' AND day < ?1))) AS due30, SUM(mark = 'd') AS total FROM walk WHERE mark <> '' GROUP BY id), t AS (SELECT x.*, COALESCE(x.target, 1) AS goal, (SELECT c.status FROM checkins c WHERE c.habit_id = x.id AND c.day = ?1 AND c.id = (SELECT MAX(c2.id) FROM checkins c2 WHERE c2.habit_id = c.habit_id AND c2.day = c.day)) AS st, (SELECT c.count FROM checkins c WHERE c.habit_id = x.id AND c.day = ?1 AND c.id = (SELECT MAX(c2.id) FROM checkins c2 WHERE c2.habit_id = c.habit_id AND c2.day = c.day)) AS cnt, instr(',' || x.weekdays || ',', ',' || ((CAST(strftime('%w', ?1) AS INTEGER) + 6) % 7) || ',') > 0 AS sched FROM habits x WHERE x._deleted IS NULL) SELECT x.id, x.title, x.category, x.reminder, x.paused, x.unit, x.goal AS target, x.sched AS scheduled, COALESCE(x.st, 'open') AS status, COALESCE(x.st = 'done', 0) AS is_done, COALESCE(x.st = 'skipped', 0) AS is_skipped, (x.st IS NULL OR x.st IN ('cleared', 'partial')) AS is_open, COALESCE(x.st IN ('done', 'skipped'), 0) AS has_checkin, CASE WHEN x.st = 'done' THEN x.goal WHEN x.st = 'partial' THEN COALESCE(x.cnt, 0) ELSE 0 END AS count, x.goal > 1 AND x.paused = 0 AS countable, CASE WHEN x.goal > 1 THEN (CASE WHEN x.st = 'done' THEN x.goal WHEN x.st = 'partial' THEN COALESCE(x.cnt, 0) ELSE 0 END) || '/' || x.goal || COALESCE(' ' || x.unit, '') END AS progress_label, CASE WHEN x.st = 'skipped' THEN 'Skipped today' END AS skipped_label, COALESCE(s.streak, 0) AS streak, COALESCE(s.best, 0) AS best, CASE WHEN COALESCE(s.streak, 0) = 0 THEN NULL WHEN x.weekdays = '0,1,2,3,4,5,6' THEN s.streak || CASE WHEN s.streak = 1 THEN ' day' ELSE ' days' END ELSE s.streak || ' in a row' END AS streak_label, CASE WHEN x.weekdays <> '0,1,2,3,4,5,6' THEN CASE x.weekdays WHEN '0,1,2,3,4,5,6' THEN 'Every day' WHEN '0,1,2,3,4' THEN 'Weekdays' WHEN '5,6' THEN 'Weekends' ELSE replace(replace(replace(replace(replace(replace(replace(replace(x.weekdays, ',', ', '), '0', 'Mon'), '1', 'Tue'), '2', 'Wed'), '3', 'Thu'), '4', 'Fri'), '5', 'Sat'), '6', 'Sun') END END AS schedule_label, s.week, CASE WHEN x.paused THEN 'Paused' WHEN x.st IN ('done', 'skipped') THEN 'Done' WHEN x.sched THEN 'To do' ELSE 'Not today' END AS section FROM t x LEFT JOIN s ON s.id = x.id ORDER BY CASE WHEN x.paused THEN 3 WHEN x.st IN ('done', 'skipped') THEN 1 WHEN x.sched THEN 0 ELSE 2 END, COALESCE(x.reminder, '99'), x.title COLLATE NOCASE",
+      "params": [
+        "today"
+      ]
+    },
+    "heatmap": {
+      "sql": "SELECT day, COUNT(*) AS count FROM (SELECT c.habit_id, c.day, c.status FROM checkins c JOIN habits h ON h.id = c.habit_id AND h._deleted IS NULL WHERE c.day >= date(?1, '-84 days') AND (?2 IS NULL OR ?2 = '' OR c.habit_id = ?2) AND c.id = (SELECT MAX(c2.id) FROM checkins c2 WHERE c2.habit_id = c.habit_id AND c2.day = c.day)) WHERE status = 'done' GROUP BY day",
+      "params": [
+        "today",
+        "id"
+      ]
+    },
+    "sleep_recent": {
+      "sql": "SELECT s.id, s.day, substr('MonTueWedThuFriSatSun', ((CAST(strftime('%w', s.day) AS INTEGER) + 6) % 7) * 3 + 1, 3) || ' ' || CAST(strftime('%d', s.day) AS INTEGER) AS label, ROUND(s.minutes / 60.0, 1) AS hours, (s.minutes / 60) || 'h ' || printf('%02d', s.minutes % 60) || 'm' AS duration, s.note FROM sleep s WHERE s.id = (SELECT s2.id FROM sleep s2 WHERE s2.day = s.day ORDER BY s2.id DESC LIMIT 1) ORDER BY s.day DESC LIMIT 14",
+      "params": []
+    },
+    "trash": {
+      "sql": "SELECT id, title FROM habits WHERE _deleted IS NOT NULL ORDER BY _deleted DESC LIMIT 100",
+      "params": []
+    },
+    "due_reminders": {
+      "sql": "SELECT r.habit_id || ':' || r.day AS id, MIN(r.at_ms) AS at_ms, h.title AS title, 'Time for your habit' AS body, COALESCE(h.notify_on, 'phone') AS notify_on FROM reminders r JOIN habits h ON h.id = r.habit_id WHERE r._deleted IS NULL AND h._deleted IS NULL AND h.paused = 0 AND r.at_ms >= ?1 AND NOT EXISTS (SELECT 1 FROM checkins c WHERE c.habit_id = r.habit_id AND c.day = r.day AND c.status IN ('done', 'skipped') AND c.id = (SELECT c2.id FROM checkins c2 WHERE c2.habit_id = c.habit_id AND c2.day = c.day ORDER BY c2.id DESC LIMIT 1)) GROUP BY r.habit_id, r.day",
+      "params": [
+        "now_ms"
+      ]
+    },
+    "badge": {
+      "sql": "SELECT COUNT(*) AS count FROM habits h WHERE h._deleted IS NULL AND h.paused = 0 AND (',' || h.weekdays || ',') LIKE '%,' || ?2 || ',%' AND NOT EXISTS (SELECT 1 FROM checkins c WHERE c.habit_id = h.id AND c.day = ?1 AND c.status IN ('done', 'skipped') AND c.id = (SELECT c2.id FROM checkins c2 WHERE c2.habit_id = h.id AND c2.day = ?1 ORDER BY c2.id DESC LIMIT 1))",
+      "params": [
+        "today",
+        "weekday"
+      ]
+    },
+    "day_summary": {
+      "sql": "WITH RECURSIVE h AS (SELECT id, weekdays, MIN(COALESCE(started, ?1), COALESCE((SELECT MIN(day) FROM checkins c WHERE c.habit_id = habits.id), ?1)) AS born FROM habits WHERE _deleted IS NULL ), walk(id, weekdays, born, day, run, mark) AS ( SELECT id, weekdays, born, date(MAX(date(?1, '-366 days'), MIN(born, date(?1, '-6 days'))), '-1 day'), 0, '' FROM h UNION ALL SELECT w.id, w.weekdays, w.born, date(w.day, '+1 day'), CASE WHEN c.status = 'done' THEN w.run + 1 WHEN date(w.day, '+1 day') < w.born THEN 0 WHEN c.status = 'skipped' OR date(w.day, '+1 day') = ?1 OR NOT instr(',' || w.weekdays || ',', ',' || ((CAST(strftime('%w', w.day, '+1 day') AS INTEGER) + 6) % 7) || ',') > 0 THEN w.run ELSE 0 END, CASE WHEN c.status = 'done' THEN 'd' WHEN c.status = 'partial' THEN 'p' WHEN c.status = 'skipped' THEN 's' WHEN date(w.day, '+1 day') < w.born OR NOT instr(',' || w.weekdays || ',', ',' || ((CAST(strftime('%w', w.day, '+1 day') AS INTEGER) + 6) % 7) || ',') > 0 THEN '-' WHEN date(w.day, '+1 day') = ?1 THEN 'o' ELSE 'm' END FROM walk w LEFT JOIN checkins c ON c.habit_id = w.id AND c.day = date(w.day, '+1 day') AND c.id = (SELECT MAX(c2.id) FROM checkins c2 WHERE c2.habit_id = w.id AND c2.day = date(w.day, '+1 day')) WHERE w.day < ?1 ), s AS (SELECT id, MAX(run) AS best, MAX(CASE WHEN day = ?1 THEN run END) AS streak, group_concat(CASE WHEN day > date(?1, '-7 days') THEN mark END, '') AS week, SUM(day > date(?1, '-30 days') AND mark = 'd') AS done30, SUM(day > date(?1, '-30 days') AND (mark IN ('d', 'm') OR (mark = 'p' AND day < ?1))) AS due30, SUM(mark = 'd') AS total FROM walk WHERE mark <> '' GROUP BY id), t AS (SELECT x.id, x.title, instr(',' || x.weekdays || ',', ',' || ((CAST(strftime('%w', ?1) AS INTEGER) + 6) % 7) || ',') > 0 AS sched, COALESCE((SELECT c.status FROM checkins c WHERE c.habit_id = x.id AND c.day = ?1 AND c.id = (SELECT MAX(c2.id) FROM checkins c2 WHERE c2.habit_id = c.habit_id AND c2.day = c.day)), '') AS st FROM habits x WHERE x._deleted IS NULL AND x.paused = 0) SELECT SUM(t.sched AND t.st = 'done') AS done, SUM(t.sched AND (t.st IS NULL OR t.st <> 'skipped')) AS due, CASE WHEN SUM(t.sched AND (t.st IS NULL OR t.st <> 'skipped')) > 0 THEN SUM(t.sched AND t.st = 'done') * 100 / SUM(t.sched AND (t.st IS NULL OR t.st <> 'skipped')) ELSE 0 END AS pct, CASE WHEN COUNT(*) = 0 THEN NULL WHEN SUM(t.sched AND (t.st IS NULL OR t.st NOT IN ('done', 'skipped'))) = 0 AND SUM(t.sched) > 0 THEN 'All done for today' WHEN SUM(t.sched) = 0 THEN 'Nothing scheduled today' ELSE SUM(t.sched AND t.st = 'done') || ' of ' || SUM(t.sched AND (t.st IS NULL OR t.st <> 'skipped')) || ' done today' END AS label, (SELECT t2.title || ' · ' || s.streak || CASE WHEN s.streak = 1 THEN ' day' ELSE ' days' END FROM s JOIN t t2 ON t2.id = s.id WHERE s.streak > 0 ORDER BY s.streak DESC LIMIT 1) AS top_streak, COUNT(*) AS habits FROM t",
+      "params": [
+        "today"
+      ]
+    },
+    "habit": {
+      "sql": "WITH RECURSIVE h AS (SELECT id, weekdays, MIN(COALESCE(started, ?2), COALESCE((SELECT MIN(day) FROM checkins c WHERE c.habit_id = habits.id), ?2)) AS born FROM habits WHERE _deleted IS NULL AND id = ?1), walk(id, weekdays, born, day, run, mark) AS ( SELECT id, weekdays, born, date(MAX(date(?2, '-366 days'), MIN(born, date(?2, '-13 days'))), '-1 day'), 0, '' FROM h UNION ALL SELECT w.id, w.weekdays, w.born, date(w.day, '+1 day'), CASE WHEN c.status = 'done' THEN w.run + 1 WHEN date(w.day, '+1 day') < w.born THEN 0 WHEN c.status = 'skipped' OR date(w.day, '+1 day') = ?2 OR NOT instr(',' || w.weekdays || ',', ',' || ((CAST(strftime('%w', w.day, '+1 day') AS INTEGER) + 6) % 7) || ',') > 0 THEN w.run ELSE 0 END, CASE WHEN c.status = 'done' THEN 'd' WHEN c.status = 'partial' THEN 'p' WHEN c.status = 'skipped' THEN 's' WHEN date(w.day, '+1 day') < w.born OR NOT instr(',' || w.weekdays || ',', ',' || ((CAST(strftime('%w', w.day, '+1 day') AS INTEGER) + 6) % 7) || ',') > 0 THEN '-' WHEN date(w.day, '+1 day') = ?2 THEN 'o' ELSE 'm' END FROM walk w LEFT JOIN checkins c ON c.habit_id = w.id AND c.day = date(w.day, '+1 day') AND c.id = (SELECT MAX(c2.id) FROM checkins c2 WHERE c2.habit_id = w.id AND c2.day = date(w.day, '+1 day')) WHERE w.day < ?2 ), s AS (SELECT id, MAX(run) AS best, MAX(CASE WHEN day = ?2 THEN run END) AS streak, group_concat(CASE WHEN day > date(?2, '-14 days') THEN mark END, '') AS week, SUM(day > date(?2, '-30 days') AND mark = 'd') AS done30, SUM(day > date(?2, '-30 days') AND (mark IN ('d', 'm') OR (mark = 'p' AND day < ?2))) AS due30, SUM(mark = 'd') AS total FROM walk WHERE mark <> '' GROUP BY id) SELECT x.id, x.title, x.category, x.weekdays, x.reminder, COALESCE(x.notify_on, 'phone') AS notify_on, x.paused, COALESCE(x.target, 1) AS target, x.unit, x.notes, COALESCE(s.streak, 0) AS streak, COALESCE(s.best, 0) AS best, COALESCE(s.total, 0) AS total, CASE WHEN COALESCE(s.due30, 0) > 0 THEN (s.done30 * 100 / s.due30) || '%' ELSE '–' END AS rate30, s.week, CASE x.weekdays WHEN '0,1,2,3,4,5,6' THEN 'Every day' WHEN '0,1,2,3,4' THEN 'Weekdays' WHEN '5,6' THEN 'Weekends' ELSE replace(replace(replace(replace(replace(replace(replace(replace(x.weekdays, ',', ', '), '0', 'Mon'), '1', 'Tue'), '2', 'Wed'), '3', 'Thu'), '4', 'Fri'), '5', 'Sat'), '6', 'Sun') END AS schedule_label, CASE WHEN x.paused THEN 'Resume' ELSE 'Pause' END AS pause_label, CASE WHEN x.paused THEN 'play' ELSE 'pause' END AS pause_icon FROM habits x LEFT JOIN s ON s.id = x.id WHERE x.id = ?1 AND x._deleted IS NULL",
+      "params": [
+        "id",
+        "today"
+      ]
+    },
+    "rates": {
+      "sql": "WITH RECURSIVE h AS (SELECT id, weekdays, MIN(COALESCE(started, ?1), COALESCE((SELECT MIN(day) FROM checkins c WHERE c.habit_id = habits.id), ?1)) AS born FROM habits WHERE _deleted IS NULL ), walk(id, weekdays, born, day, run, mark) AS ( SELECT id, weekdays, born, date(MAX(date(?1, '-366 days'), MIN(born, date(?1, '-6 days'))), '-1 day'), 0, '' FROM h UNION ALL SELECT w.id, w.weekdays, w.born, date(w.day, '+1 day'), CASE WHEN c.status = 'done' THEN w.run + 1 WHEN date(w.day, '+1 day') < w.born THEN 0 WHEN c.status = 'skipped' OR date(w.day, '+1 day') = ?1 OR NOT instr(',' || w.weekdays || ',', ',' || ((CAST(strftime('%w', w.day, '+1 day') AS INTEGER) + 6) % 7) || ',') > 0 THEN w.run ELSE 0 END, CASE WHEN c.status = 'done' THEN 'd' WHEN c.status = 'partial' THEN 'p' WHEN c.status = 'skipped' THEN 's' WHEN date(w.day, '+1 day') < w.born OR NOT instr(',' || w.weekdays || ',', ',' || ((CAST(strftime('%w', w.day, '+1 day') AS INTEGER) + 6) % 7) || ',') > 0 THEN '-' WHEN date(w.day, '+1 day') = ?1 THEN 'o' ELSE 'm' END FROM walk w LEFT JOIN checkins c ON c.habit_id = w.id AND c.day = date(w.day, '+1 day') AND c.id = (SELECT MAX(c2.id) FROM checkins c2 WHERE c2.habit_id = w.id AND c2.day = date(w.day, '+1 day')) WHERE w.day < ?1 ), s AS (SELECT id, MAX(run) AS best, MAX(CASE WHEN day = ?1 THEN run END) AS streak, group_concat(CASE WHEN day > date(?1, '-7 days') THEN mark END, '') AS week, SUM(day > date(?1, '-30 days') AND mark = 'd') AS done30, SUM(day > date(?1, '-30 days') AND (mark IN ('d', 'm') OR (mark = 'p' AND day < ?1))) AS due30, SUM(mark = 'd') AS total FROM walk WHERE mark <> '' GROUP BY id) SELECT x.title AS label, CASE WHEN s.due30 > 0 THEN s.done30 * 100 / s.due30 ELSE 0 END AS pct FROM habits x JOIN s ON s.id = x.id WHERE x._deleted IS NULL AND x.paused = 0 ORDER BY pct DESC, x.title COLLATE NOCASE",
+      "params": [
+        "today"
+      ]
+    },
+    "sleep_stats": {
+      "sql": "SELECT COUNT(*) AS nights, CASE WHEN COUNT(*) > 0 THEN (CAST(AVG(s.minutes) AS INTEGER) / 60) || 'h ' || printf('%02d', CAST(AVG(s.minutes) AS INTEGER) % 60) || 'm' ELSE '–' END AS average, CASE WHEN COUNT(*) > 0 THEN (MAX(s.minutes) / 60) || 'h ' || printf('%02d', MAX(s.minutes) % 60) || 'm' ELSE '–' END AS longest FROM sleep s WHERE s.day > date(?1, '-7 days') AND s.id = (SELECT s2.id FROM sleep s2 WHERE s2.day = s.day ORDER BY s2.id DESC LIMIT 1)",
+      "params": [
+        "today"
+      ]
+    },
+    "sleep_chart": {
+      "sql": "SELECT * FROM (SELECT substr('MonTueWedThuFriSatSun', ((CAST(strftime('%w', s.day) AS INTEGER) + 6) % 7) * 3 + 1, 3) || ' ' || CAST(strftime('%d', s.day) AS INTEGER) AS label, ROUND(s.minutes / 60.0, 1) AS hours, s.day FROM sleep s WHERE s.day > date(?1, '-14 days') AND s.id = (SELECT s2.id FROM sleep s2 WHERE s2.day = s.day ORDER BY s2.id DESC LIMIT 1)) ORDER BY day",
+      "params": [
+        "today"
+      ]
+    },
+    "due_today": {
+      "sql": "WITH RECURSIVE h AS (SELECT id, weekdays, MIN(COALESCE(started, ?1), COALESCE((SELECT MIN(day) FROM checkins c WHERE c.habit_id = habits.id), ?1)) AS born FROM habits WHERE _deleted IS NULL ), walk(id, weekdays, born, day, run, mark) AS ( SELECT id, weekdays, born, date(MAX(date(?1, '-366 days'), MIN(born, date(?1, '-6 days'))), '-1 day'), 0, '' FROM h UNION ALL SELECT w.id, w.weekdays, w.born, date(w.day, '+1 day'), CASE WHEN c.status = 'done' THEN w.run + 1 WHEN date(w.day, '+1 day') < w.born THEN 0 WHEN c.status = 'skipped' OR date(w.day, '+1 day') = ?1 OR NOT instr(',' || w.weekdays || ',', ',' || ((CAST(strftime('%w', w.day, '+1 day') AS INTEGER) + 6) % 7) || ',') > 0 THEN w.run ELSE 0 END, CASE WHEN c.status = 'done' THEN 'd' WHEN c.status = 'partial' THEN 'p' WHEN c.status = 'skipped' THEN 's' WHEN date(w.day, '+1 day') < w.born OR NOT instr(',' || w.weekdays || ',', ',' || ((CAST(strftime('%w', w.day, '+1 day') AS INTEGER) + 6) % 7) || ',') > 0 THEN '-' WHEN date(w.day, '+1 day') = ?1 THEN 'o' ELSE 'm' END FROM walk w LEFT JOIN checkins c ON c.habit_id = w.id AND c.day = date(w.day, '+1 day') AND c.id = (SELECT MAX(c2.id) FROM checkins c2 WHERE c2.habit_id = w.id AND c2.day = date(w.day, '+1 day')) WHERE w.day < ?1 ), s AS (SELECT id, MAX(run) AS best, MAX(CASE WHEN day = ?1 THEN run END) AS streak, group_concat(CASE WHEN day > date(?1, '-7 days') THEN mark END, '') AS week, SUM(day > date(?1, '-30 days') AND mark = 'd') AS done30, SUM(day > date(?1, '-30 days') AND (mark IN ('d', 'm') OR (mark = 'p' AND day < ?1))) AS due30, SUM(mark = 'd') AS total FROM walk WHERE mark <> '' GROUP BY id), t AS (SELECT x.*, COALESCE(x.target, 1) AS goal, (SELECT c.status FROM checkins c WHERE c.habit_id = x.id AND c.day = ?1 AND c.id = (SELECT MAX(c2.id) FROM checkins c2 WHERE c2.habit_id = c.habit_id AND c2.day = c.day)) AS st, (SELECT c.count FROM checkins c WHERE c.habit_id = x.id AND c.day = ?1 AND c.id = (SELECT MAX(c2.id) FROM checkins c2 WHERE c2.habit_id = c.habit_id AND c2.day = c.day)) AS cnt, instr(',' || x.weekdays || ',', ',' || ((CAST(strftime('%w', ?1) AS INTEGER) + 6) % 7) || ',') > 0 AS sched FROM habits x WHERE x._deleted IS NULL) SELECT x.id, x.title, x.category, x.reminder, x.paused, x.unit, x.goal AS target, x.sched AS scheduled, COALESCE(x.st, 'open') AS status, COALESCE(x.st = 'done', 0) AS is_done, COALESCE(x.st = 'skipped', 0) AS is_skipped, (x.st IS NULL OR x.st IN ('cleared', 'partial')) AS is_open, COALESCE(x.st IN ('done', 'skipped'), 0) AS has_checkin, CASE WHEN x.st = 'done' THEN x.goal WHEN x.st = 'partial' THEN COALESCE(x.cnt, 0) ELSE 0 END AS count, x.goal > 1 AND x.paused = 0 AS countable, CASE WHEN x.goal > 1 THEN (CASE WHEN x.st = 'done' THEN x.goal WHEN x.st = 'partial' THEN COALESCE(x.cnt, 0) ELSE 0 END) || '/' || x.goal || COALESCE(' ' || x.unit, '') END AS progress_label, CASE WHEN x.st = 'skipped' THEN 'Skipped today' END AS skipped_label, COALESCE(s.streak, 0) AS streak, COALESCE(s.best, 0) AS best, CASE WHEN COALESCE(s.streak, 0) = 0 THEN NULL WHEN x.weekdays = '0,1,2,3,4,5,6' THEN s.streak || CASE WHEN s.streak = 1 THEN ' day' ELSE ' days' END ELSE s.streak || ' in a row' END AS streak_label, CASE WHEN x.weekdays <> '0,1,2,3,4,5,6' THEN CASE x.weekdays WHEN '0,1,2,3,4,5,6' THEN 'Every day' WHEN '0,1,2,3,4' THEN 'Weekdays' WHEN '5,6' THEN 'Weekends' ELSE replace(replace(replace(replace(replace(replace(replace(replace(x.weekdays, ',', ', '), '0', 'Mon'), '1', 'Tue'), '2', 'Wed'), '3', 'Thu'), '4', 'Fri'), '5', 'Sat'), '6', 'Sun') END END AS schedule_label, s.week, CASE WHEN x.paused THEN 'Paused' WHEN x.st IN ('done', 'skipped') THEN 'Done' WHEN x.sched THEN 'To do' ELSE 'Not today' END AS section FROM t x LEFT JOIN s ON s.id = x.id WHERE x.paused = 0 AND (x.sched OR x.st IN ('done', 'skipped')) ORDER BY CASE WHEN x.paused THEN 3 WHEN x.st IN ('done', 'skipped') THEN 1 WHEN x.sched THEN 0 ELSE 2 END, COALESCE(x.reminder, '99'), x.title COLLATE NOCASE",
+      "params": [
+        "today"
+      ]
+    }
+  },
+  "reminders": {
+    "query": "due_reminders"
+  },
+  "jobs": {
+    "plan-reminders": {
+      "operation": "plan_reminders",
+      "schedule": {
+        "every_minutes": 60
+      },
+      "run_on": "desktop"
+    }
+  },
+  "pages": [
+    {
+      "id": "main",
+      "title": "Habits",
+      "template": "ui/page-main.json"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "today",
+      "title": "Habits today",
+      "template": "ui/widget-today.json"
+    },
+    {
+      "id": "streaks",
+      "title": "Habit streaks",
+      "template": "ui/widget-streaks.json"
+    }
+  ],
+  "icon": "target",
+  "color": "#15803D",
+  "badge": "badge",
+  "quick_actions": [
+    {
+      "label": "New habit",
+      "op": "save",
+      "arg": "title"
+    }
+  ]
+}

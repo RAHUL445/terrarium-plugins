@@ -1,0 +1,274 @@
+{
+  "id": "todo",
+  "name": "To-do",
+  "version": "0.4.0",
+  "api": "terrarium:plugin@0.1.0",
+  "description": "Tasks with due dates, reminders, priorities, repeats and steps.",
+  "storage": {
+    "version": 4,
+    "tables": [
+      {
+        "name": "tasks",
+        "delete_policy": "trash",
+        "columns": [
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "notes",
+            "type": "text"
+          },
+          {
+            "name": "due",
+            "type": "text"
+          },
+          {
+            "name": "tags",
+            "type": "text"
+          },
+          {
+            "name": "done",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "completed_at",
+            "type": "integer"
+          },
+          {
+            "name": "priority",
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "repeat",
+            "type": "text"
+          },
+          {
+            "name": "remind_time",
+            "type": "text"
+          },
+          {
+            "name": "remind_at",
+            "type": "integer"
+          },
+          {
+            "name": "cleared_at",
+            "type": "integer"
+          },
+          {
+            "name": "series",
+            "type": "text"
+          },
+          {
+            "name": "done_note",
+            "type": "text"
+          },
+          {
+            "name": "note_id",
+            "type": "text"
+          },
+          {
+            "name": "in_progress",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "urgent",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "important",
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      },
+      {
+        "name": "steps",
+        "delete_policy": "trash",
+        "columns": [
+          {
+            "name": "task_id",
+            "type": "text"
+          },
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "done",
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      },
+      {
+        "name": "settings",
+        "columns": [
+          {
+            "name": "ask_note",
+            "type": "text"
+          },
+          {
+            "name": "note_tags",
+            "type": "text"
+          }
+        ]
+      }
+    ]
+  },
+  "operations": {
+    "create": {
+      "description": "Create a task. Dates, times, #tags, !priority and \"every week\" in the title are understood (\"Call Sam tomorrow 6pm #work !high\"); due (YYYY-MM-DD), remind_time (HH:MM), priority (0-3), repeat, tags and notes may also be given. Optional in_progress, urgent and important booleans."
+    },
+    "update": {
+      "description": "Change a task's title, notes, due, remind_time, priority (0-3), repeat (daily, weekdays, weekly, monthly) or tags; empty clears. Also accepts in_progress, urgent and important (booleans)."
+    },
+    "toggle": {
+      "description": "Mark a task done or not done. Finishing a repeating task creates the next one. Returns ask_note (the task id) when a note should be offered."
+    },
+    "delete": {
+      "description": "Move a task to trash."
+    },
+    "restore": {
+      "description": "Bring a task back from trash."
+    },
+    "completed_between": {
+      "description": "Tasks completed between local dates start and end (inclusive), with their notes."
+    },
+    "clear_done": {
+      "description": "Hide finished tasks from the lists (they still count in reviews)."
+    },
+    "add_step": {
+      "description": "Add a step (task_id, title) to a task."
+    },
+    "toggle_step": {
+      "description": "Tick or untick a step (id, done)."
+    },
+    "delete_step": {
+      "description": "Remove a step."
+    },
+    "save_note": {
+      "description": "Save what came of a finished task (id, text); also kept in Notes under the Tasks project. Empty text removes it from the task."
+    },
+    "note_settings": {
+      "description": "When to offer a note on finishing a task: ask (always, tagged, never) and tags (for tagged)."
+    },
+    "open_tasks": {
+      "description": "Open tasks for reviews: overdue, due up to end (YYYY-MM-DD, default a week from today), and undated."
+    }
+  },
+  "queries": {
+    "focus_suggestions": {
+      "sql": "WITH RECURSIVE s(tag, rest) AS (SELECT '', tags || ', ' FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND tags IS NOT NULL AND tags <> '' UNION ALL SELECT trim(substr(rest, 1, instr(rest, ', ') - 1)), substr(rest, instr(rest, ', ') + 2) FROM s WHERE rest <> '') SELECT tag AS value, COUNT(*) AS count FROM s WHERE tag <> '' GROUP BY tag ORDER BY count DESC, tag LIMIT 30",
+      "params": []
+    },
+    "tasks": {
+      "sql": "SELECT id, title, notes, due, tags, COALESCE(in_progress, 0) AS in_progress, COALESCE(urgent, 0) AS urgent, COALESCE(important, 0) AS important, CASE WHEN done = 1 THEN 'done' WHEN in_progress = 1 THEN 'doing' ELSE 'todo' END AS board_lane, CASE WHEN in_progress = 1 THEN 'Move to To do' ELSE 'Start task' END AS move_label, CASE WHEN urgent = 1 AND important = 1 THEN 'do' WHEN important = 1 THEN 'schedule' WHEN urgent = 1 THEN 'delegate' ELSE 'eliminate' END AS matrix_lane, COALESCE(priority, 0) AS priority, repeat, remind_time, done, CASE WHEN due IS NULL THEN NULL WHEN d = 0 THEN 'Today' WHEN d = 1 THEN 'Tomorrow' WHEN d = -1 THEN 'Yesterday' WHEN d BETWEEN 2 AND 6 THEN CASE strftime('%w', due) WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END ELSE CAST(strftime('%d', due) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', due) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(due, 1, 4) <> substr(?1, 1, 4) THEN ' ' || substr(due, 1, 4) ELSE '' END END || CASE WHEN remind_time IS NOT NULL THEN ' ' || remind_time ELSE '' END AS due_label, CASE WHEN done = 0 AND d < 0 THEN 'danger' WHEN done = 0 AND d = 0 THEN 'accent' END AS due_tone, CASE WHEN done = 1 THEN 'Completed' WHEN due IS NULL THEN 'No date' WHEN d < 0 THEN 'Overdue' WHEN d = 0 THEN 'Today' WHEN d = 1 THEN 'Tomorrow' WHEN d <= 6 THEN CASE strftime('%w', due) WHEN '0' THEN 'Sunday' WHEN '1' THEN 'Monday' WHEN '2' THEN 'Tuesday' WHEN '3' THEN 'Wednesday' WHEN '4' THEN 'Thursday' WHEN '5' THEN 'Friday' ELSE 'Saturday' END ELSE 'Later' END AS section, CASE WHEN done = 0 AND d < 0 THEN 'danger' END AS section_tone, CASE repeat WHEN 'daily' THEN 'Daily' WHEN 'weekdays' THEN 'Weekdays' WHEN 'weekly' THEN 'Weekly' WHEN 'monthly' THEN 'Monthly' END AS repeat_label, CASE WHEN steps_total > 0 THEN steps_done || '/' || steps_total END AS steps_label, CASE WHEN done_note IS NOT NULL THEN 'Note' END AS note_chip FROM (SELECT t.*, CAST(julianday(t.due) - julianday(?1) AS INTEGER) AS d, (SELECT COUNT(*) FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS steps_total, (SELECT COUNT(*) FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL AND s.done = 1) AS steps_done FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL) WHERE (?3 IS NULL OR ?3 = '' OR title LIKE '%' || ?3 || '%' OR tags LIKE '%' || ?3 || '%' OR notes LIKE '%' || ?3 || '%') AND (?4 IS NULL OR ?4 = '' OR EXISTS (WITH RECURSIVE f(tag, rest) AS (SELECT '', ?4 || ',' UNION ALL SELECT lower(ltrim(trim(substr(rest, 1, instr(rest, ',') - 1)), '#')), substr(rest, instr(rest, ',') + 1) FROM f WHERE rest <> '') SELECT 1 FROM f WHERE tag <> '' AND instr(', ' || lower(COALESCE(tags, '')) || ', ', ', ' || tag || ', ') > 0)) AND CASE ?2 WHEN 'today' THEN done = 0 AND (due IS NULL OR d <= 0) WHEN 'upcoming' THEN done = 0 AND d > 0 WHEN 'done' THEN done = 1 WHEN 'everything' THEN 1 ELSE done = 0 END ORDER BY CASE WHEN done = 1 THEN 6 WHEN due IS NULL THEN 5 WHEN d < 0 THEN 0 WHEN d = 0 THEN 1 WHEN d <= 6 THEN 2 ELSE 4 END, due, COALESCE(priority, 0) DESC, CASE WHEN done = 1 THEN -completed_at END, id DESC LIMIT 500",
+      "params": [
+        "today",
+        "filter",
+        "q",
+        "tags"
+      ]
+    },
+    "trash": {
+      "sql": "SELECT id, title FROM tasks WHERE _deleted IS NOT NULL ORDER BY _deleted DESC LIMIT 100",
+      "params": []
+    },
+    "summary": {
+      "sql": "SELECT COALESCE(SUM(done = 0 AND (due IS NULL OR due <= ?1)), 0) AS today, COALESCE(SUM(done = 0 AND due < ?1), 0) AS overdue, COALESCE(SUM(done = 0), 0) AS open FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL",
+      "params": [
+        "today"
+      ]
+    },
+    "badge": {
+      "sql": "SELECT COUNT(*) AS count FROM tasks WHERE _deleted IS NULL AND done = 0 AND due IS NOT NULL AND due <= ?1",
+      "params": [
+        "today"
+      ]
+    },
+    "search": {
+      "sql": "SELECT id, title, CASE WHEN done = 1 THEN 'Done' ELSE COALESCE(due, tags) END AS subtitle FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND (title LIKE '%' || ?1 || '%' OR notes LIKE '%' || ?1 || '%' OR tags LIKE '%' || ?1 || '%') ORDER BY done, due IS NULL, due LIMIT 8",
+      "params": [
+        "q"
+      ]
+    },
+    "task": {
+      "sql": "SELECT COALESCE(t.in_progress, 0) AS in_progress, COALESCE(t.urgent, 0) AS urgent, COALESCE(t.important, 0) AS important, t.id, t.title, COALESCE(t.notes, '') AS notes, t.due, COALESCE(t.tags, '') AS tags, COALESCE(t.priority, 0) AS priority, COALESCE(t.repeat, '') AS repeat, t.remind_time, t.done, CASE WHEN t.done = 1 THEN 'Mark not done' ELSE 'Mark done' END AS done_label, COALESCE(t.done_note, '') AS done_note, t.done = 1 AS can_note, (SELECT p.done_note FROM tasks p WHERE p._deleted IS NULL AND p.id <> t.id AND p.done = 1 AND p.done_note IS NOT NULL AND COALESCE(p.series, p.id) = COALESCE(t.series, t.id) ORDER BY p.completed_at DESC LIMIT 1) AS last_note, (SELECT 'Last time (' || date(p.completed_at / 1000, 'unixepoch') || ')' FROM tasks p WHERE p._deleted IS NULL AND p.id <> t.id AND p.done = 1 AND p.done_note IS NOT NULL AND COALESCE(p.series, p.id) = COALESCE(t.series, t.id) ORDER BY p.completed_at DESC LIMIT 1) AS last_note_title FROM tasks t WHERE t.id = ?1 AND t._deleted IS NULL",
+      "params": [
+        "id"
+      ]
+    },
+    "steps": {
+      "sql": "SELECT id, title, done FROM steps WHERE task_id = ?1 AND _deleted IS NULL ORDER BY id",
+      "params": [
+        "task_id"
+      ]
+    },
+    "counts": {
+      "sql": "SELECT COALESCE(SUM(done = 0 AND (due IS NULL OR due <= ?1)), 0) AS today, COALESCE(SUM(done = 0 AND due > ?1), 0) AS upcoming, COALESCE(SUM(done = 0), 0) AS open, COALESCE(SUM(done = 1), 0) AS done FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL",
+      "params": [
+        "today"
+      ]
+    },
+    "due_reminders": {
+      "sql": "SELECT id, remind_at AS at_ms, title, CASE WHEN notes IS NOT NULL THEN substr(notes, 1, 120) ELSE 'To-do reminder' END AS body, 'both' AS notify_on FROM tasks WHERE _deleted IS NULL AND done = 0 AND remind_at IS NOT NULL AND remind_at >= ?1",
+      "params": [
+        "now_ms"
+      ]
+    },
+    "note_settings": {
+      "sql": "SELECT COALESCE((SELECT ask_note FROM settings WHERE _deleted IS NULL ORDER BY id LIMIT 1), 'always') AS ask, COALESCE((SELECT note_tags FROM settings WHERE _deleted IS NULL ORDER BY id LIMIT 1), '') AS tags",
+      "params": []
+    }
+  },
+  "reminders": {
+    "query": "due_reminders"
+  },
+  "pages": [
+    {
+      "id": "main",
+      "title": "To-do",
+      "template": "ui/page-main.json"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "quick-add",
+      "title": "Create task",
+      "template": "ui/widget-quick-add.json"
+    },
+    {
+      "id": "today",
+      "title": "Today",
+      "template": "ui/widget-today.json"
+    }
+  ],
+  "provides": {
+    "tasks": {
+      "operations": [
+        "create",
+        "completed_between",
+        "open_tasks"
+      ]
+    }
+  },
+  "icon": "check",
+  "color": "#2563EB",
+  "badge": "badge",
+  "search": "search",
+  "quick_actions": [
+    {
+      "label": "New task",
+      "op": "create",
+      "arg": "title"
+    }
+  ],
+  "uses": [
+    "notes"
+  ]
+}

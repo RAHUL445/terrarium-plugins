@@ -1,0 +1,232 @@
+{
+  "creation": {"operation": "create", "bind": "state.creating", "prefill": "state.newText"},
+  "state": {
+    "creating": "",
+    "newText": "", "q": "", "project": "", "tag": "", "sort": "new", "open": "" },
+  "body": {
+    "type": "stack", "gap": 16,
+    "children": [
+      {
+        "type": "stack", "gap": 2,
+        "children": [
+          { "type": "heading", "text": "Bookmarks" },
+          { "type": "list", "query": "summary", "item": { "type": "text", "text": "{{row.label}}", "tone": "muted" } }
+        ]
+      },
+      {
+        "type": "card",
+        "children": [
+          {
+            "type": "form", "inline": true, "submit_icon": "plus",
+            "submit": {
+              "op": "create",
+              "args": { "text": "{{form.text}}", "project": "{{state.project}}", "tags": "{{state.tag}}" },
+              "success": "{{result.message}}", "reset": true
+            },
+            "submit_label": "Save",
+            "children": [
+              {
+                "type": "text-field", "name": "text", "label": "Save a link", "label_hidden": true, "required": true,
+                "placeholder": "Paste a link · add #tags"
+              }
+            ]
+          },
+          { "type": "text", "tone": "muted", "text": "Words before the link become its title. New links join the project and tag you’ve picked." }
+        ]
+      },
+      {
+        "type": "stack", "direction": "row", "gap": 12, "wrap": true, "align": "center",
+        "children": [
+          { "type": "search-field", "bind": "state.q", "label": "Search bookmarks", "label_hidden": true, "placeholder": "Search bookmarks", "grow": 1, "basis": 220 },
+          {
+            "type": "tabs", "bind": "state.sort", "label": "Sort",
+            "options": [
+              { "value": "new", "label": "Newest" },
+              { "value": "visits", "label": "Popular" },
+              { "value": "opened", "label": "Last used" },
+              { "value": "title", "label": "A–Z" }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "list", "query": "projects", "layout": "chips", "params": { "project": "{{state.project}}" },
+        "item": {
+          "type": "button", "variant": "chip", "label": "{{row.label}} · {{row.count}}", "pressed": "{{row.selected}}",
+          "action": { "set": { "state.project": "{{row.project}}", "state.tag": "" } }
+        }
+      },
+      {
+        "type": "list", "query": "tags", "layout": "chips", "params": { "project": "{{state.project}}", "tag": "{{state.tag}}" },
+        "item": {
+          "type": "button", "variant": "chip", "label": "{{row.label}} · {{row.count}}", "pressed": "{{row.selected}}",
+          "aria_label": "Filter by {{row.label}}",
+          "action": { "set": { "state.tag": "{{row.next}}" } }
+        }
+      },
+      {
+        "type": "list", "query": "list", "group": "section",
+        "params": {
+          "q": "{{state.q}}", "project": "{{state.project}}", "tag": "{{state.tag}}", "sort": "{{state.sort}}",
+          "utc_offset_ms": "{{$utc_offset_ms}}", "today": "{{$today}}"
+        },
+        "empty": "Nothing here yet. Paste a link above to save it.",
+        "item": {
+          "type": "item", "title": "{{row.title}}", "subtitle": "{{row.subtitle}}", "avatar": "{{row.host}}",
+          "action": { "open": "{{row.url}}", "op": "visit", "args": { "id": "{{row.id}}" } },
+          "chips": [
+            { "text": "{{row.project}}", "icon": "folder" },
+            { "text": "{{row.tags_label}}", "tone": "accent" },
+            { "text": "{{row.visits_label}}", "icon": "eye" },
+            { "text": "{{row.added}}", "icon": "clock" }
+          ],
+          "trailing": [
+            {
+              "type": "button", "icon": "pin", "variant": "ghost", "pressed": "{{row.pinned}}",
+              "aria_label": "Pin {{row.title}}",
+              "action": { "op": "pin", "args": { "id": "{{row.id}}" }, "success": "{{result.message}}" }
+            },
+            {
+              "type": "button", "icon": "edit", "variant": "ghost", "aria_label": "Edit {{row.title}}",
+              "action": { "set": { "state.open": "{{row.id}}" } }
+            }
+          ]
+        }
+      },
+      {
+        "type": "section", "title": "Trash", "collapsible": true,
+        "children": [
+          {
+            "type": "list", "query": "trash", "empty": "Trash is empty.",
+            "item": {
+              "type": "item", "title": "{{row.title}}", "subtitle": "{{row.host}}",
+              "trailing": [
+                {
+                  "type": "button", "label": "Restore", "icon": "undo", "variant": "ghost", "aria_label": "Restore {{row.title}}",
+                  "action": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored" }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "type": "sheet", "bind": "state.open", "title": "Bookmark", "query": "bookmark",
+        "params": { "id": "{{state.open}}", "utc_offset_ms": "{{$utc_offset_ms}}", "today": "{{$today}}" },
+        "children": [
+          { "type": "text", "if": "{{row.info}}", "text": "{{row.info}}", "tone": "muted" },
+          {
+            "type": "form", "autosave": true,
+            "submit": {
+              "op": "update",
+              "args": {
+                "id": "{{row.id}}", "url": "{{form.url}}", "title": "{{form.title}}", "project": "{{form.project}}",
+                "tags": "{{form.tags}}", "note": "{{form.note}}", "pinned": "{{form.pinned}}"
+              }
+            },
+            "children": [
+              { "type": "text-field", "name": "title", "label": "Title", "placeholder": "{{row.host}}", "value": "{{row.title}}" },
+              { "type": "text-field", "name": "url", "label": "Address", "value": "{{row.url}}", "required": true },
+              {
+                "type": "stack", "direction": "row", "gap": 12, "wrap": true, "align": "end",
+                "children": [
+                  {
+                    "type": "text-field", "name": "project", "label": "Project", "placeholder": "None", "value": "{{row.project}}",
+                    "grow": 1, "basis": 160, "suggestions": { "query": "project_names", "column": "project" }
+                  },
+                  { "type": "toggle", "name": "pinned", "label": "Pinned", "value": "{{row.pinned}}" }
+                ]
+              },
+              { "type": "text-field", "name": "tags", "label": "Tags", "placeholder": "rust, docs", "value": "{{row.tags}}" },
+              { "type": "text-area", "name": "note", "label": "Note", "rows": 4, "value": "{{row.note}}", "placeholder": "Why you saved it, what to read first…" }
+            ]
+          },
+          {
+            "type": "stack", "direction": "row", "gap": 8, "wrap": true,
+            "children": [
+              {
+                "type": "button", "label": "Open link", "icon": "external", "variant": "primary",
+                "action": { "open": "{{row.url}}", "op": "visit", "args": { "id": "{{row.id}}" } }
+              },
+              {
+                "type": "button", "label": "Delete", "icon": "trash", "variant": "danger",
+                "action": { "op": "delete", "args": { "id": "{{row.id}}" }, "success": "Moved to trash", "undo": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored from trash" }, "then": { "state.open": "" } }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "sheet",
+        "bind": "state.creating",
+        "title": "Save link",
+        "presentation": "modal",
+        "children": [
+          {
+            "type": "form",
+            "children": [
+              {
+                "type": "text-field",
+                "name": "text",
+                "label": "Link",
+                "required": true,
+                "value": "{{state.newText}}",
+                "placeholder": "https://example.com \u00b7 #tags"
+              },
+              {
+                "type": "text-field",
+                "name": "title",
+                "label": "Title",
+                "placeholder": "Optional title"
+              },
+              {
+                "type": "text-field",
+                "name": "project",
+                "label": "Project",
+                "placeholder": "Optional project"
+              },
+              {
+                "type": "text-field",
+                "name": "tags",
+                "label": "Tags",
+                "placeholder": "rust, docs"
+              },
+              {
+                "type": "text-area",
+                "name": "note",
+                "label": "Note",
+                "rows": 3,
+                "placeholder": "Why you saved it"
+              }
+            ],
+            "submit": {
+              "args": {
+                "text": "{{form.text}}",
+                "title": "{{form.title}}",
+                "project": "{{form.project}}",
+                "tags": "{{form.tags}}",
+                "note": "{{form.note}}"
+              },
+              "op": "create",
+              "success": "{{result.message}}",
+              "then": {
+                "state.creating": ""
+              }
+            },
+            "submit_label": "Save link"
+          },
+          {
+            "type": "button",
+            "label": "Cancel",
+            "action": {
+              "set": {
+                "state.creating": ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "entry": {"bind": "state.open"}
+}

@@ -1,0 +1,115 @@
+{
+  "state": {},
+  "body": {
+    "type": "stack",
+    "gap": 12,
+    "children": [
+      {
+        "type": "audio-recorder",
+        "label": "Tap to record",
+        "hint": "Up to 3 minutes · transcribed on your computer",
+        "max_seconds": 180,
+        "action": {
+          "op": "capture_audio",
+          "args": {
+            "audio": "{{value.audio}}",
+            "mime": "{{value.mime}}",
+            "duration_ms": "{{value.duration_ms}}"
+          },
+          "success": "Saved recording"
+        }
+      },
+      {
+        "type": "form",
+        "inline": true,
+        "submit_label": "Save",
+        "submit_icon": "plus",
+        "submit": {
+          "op": "capture_text",
+          "args": {
+            "text": "{{form.text}}"
+          },
+          "success": "Saved to inbox",
+          "reset": true
+        },
+        "children": [
+          {
+            "type": "text-field",
+            "name": "text",
+            "label": "Type a capture",
+            "label_hidden": true,
+            "required": true,
+            "placeholder": "Or type a thought…"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "query": "summary",
+        "item": {
+          "type": "text",
+          "tone": "muted",
+          "text": "{{row.label}}"
+        }
+      },
+      {
+        "type": "list",
+        "query": "latest",
+        "params": {
+          "utc_offset_ms": "{{$utc_offset_ms}}",
+          "today": "{{$today}}"
+        },
+        "item": {
+          "type": "item",
+          "title": "{{row.title}}",
+          "chips": [
+            {
+              "text": "{{row.at}}",
+              "icon": "clock"
+            },
+            {
+              "text": "{{row.length}}",
+              "icon": "{{row.length_icon}}"
+            }
+          ],
+          "trailing": [
+            {
+              "type": "button",
+              "if": "{{row.is_ready}}",
+              "icon": "check",
+              "variant": "ghost",
+              "aria_label": "Send “{{row.title}}” to To-do",
+              "action": {
+                "op": "send",
+                "args": {
+                  "id": "{{row.id}}",
+                  "to": "todo"
+                },
+                "success": "{{result.message}}"
+              }
+            },
+            {
+              "type": "button",
+              "if": "{{row.is_ready}}",
+              "icon": "note",
+              "variant": "ghost",
+              "aria_label": "Send “{{row.title}}” to Notes",
+              "action": {
+                "op": "send",
+                "args": {
+                  "id": "{{row.id}}",
+                  "to": "notes"
+                },
+                "success": "{{result.message}}"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "home": {"order": 10},
+  "page": {
+    "size": { "default": [6, 3], "min": [4, 3], "max": [12, 5] }
+  }
+}

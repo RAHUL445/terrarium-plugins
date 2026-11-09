@@ -1,0 +1,163 @@
+{
+  "id": "notes",
+  "name": "Notes",
+  "version": "0.3.0",
+  "api": "terrarium:plugin@0.1.0",
+  "description": "Markdown notes in projects, with checklists and autosave; edits on different devices merge. Notes saved from finished tasks live in the Tasks project.",
+  "storage": {
+    "version": 2,
+    "tables": [
+      {
+        "name": "notes",
+        "columns": [
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "body",
+            "type": "text",
+            "rule": "text"
+          },
+          {
+            "name": "project",
+            "type": "text"
+          },
+          {
+            "name": "pinned",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "created_at",
+            "type": "integer"
+          },
+          {
+            "name": "updated_at",
+            "type": "integer"
+          },
+          {
+            "name": "task_key",
+            "type": "text"
+          }
+        ]
+      }
+    ]
+  },
+  "operations": {
+    "create": {
+      "description": "Create a note: title (optional, defaults to the first line), body (Markdown), project, and focus (used as the project when none is given). Returns its id."
+    },
+    "update": {
+      "description": "Change a note's title (blank follows the first line), body, project or pinned flag."
+    },
+    "delete": {
+      "description": "Move a note to trash."
+    },
+    "restore": {
+      "description": "Bring a note back from trash."
+    },
+    "to_task": {
+      "description": "Create a To-do task from a line of text."
+    },
+    "summary": {
+      "description": "Notes created or changed between local dates start and end."
+    },
+    "tidy": {
+      "description": "Move a note to trash if it is empty."
+    },
+    "task_note": {
+      "description": "Save what came of a finished task in its note in the Tasks project: key (the task, or its repeating series), title, date (YYYY-MM-DD), text, tags. One note per key, newest entry first; replace (true when editing a saved note) swaps the entry with the same date. Returns its id."
+    }
+  },
+  "uses": [
+    "tasks"
+  ],
+  "provides": {
+    "notes": {
+      "operations": [
+        "summary",
+        "create",
+        "task_note"
+      ]
+    }
+  },
+  "queries": {
+    "focus_suggestions": {
+      "sql": "SELECT project AS value, COUNT(*) AS count FROM notes WHERE _deleted IS NULL AND project IS NOT NULL AND project <> '' AND project <> 'Tasks' GROUP BY project ORDER BY count DESC, project LIMIT 30",
+      "params": []
+    },
+    "list": {
+      "sql": "SELECT id, title, project, pinned, trim(substr(replace(replace(replace(replace(replace(replace(replace(char(10) || substr(body, instr(body || char(10), char(10)) + 1), char(10) || '- [', char(10) || '['), char(10) || '- ', char(10)), char(10), ' '), '[ ] ', '☐ '), '[x] ', '☑ '), '**', ''), '#', ''), 1, 160)) AS snippet, CASE WHEN COALESCE(updated_at, created_at) IS NULL THEN NULL WHEN date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') = ?4 THEN strftime('%H:%M', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') WHEN date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') = date(?4, '-1 day') THEN 'Yesterday' WHEN date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') > date(?4, '-7 day') THEN CASE strftime('%w', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END ELSE CAST(strftime('%d', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch'), 1, 4) <> substr(?4, 1, 4) THEN ' ' || substr(date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch'), 1, 4) ELSE '' END END AS edited, CASE WHEN ((length(body) - length(replace(body, '- [x]', ''))) / 5) + ((length(body) - length(replace(body, '- [ ]', ''))) / 5) > 0 THEN ((length(body) - length(replace(body, '- [x]', ''))) / 5) || '/' || (((length(body) - length(replace(body, '- [x]', ''))) / 5) + ((length(body) - length(replace(body, '- [ ]', ''))) / 5)) END AS checklist, CASE WHEN (SELECT COUNT(*) FROM notes p WHERE p._deleted IS NULL AND p.pinned = 1) = 0 THEN NULL WHEN pinned = 1 THEN 'Pinned' ELSE 'Notes' END AS section FROM (SELECT * FROM notes WHERE _deleted IS NULL AND (?1 IS NULL OR ?1 = '' OR title LIKE '%' || ?1 || '%' OR body LIKE '%' || ?1 || '%' OR project LIKE '%' || ?1 || '%') AND ((COALESCE(?2, '') = '' AND COALESCE(project, '') <> 'Tasks') OR project = ?2) ORDER BY pinned DESC, COALESCE(updated_at, created_at) DESC LIMIT 300) AS notes ORDER BY pinned DESC, COALESCE(updated_at, created_at) DESC",
+      "params": [
+        "q",
+        "project",
+        "utc_offset_ms",
+        "today"
+      ]
+    },
+    "note": {
+      "sql": "SELECT id, CASE WHEN title = 'Untitled' OR title = trim(ltrim(trim(substr(body, 1, instr(body || char(10), char(10)) - 1)), '#')) THEN '' ELSE title END AS title, body, COALESCE(project, '') AS project, pinned FROM notes WHERE id = ?1 AND _deleted IS NULL",
+      "params": [
+        "id"
+      ]
+    },
+    "projects": {
+      "sql": "SELECT '' AS project, 'All' AS label, COUNT(*) AS count, (?1 IS NULL OR ?1 = '') AS selected FROM notes WHERE _deleted IS NULL AND COALESCE(project, '') <> 'Tasks' UNION ALL SELECT project, project, COUNT(*), project = ?1 FROM notes WHERE _deleted IS NULL AND project IS NOT NULL AND project <> '' GROUP BY project ORDER BY 1",
+      "params": [
+        "project"
+      ]
+    },
+    "pinned": {
+      "sql": "SELECT id, title FROM notes WHERE _deleted IS NULL AND pinned = 1 ORDER BY title LIMIT 8",
+      "params": []
+    },
+    "trash": {
+      "sql": "SELECT id, title FROM notes WHERE _deleted IS NOT NULL AND NOT (title = 'Untitled' AND trim(COALESCE(body, '')) = '') ORDER BY _deleted DESC LIMIT 100",
+      "params": []
+    },
+    "search": {
+      "sql": "SELECT id, title, COALESCE(project, trim(substr(replace(replace(replace(replace(replace(replace(replace(char(10) || substr(body, instr(body || char(10), char(10)) + 1), char(10) || '- [', char(10) || '['), char(10) || '- ', char(10)), char(10), ' '), '[ ] ', '☐ '), '[x] ', '☑ '), '**', ''), '#', ''), 1, 160))) AS subtitle FROM notes WHERE _deleted IS NULL AND (title LIKE '%' || ?1 || '%' OR body LIKE '%' || ?1 || '%') ORDER BY pinned DESC, COALESCE(updated_at, created_at) DESC LIMIT 8",
+      "params": [
+        "q"
+      ]
+    },
+    "project_names": {
+      "sql": "SELECT DISTINCT project FROM notes WHERE _deleted IS NULL AND project IS NOT NULL AND project <> '' ORDER BY project",
+      "params": []
+    },
+    "recent": {
+      "sql": "SELECT id, title, pinned, trim(substr(replace(replace(replace(replace(replace(replace(replace(char(10) || substr(body, instr(body || char(10), char(10)) + 1), char(10) || '- [', char(10) || '['), char(10) || '- ', char(10)), char(10), ' '), '[ ] ', '☐ '), '[x] ', '☑ '), '**', ''), '#', ''), 1, 160)) AS snippet, project FROM notes WHERE _deleted IS NULL AND COALESCE(project, '') <> 'Tasks' AND (?1 IS NULL OR ?1 = '' OR project = ?1 COLLATE NOCASE OR title LIKE '%' || ?1 || '%' OR body LIKE '%' || ?1 || '%') AND (?2 IS NULL OR ?2 = '' OR project = ?2 COLLATE NOCASE) ORDER BY pinned DESC, COALESCE(updated_at, created_at) DESC LIMIT 5",
+      "params": ["focus", "project"]
+    }
+  },
+  "pages": [
+    {
+      "id": "main",
+      "title": "Notes",
+      "template": "ui/page-main.json"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "pinned",
+      "title": "Notes",
+      "template": "ui/widget-pinned.json"
+    },
+    {
+      "id": "capture",
+      "title": "Quick note",
+      "template": "ui/widget-capture.json"
+    }
+  ],
+  "icon": "note",
+  "color": "#B45309",
+  "search": "search",
+  "quick_actions": [
+    {
+      "label": "Quick note",
+      "op": "create",
+      "arg": "body"
+    }
+  ]
+}

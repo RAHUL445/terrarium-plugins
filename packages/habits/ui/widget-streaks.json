@@ -1,0 +1,36 @@
+{
+  "state": {},
+  "body": {
+    "type": "stack",
+    "gap": 8,
+    "children": [
+      {
+        "type": "calendar-heatmap",
+        "query": "heatmap",
+        "params": {
+          "today": "{{$today}}",
+          "id": ""
+        },
+        "weeks": 12,
+        "label": "Habits completed per day, last 12 weeks"
+      },
+      {
+        "type": "list",
+        "query": "day_summary",
+        "params": {
+          "today": "{{$today}}"
+        },
+        "item": {
+          "type": "text",
+          "tone": "muted",
+          "if": "{{row.top_streak}}",
+          "text": "Best run now: {{row.top_streak}}"
+        }
+      }
+    ]
+  },
+  "home": {"order": 70, "collapsed": true},
+  "page": {
+    "size": { "default": [6, 5], "min": [4, 4], "max": [12, 8] }
+  }
+}

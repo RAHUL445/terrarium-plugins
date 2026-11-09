@@ -1,0 +1,32 @@
+{
+  "state": {},
+  "body": {
+    "type": "stack", "gap": 8,
+    "children": [
+      {
+        "type": "form", "inline": true, "submit_label": "Save link", "submit_icon": "plus",
+        "submit": { "op": "create", "args": { "text": "{{form.text}}", "tags": "{{$page.focus}}, {{$config.tags}}", "project": "{{$config.project}}" }, "success": "{{result.message}}", "reset": true },
+        "children": [
+          { "type": "text-field", "name": "text", "label": "Save a link", "label_hidden": true, "required": true, "placeholder": "Paste a link · #tags" }
+        ]
+      },
+      {
+        "type": "list", "query": "recent", "params": { "focus": "{{$page.focus}}", "project": "{{$config.project}}", "tags": "{{$config.tags}}" }, "empty": "No bookmarks yet.", "empty_focus": "No bookmarks match “{{$page.focus}}” yet. Links saved here are tagged with it.",
+        "item": {
+          "type": "item", "title": "{{row.title}}", "subtitle": "{{row.host}}", "avatar": "{{row.host}}",
+          "action": { "open": "{{row.url}}", "op": "visit", "args": { "id": "{{row.id}}" } },
+          "chips": [ { "text": "{{row.pin_label}}", "icon": "pin", "tone": "accent" } ]
+        }
+      }
+    ]
+  },
+  "home": {"order": 50},
+  "page": {
+    "size": { "default": [6, 4], "min": [3, 3], "max": [12, 8] },
+    "focus": { "suggest": "focus_suggestions" },
+    "config": {
+      "project": { "type": "choice", "label": "Project", "any": "Any project", "suggest": "project_names", "default": "", "empty": "No projects yet." },
+      "tags": { "type": "choice", "multiple": true, "label": "Tags", "suggest": "tag_names", "prefix": "#", "default": "", "empty": "No tags yet.", "help": "Links with any of these tags. Links saved here get them too." }
+    }
+  }
+}

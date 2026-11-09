@@ -1,0 +1,26 @@
+name: Plugin checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  checks:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - run: rustup show
+      - name: Verify pinned SDK snapshot
+        run: python3 -c "import runpy; runpy.run_path('scripts/build-release.py')['verify_sdk']()"
+      - name: Build all plugin crates
+        run: |
+          for package in packages/*/Cargo.toml; do
+            cargo fmt --manifest-path "$package" -- --check
+            cargo build --locked --release --target wasm32-unknown-unknown --manifest-path "$package"
+          done
+      - name: Input validation regressions
+        run: |
+          cargo test --locked --manifest-path packages/habits/Cargo.toml --lib
+          cargo test --locked --manifest-path packages/voice/Cargo.toml --lib
+      - run: python3 -m unittest discover -s packages/notes/tests -p '*_query.py'

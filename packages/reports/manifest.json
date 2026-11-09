@@ -1,0 +1,465 @@
+{
+  "id": "reports",
+  "name": "Reports",
+  "version": "0.3.1",
+  "api": "terrarium:plugin@0.1.0",
+  "description": "Reviews of any range from your tasks, task notes, habits and notes; written by AI with skills you choose, on demand or on a schedule.",
+  "storage": {
+    "version": 3,
+    "tables": [
+      {
+        "name": "reports",
+        "delete_policy": "delete-wins",
+        "columns": [
+          {
+            "name": "start",
+            "type": "text"
+          },
+          {
+            "name": "end",
+            "type": "text"
+          },
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "tasks_done",
+            "type": "integer"
+          },
+          {
+            "name": "habits_rate",
+            "type": "real"
+          },
+          {
+            "name": "notes_count",
+            "type": "integer"
+          },
+          {
+            "name": "summary",
+            "type": "text"
+          },
+          {
+            "name": "created_at",
+            "type": "integer"
+          },
+          {
+            "name": "period",
+            "type": "text"
+          },
+          {
+            "name": "days",
+            "type": "integer"
+          },
+          {
+            "name": "label",
+            "type": "text"
+          },
+          {
+            "name": "compare",
+            "type": "text"
+          },
+          {
+            "name": "tasks_prev",
+            "type": "integer"
+          },
+          {
+            "name": "habits_prev",
+            "type": "real"
+          },
+          {
+            "name": "notes_prev",
+            "type": "integer"
+          },
+          {
+            "name": "notes_edited",
+            "type": "integer"
+          },
+          {
+            "name": "daily",
+            "type": "text"
+          },
+          {
+            "name": "tag_list",
+            "type": "text"
+          },
+          {
+            "name": "habit_list",
+            "type": "text"
+          },
+          {
+            "name": "task_list",
+            "type": "text"
+          },
+          {
+            "name": "note_list",
+            "type": "text"
+          },
+          {
+            "name": "highlights",
+            "type": "text"
+          },
+          {
+            "name": "wins",
+            "type": "text"
+          },
+          {
+            "name": "focus",
+            "type": "text"
+          },
+          {
+            "name": "updated_at",
+            "type": "integer"
+          },
+          {
+            "name": "skill_id",
+            "type": "text"
+          },
+          {
+            "name": "skill_name",
+            "type": "text"
+          },
+          {
+            "name": "prompt",
+            "type": "text"
+          },
+          {
+            "name": "model",
+            "type": "text"
+          },
+          {
+            "name": "sources",
+            "type": "text"
+          },
+          {
+            "name": "tag_filter",
+            "type": "text"
+          },
+          {
+            "name": "facts",
+            "type": "text"
+          },
+          {
+            "name": "draft",
+            "type": "text"
+          },
+          {
+            "name": "draft_status",
+            "type": "text"
+          },
+          {
+            "name": "draft_error",
+            "type": "text"
+          },
+          {
+            "name": "draft_model",
+            "type": "text"
+          },
+          {
+            "name": "draft_edited",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "draft_at",
+            "type": "integer"
+          },
+          {
+            "name": "draft_request",
+            "type": "text"
+          },
+          {
+            "name": "run_id",
+            "type": "text"
+          },
+          {
+            "name": "schedule_id",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "name": "skills",
+        "columns": [
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "prompt",
+            "type": "text"
+          },
+          {
+            "name": "model",
+            "type": "text"
+          },
+          {
+            "name": "period",
+            "type": "text"
+          },
+          {
+            "name": "sources",
+            "type": "text"
+          },
+          {
+            "name": "tags",
+            "type": "text"
+          },
+          {
+            "name": "builtin_key",
+            "type": "text"
+          },
+          {
+            "name": "hidden",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "created_at",
+            "type": "integer"
+          },
+          {
+            "name": "updated_at",
+            "type": "integer"
+          }
+        ]
+      },
+      {
+        "name": "schedules",
+        "columns": [
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "skill",
+            "type": "text"
+          },
+          {
+            "name": "period",
+            "type": "text"
+          },
+          {
+            "name": "sources",
+            "type": "text"
+          },
+          {
+            "name": "tags",
+            "type": "text"
+          },
+          {
+            "name": "every",
+            "type": "text"
+          },
+          {
+            "name": "days",
+            "type": "text"
+          },
+          {
+            "name": "at",
+            "type": "text"
+          },
+          {
+            "name": "day",
+            "type": "text"
+          },
+          {
+            "name": "describe",
+            "type": "text"
+          },
+          {
+            "name": "enabled",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "last_status",
+            "type": "text"
+          },
+          {
+            "name": "last_error",
+            "type": "text"
+          },
+          {
+            "name": "last_run_at",
+            "type": "integer"
+          },
+          {
+            "name": "last_report",
+            "type": "text"
+          },
+          {
+            "name": "created_at",
+            "type": "integer"
+          }
+        ]
+      }
+    ]
+  },
+  "operations": {
+    "generate": {
+      "description": "Build or refresh a report. period: week (default), last_week, 7d, month, last_month, or custom with start/end; or id to refresh a saved one. skill (a skill id, custom with prompt, or none) has AI write it from sources (tasks, task_notes, open_tasks, notes, habits) and tags; review waits for a check before sending."
+    },
+    "reflect": {
+      "description": "Save a report's reflection: `wins`, `focus`."
+    },
+    "delete": {
+      "description": "Delete a report."
+    },
+    "send": {
+      "description": "Send a report's data to AI (after checking it), write it again, or rewrite it with changes: id, feedback?."
+    },
+    "on_draft": {
+      "description": "Receives the AI's text for a report (called by the host)."
+    },
+    "edit_draft": {
+      "description": "Save your edit of a report's AI text: id, draft."
+    },
+    "save_skill": {
+      "description": "Add or change a skill: id (or builtin:<key> for a starter), name, prompt, period, sources, tags, model."
+    },
+    "delete_skill": {
+      "description": "Delete a skill; starters are hidden, or restored with reset."
+    },
+    "save_schedule": {
+      "description": "Add or change a report schedule: id?, name, skill, period, sources, tags, every (day, week, month), days, at, day, enabled."
+    },
+    "delete_schedule": {
+      "description": "Remove a report schedule."
+    },
+    "toggle_schedule": {
+      "description": "Turn a report schedule on or off: id, enabled."
+    },
+    "run_schedule": {
+      "description": "Run a report schedule now."
+    },
+    "scheduled": {
+      "description": "A due report schedule (called by the host scheduler)."
+    }
+  },
+  "uses": [
+    "tasks",
+    "habits",
+    "notes"
+  ],
+  "jobs": {
+    "weekly-review": {
+      "operation": "generate",
+      "schedule": {
+        "weekly": {
+          "day": "sun",
+          "at": "18:00"
+        }
+      },
+      "run_on": "desktop"
+    }
+  },
+  "queries": {
+    "list": {
+      "sql": "SELECT r.id, r.start, r.end, r.period, r.days, r.wins, r.focus, CASE WHEN (r.period = 'week' AND r.start = date(?1, '-' || ((CAST(strftime('%w', ?1) AS INTEGER) + 6) % 7) || ' days')) THEN 'This week' WHEN (r.period = 'month' AND substr(r.start, 1, 7) = substr(?1, 1, 7)) THEN 'This month' ELSE r.title END || CASE WHEN r.skill_name IS NOT NULL THEN ' · ' || r.skill_name ELSE '' END AS title, r.skill_id, COALESCE(r.skill_name, '') AS skill_name, r.skill_id IS NOT NULL AS has_ai, COALESCE(r.draft, '') AS draft, COALESCE(r.draft, '') <> '' AS has_draft, COALESCE(r.draft_status, '') AS draft_status, r.draft_error, COALESCE(r.facts, '') AS facts, COALESCE(r.prompt, '') AS prompt, replace(replace(replace(replace(replace(replace(COALESCE(r.sources, ''), 'task_notes', 'TN'), 'open_tasks', 'OT'), 'tasks', 'done tasks'), 'TN', 'task notes'), 'OT', 'open tasks'), ',', ', ') AS sources_label, COALESCE(r.tag_filter, '') AS tag_filter, CASE r.draft_status WHEN 'pending' THEN 'Writing with AI…' WHEN 'ready' THEN 'Check the data below, then send it to AI.' WHEN 'failed' THEN 'AI could not write this: ' || COALESCE(r.draft_error, 'unknown error') WHEN 'done' THEN 'Written by ' || COALESCE(r.draft_model, 'AI') || CASE WHEN r.draft_edited THEN ' · edited by you' ELSE '' END ELSE '' END AS draft_note, CASE r.draft_status WHEN 'pending' THEN 'Writing…' WHEN 'failed' THEN 'AI failed' WHEN 'ready' THEN 'Not sent' END AS draft_chip, CASE WHEN r.draft_status = 'failed' THEN 'danger' ELSE 'accent' END AS draft_tone, r.draft_status IN ('ready', 'failed') AS can_send, r.draft_status IN ('done', 'failed') AS can_rewrite, CASE WHEN r.draft_status = 'failed' THEN 'Try again' ELSE 'Send to AI' END AS send_label, COALESCE(r.label, r.start || ' – ' || r.end) AS label, ((r.period = 'week' AND r.start = date(?1, '-' || ((CAST(strftime('%w', ?1) AS INTEGER) + 6) % 7) || ' days')) OR (r.period = 'month' AND substr(r.start, 1, 7) = substr(?1, 1, 7))) AND r.end < ?1 AS stale, r.tasks_done, r.notes_count, COALESCE(r.notes_edited, 0) AS notes_edited, r.habits_rate IS NOT NULL AS has_habits, CASE WHEN r.habits_rate IS NULL THEN '–' ELSE CAST(round(r.habits_rate) AS INTEGER) || '%' END AS habits_value, r.daily IS NOT NULL AS detailed, COALESCE(r.tag_list, '[]') <> '[]' AS has_tags, CASE WHEN r.tasks_prev IS NULL OR r.tasks_done IS NULL THEN NULL WHEN r.tasks_done > r.tasks_prev THEN '▲ ' || (r.tasks_done - r.tasks_prev) || ' ' || r.compare WHEN r.tasks_done < r.tasks_prev THEN '▼ ' || (r.tasks_prev - r.tasks_done) || ' ' || r.compare ELSE 'Same as ' || substr(r.compare, 4) END AS tasks_note, CASE WHEN r.tasks_prev IS NULL OR r.tasks_done IS NULL OR r.tasks_done = r.tasks_prev THEN '' WHEN r.tasks_done > r.tasks_prev THEN 'good' ELSE 'bad' END AS tasks_tone, CASE WHEN CAST(round(r.habits_prev) AS INTEGER) IS NULL OR CAST(round(r.habits_rate) AS INTEGER) IS NULL THEN NULL WHEN CAST(round(r.habits_rate) AS INTEGER) > CAST(round(r.habits_prev) AS INTEGER) THEN '▲ ' || (CAST(round(r.habits_rate) AS INTEGER) - CAST(round(r.habits_prev) AS INTEGER)) || ' pts ' || r.compare WHEN CAST(round(r.habits_rate) AS INTEGER) < CAST(round(r.habits_prev) AS INTEGER) THEN '▼ ' || (CAST(round(r.habits_prev) AS INTEGER) - CAST(round(r.habits_rate) AS INTEGER)) || ' pts ' || r.compare ELSE 'Same as ' || substr(r.compare, 4) END AS habits_note, CASE WHEN CAST(round(r.habits_prev) AS INTEGER) IS NULL OR CAST(round(r.habits_rate) AS INTEGER) IS NULL OR CAST(round(r.habits_rate) AS INTEGER) = CAST(round(r.habits_prev) AS INTEGER) THEN '' WHEN CAST(round(r.habits_rate) AS INTEGER) > CAST(round(r.habits_prev) AS INTEGER) THEN 'good' ELSE 'bad' END AS habits_tone, CASE WHEN r.notes_prev IS NULL OR r.notes_count IS NULL THEN NULL WHEN r.notes_count > r.notes_prev THEN '▲ ' || (r.notes_count - r.notes_prev) || ' ' || r.compare WHEN r.notes_count < r.notes_prev THEN '▼ ' || (r.notes_prev - r.notes_count) || ' ' || r.compare ELSE 'Same as ' || substr(r.compare, 4) END AS notes_note, CASE WHEN r.notes_prev IS NULL OR r.notes_count IS NULL OR r.notes_count = r.notes_prev THEN '' WHEN r.notes_count > r.notes_prev THEN 'good' ELSE 'bad' END AS notes_tone, r.tasks_done || CASE WHEN r.tasks_done = 1 THEN ' task' ELSE ' tasks' END AS tasks_chip, CASE WHEN r.habits_rate IS NOT NULL THEN CAST(round(r.habits_rate) AS INTEGER) || '% habits' END AS habits_chip, CASE WHEN r.notes_count > 0 THEN r.notes_count || CASE WHEN r.notes_count = 1 THEN ' note' ELSE ' notes' END END AS notes_chip, CASE WHEN r.wins IS NOT NULL OR r.focus IS NOT NULL THEN 'Reflected' END AS reflected_chip, CASE WHEN ((r.period = 'week' AND r.start = date(?1, '-' || ((CAST(strftime('%w', ?1) AS INTEGER) + 6) % 7) || ' days')) OR (r.period = 'month' AND substr(r.start, 1, 7) = substr(?1, 1, 7))) AND r.end < ?1 THEN 'Up to ' || CAST(strftime('%d', r.end) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', r.end) AS INTEGER) - 1) * 3 + 1, 3) END AS stale_chip, COALESCE(r.label, r.start || ' – ' || r.end) || CASE WHEN r.days IS NOT NULL THEN ' · ' || r.days || CASE WHEN r.days = 1 THEN ' day' ELSE ' days' END ELSE '' END AS info, CASE WHEN COALESCE(r.draft, '') <> '' THEN r.draft ELSE r.summary || CASE WHEN r.wins IS NOT NULL THEN char(10) || '## What went well' || char(10) || r.wins ELSE '' END || CASE WHEN r.focus IS NOT NULL THEN char(10) || '## Focus next' || char(10) || r.focus ELSE '' END END AS copy_text, r.summary FROM reports r WHERE r._deleted IS NULL ORDER BY r.end DESC, r.start DESC LIMIT 200",
+      "params": [
+        "today"
+      ]
+    },
+    "latest": {
+      "sql": "SELECT r.id, r.start, r.end, r.period, r.days, r.wins, r.focus, CASE WHEN (r.period = 'week' AND r.start = date(?1, '-' || ((CAST(strftime('%w', ?1) AS INTEGER) + 6) % 7) || ' days')) THEN 'This week' WHEN (r.period = 'month' AND substr(r.start, 1, 7) = substr(?1, 1, 7)) THEN 'This month' ELSE r.title END || CASE WHEN r.skill_name IS NOT NULL THEN ' · ' || r.skill_name ELSE '' END AS title, r.skill_id, COALESCE(r.skill_name, '') AS skill_name, r.skill_id IS NOT NULL AS has_ai, COALESCE(r.draft, '') AS draft, COALESCE(r.draft, '') <> '' AS has_draft, COALESCE(r.draft_status, '') AS draft_status, r.draft_error, COALESCE(r.facts, '') AS facts, COALESCE(r.prompt, '') AS prompt, replace(replace(replace(replace(replace(replace(COALESCE(r.sources, ''), 'task_notes', 'TN'), 'open_tasks', 'OT'), 'tasks', 'done tasks'), 'TN', 'task notes'), 'OT', 'open tasks'), ',', ', ') AS sources_label, COALESCE(r.tag_filter, '') AS tag_filter, CASE r.draft_status WHEN 'pending' THEN 'Writing with AI…' WHEN 'ready' THEN 'Check the data below, then send it to AI.' WHEN 'failed' THEN 'AI could not write this: ' || COALESCE(r.draft_error, 'unknown error') WHEN 'done' THEN 'Written by ' || COALESCE(r.draft_model, 'AI') || CASE WHEN r.draft_edited THEN ' · edited by you' ELSE '' END ELSE '' END AS draft_note, CASE r.draft_status WHEN 'pending' THEN 'Writing…' WHEN 'failed' THEN 'AI failed' WHEN 'ready' THEN 'Not sent' END AS draft_chip, CASE WHEN r.draft_status = 'failed' THEN 'danger' ELSE 'accent' END AS draft_tone, r.draft_status IN ('ready', 'failed') AS can_send, r.draft_status IN ('done', 'failed') AS can_rewrite, CASE WHEN r.draft_status = 'failed' THEN 'Try again' ELSE 'Send to AI' END AS send_label, COALESCE(r.label, r.start || ' – ' || r.end) AS label, ((r.period = 'week' AND r.start = date(?1, '-' || ((CAST(strftime('%w', ?1) AS INTEGER) + 6) % 7) || ' days')) OR (r.period = 'month' AND substr(r.start, 1, 7) = substr(?1, 1, 7))) AND r.end < ?1 AS stale, r.tasks_done, r.notes_count, COALESCE(r.notes_edited, 0) AS notes_edited, r.habits_rate IS NOT NULL AS has_habits, CASE WHEN r.habits_rate IS NULL THEN '–' ELSE CAST(round(r.habits_rate) AS INTEGER) || '%' END AS habits_value, r.daily IS NOT NULL AS detailed, COALESCE(r.tag_list, '[]') <> '[]' AS has_tags, CASE WHEN r.tasks_prev IS NULL OR r.tasks_done IS NULL THEN NULL WHEN r.tasks_done > r.tasks_prev THEN '▲ ' || (r.tasks_done - r.tasks_prev) || ' ' || r.compare WHEN r.tasks_done < r.tasks_prev THEN '▼ ' || (r.tasks_prev - r.tasks_done) || ' ' || r.compare ELSE 'Same as ' || substr(r.compare, 4) END AS tasks_note, CASE WHEN r.tasks_prev IS NULL OR r.tasks_done IS NULL OR r.tasks_done = r.tasks_prev THEN '' WHEN r.tasks_done > r.tasks_prev THEN 'good' ELSE 'bad' END AS tasks_tone, CASE WHEN CAST(round(r.habits_prev) AS INTEGER) IS NULL OR CAST(round(r.habits_rate) AS INTEGER) IS NULL THEN NULL WHEN CAST(round(r.habits_rate) AS INTEGER) > CAST(round(r.habits_prev) AS INTEGER) THEN '▲ ' || (CAST(round(r.habits_rate) AS INTEGER) - CAST(round(r.habits_prev) AS INTEGER)) || ' pts ' || r.compare WHEN CAST(round(r.habits_rate) AS INTEGER) < CAST(round(r.habits_prev) AS INTEGER) THEN '▼ ' || (CAST(round(r.habits_prev) AS INTEGER) - CAST(round(r.habits_rate) AS INTEGER)) || ' pts ' || r.compare ELSE 'Same as ' || substr(r.compare, 4) END AS habits_note, CASE WHEN CAST(round(r.habits_prev) AS INTEGER) IS NULL OR CAST(round(r.habits_rate) AS INTEGER) IS NULL OR CAST(round(r.habits_rate) AS INTEGER) = CAST(round(r.habits_prev) AS INTEGER) THEN '' WHEN CAST(round(r.habits_rate) AS INTEGER) > CAST(round(r.habits_prev) AS INTEGER) THEN 'good' ELSE 'bad' END AS habits_tone, CASE WHEN r.notes_prev IS NULL OR r.notes_count IS NULL THEN NULL WHEN r.notes_count > r.notes_prev THEN '▲ ' || (r.notes_count - r.notes_prev) || ' ' || r.compare WHEN r.notes_count < r.notes_prev THEN '▼ ' || (r.notes_prev - r.notes_count) || ' ' || r.compare ELSE 'Same as ' || substr(r.compare, 4) END AS notes_note, CASE WHEN r.notes_prev IS NULL OR r.notes_count IS NULL OR r.notes_count = r.notes_prev THEN '' WHEN r.notes_count > r.notes_prev THEN 'good' ELSE 'bad' END AS notes_tone, r.tasks_done || CASE WHEN r.tasks_done = 1 THEN ' task' ELSE ' tasks' END AS tasks_chip, CASE WHEN r.habits_rate IS NOT NULL THEN CAST(round(r.habits_rate) AS INTEGER) || '% habits' END AS habits_chip, CASE WHEN r.notes_count > 0 THEN r.notes_count || CASE WHEN r.notes_count = 1 THEN ' note' ELSE ' notes' END END AS notes_chip, CASE WHEN r.wins IS NOT NULL OR r.focus IS NOT NULL THEN 'Reflected' END AS reflected_chip, CASE WHEN ((r.period = 'week' AND r.start = date(?1, '-' || ((CAST(strftime('%w', ?1) AS INTEGER) + 6) % 7) || ' days')) OR (r.period = 'month' AND substr(r.start, 1, 7) = substr(?1, 1, 7))) AND r.end < ?1 THEN 'Up to ' || CAST(strftime('%d', r.end) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', r.end) AS INTEGER) - 1) * 3 + 1, 3) END AS stale_chip, COALESCE(r.label, r.start || ' – ' || r.end) || CASE WHEN r.days IS NOT NULL THEN ' · ' || r.days || CASE WHEN r.days = 1 THEN ' day' ELSE ' days' END ELSE '' END AS info, CASE WHEN COALESCE(r.draft, '') <> '' THEN r.draft ELSE r.summary || CASE WHEN r.wins IS NOT NULL THEN char(10) || '## What went well' || char(10) || r.wins ELSE '' END || CASE WHEN r.focus IS NOT NULL THEN char(10) || '## Focus next' || char(10) || r.focus ELSE '' END END AS copy_text, r.summary FROM reports r WHERE r._deleted IS NULL ORDER BY r.end DESC, COALESCE(r.days, 7) ASC, COALESCE(r.updated_at, r.created_at) DESC LIMIT 1",
+      "params": [
+        "today"
+      ]
+    },
+    "report": {
+      "sql": "SELECT r.id, r.model, r.start, r.end, r.period, r.days, r.wins, r.focus, CASE WHEN (r.period = 'week' AND r.start = date(?2, '-' || ((CAST(strftime('%w', ?2) AS INTEGER) + 6) % 7) || ' days')) THEN 'This week' WHEN (r.period = 'month' AND substr(r.start, 1, 7) = substr(?2, 1, 7)) THEN 'This month' ELSE r.title END || CASE WHEN r.skill_name IS NOT NULL THEN ' · ' || r.skill_name ELSE '' END AS title, r.skill_id, COALESCE(r.skill_name, '') AS skill_name, r.skill_id IS NOT NULL AS has_ai, COALESCE(r.draft, '') AS draft, COALESCE(r.draft, '') <> '' AS has_draft, COALESCE(r.draft_status, '') AS draft_status, r.draft_error, COALESCE(r.facts, '') AS facts, COALESCE(r.prompt, '') AS prompt, replace(replace(replace(replace(replace(replace(COALESCE(r.sources, ''), 'task_notes', 'TN'), 'open_tasks', 'OT'), 'tasks', 'done tasks'), 'TN', 'task notes'), 'OT', 'open tasks'), ',', ', ') AS sources_label, COALESCE(r.tag_filter, '') AS tag_filter, CASE r.draft_status WHEN 'pending' THEN 'Writing with AI…' WHEN 'ready' THEN 'Check the data below, then send it to AI.' WHEN 'failed' THEN 'AI could not write this: ' || COALESCE(r.draft_error, 'unknown error') WHEN 'done' THEN 'Written by ' || COALESCE(r.draft_model, 'AI') || CASE WHEN r.draft_edited THEN ' · edited by you' ELSE '' END ELSE '' END AS draft_note, CASE r.draft_status WHEN 'pending' THEN 'Writing…' WHEN 'failed' THEN 'AI failed' WHEN 'ready' THEN 'Not sent' END AS draft_chip, CASE WHEN r.draft_status = 'failed' THEN 'danger' ELSE 'accent' END AS draft_tone, r.draft_status IN ('ready', 'failed') AS can_send, r.draft_status IN ('done', 'failed') AS can_rewrite, CASE WHEN r.draft_status = 'failed' THEN 'Try again' ELSE 'Send to AI' END AS send_label, COALESCE(r.label, r.start || ' – ' || r.end) AS label, ((r.period = 'week' AND r.start = date(?2, '-' || ((CAST(strftime('%w', ?2) AS INTEGER) + 6) % 7) || ' days')) OR (r.period = 'month' AND substr(r.start, 1, 7) = substr(?2, 1, 7))) AND r.end < ?2 AS stale, r.tasks_done, r.notes_count, COALESCE(r.notes_edited, 0) AS notes_edited, r.habits_rate IS NOT NULL AS has_habits, CASE WHEN r.habits_rate IS NULL THEN '–' ELSE CAST(round(r.habits_rate) AS INTEGER) || '%' END AS habits_value, r.daily IS NOT NULL AS detailed, COALESCE(r.tag_list, '[]') <> '[]' AS has_tags, CASE WHEN r.tasks_prev IS NULL OR r.tasks_done IS NULL THEN NULL WHEN r.tasks_done > r.tasks_prev THEN '▲ ' || (r.tasks_done - r.tasks_prev) || ' ' || r.compare WHEN r.tasks_done < r.tasks_prev THEN '▼ ' || (r.tasks_prev - r.tasks_done) || ' ' || r.compare ELSE 'Same as ' || substr(r.compare, 4) END AS tasks_note, CASE WHEN r.tasks_prev IS NULL OR r.tasks_done IS NULL OR r.tasks_done = r.tasks_prev THEN '' WHEN r.tasks_done > r.tasks_prev THEN 'good' ELSE 'bad' END AS tasks_tone, CASE WHEN CAST(round(r.habits_prev) AS INTEGER) IS NULL OR CAST(round(r.habits_rate) AS INTEGER) IS NULL THEN NULL WHEN CAST(round(r.habits_rate) AS INTEGER) > CAST(round(r.habits_prev) AS INTEGER) THEN '▲ ' || (CAST(round(r.habits_rate) AS INTEGER) - CAST(round(r.habits_prev) AS INTEGER)) || ' pts ' || r.compare WHEN CAST(round(r.habits_rate) AS INTEGER) < CAST(round(r.habits_prev) AS INTEGER) THEN '▼ ' || (CAST(round(r.habits_prev) AS INTEGER) - CAST(round(r.habits_rate) AS INTEGER)) || ' pts ' || r.compare ELSE 'Same as ' || substr(r.compare, 4) END AS habits_note, CASE WHEN CAST(round(r.habits_prev) AS INTEGER) IS NULL OR CAST(round(r.habits_rate) AS INTEGER) IS NULL OR CAST(round(r.habits_rate) AS INTEGER) = CAST(round(r.habits_prev) AS INTEGER) THEN '' WHEN CAST(round(r.habits_rate) AS INTEGER) > CAST(round(r.habits_prev) AS INTEGER) THEN 'good' ELSE 'bad' END AS habits_tone, CASE WHEN r.notes_prev IS NULL OR r.notes_count IS NULL THEN NULL WHEN r.notes_count > r.notes_prev THEN '▲ ' || (r.notes_count - r.notes_prev) || ' ' || r.compare WHEN r.notes_count < r.notes_prev THEN '▼ ' || (r.notes_prev - r.notes_count) || ' ' || r.compare ELSE 'Same as ' || substr(r.compare, 4) END AS notes_note, CASE WHEN r.notes_prev IS NULL OR r.notes_count IS NULL OR r.notes_count = r.notes_prev THEN '' WHEN r.notes_count > r.notes_prev THEN 'good' ELSE 'bad' END AS notes_tone, r.tasks_done || CASE WHEN r.tasks_done = 1 THEN ' task' ELSE ' tasks' END AS tasks_chip, CASE WHEN r.habits_rate IS NOT NULL THEN CAST(round(r.habits_rate) AS INTEGER) || '% habits' END AS habits_chip, CASE WHEN r.notes_count > 0 THEN r.notes_count || CASE WHEN r.notes_count = 1 THEN ' note' ELSE ' notes' END END AS notes_chip, CASE WHEN r.wins IS NOT NULL OR r.focus IS NOT NULL THEN 'Reflected' END AS reflected_chip, CASE WHEN ((r.period = 'week' AND r.start = date(?2, '-' || ((CAST(strftime('%w', ?2) AS INTEGER) + 6) % 7) || ' days')) OR (r.period = 'month' AND substr(r.start, 1, 7) = substr(?2, 1, 7))) AND r.end < ?2 THEN 'Up to ' || CAST(strftime('%d', r.end) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', r.end) AS INTEGER) - 1) * 3 + 1, 3) END AS stale_chip, COALESCE(r.label, r.start || ' – ' || r.end) || CASE WHEN r.days IS NOT NULL THEN ' · ' || r.days || CASE WHEN r.days = 1 THEN ' day' ELSE ' days' END ELSE '' END AS info, CASE WHEN COALESCE(r.draft, '') <> '' THEN r.draft ELSE r.summary || CASE WHEN r.wins IS NOT NULL THEN char(10) || '## What went well' || char(10) || r.wins ELSE '' END || CASE WHEN r.focus IS NOT NULL THEN char(10) || '## Focus next' || char(10) || r.focus ELSE '' END END AS copy_text, r.summary FROM reports r WHERE r.id = ?1 AND r._deleted IS NULL",
+      "params": [
+        "id",
+        "today"
+      ]
+    },
+    "daily": {
+      "sql": "SELECT json_extract(j.value, '$.label') AS label, json_extract(j.value, '$.title') AS title, json_extract(j.value, '$.count') AS count FROM reports r, json_each(r.daily) j WHERE r.id = ?1 AND r.daily IS NOT NULL ORDER BY j.key",
+      "params": [
+        "id"
+      ]
+    },
+    "tags": {
+      "sql": "SELECT json_extract(j.value, '$.tag') AS tag, json_extract(j.value, '$.count') AS count, '#' || json_extract(j.value, '$.tag') || ' · ' || json_extract(j.value, '$.count') AS label FROM reports r, json_each(r.tag_list) j WHERE r.id = ?1 AND r.tag_list IS NOT NULL ORDER BY j.key",
+      "params": [
+        "id"
+      ]
+    },
+    "habits": {
+      "sql": "SELECT json_extract(j.value, '$.title') AS title, json_extract(j.value, '$.rate') AS rate, json_extract(j.value, '$.label') AS label FROM reports r, json_each(r.habit_list) j WHERE r.id = ?1 AND r.habit_list IS NOT NULL ORDER BY j.key",
+      "params": [
+        "id"
+      ]
+    },
+    "tasks": {
+      "sql": "SELECT json_extract(j.value, '$.title') AS title, json_extract(j.value, '$.day_label') AS day FROM reports r, json_each(r.task_list) j WHERE r.id = ?1 AND r.task_list IS NOT NULL ORDER BY j.key",
+      "params": [
+        "id"
+      ]
+    },
+    "notes": {
+      "sql": "SELECT j.value AS title FROM reports r, json_each(r.note_list) j WHERE r.id = ?1 AND r.note_list IS NOT NULL ORDER BY j.key",
+      "params": [
+        "id"
+      ]
+    },
+    "highlights": {
+      "sql": "SELECT j.value AS text FROM reports r, json_each(r.highlights) j WHERE r.id = ?1 AND r.highlights IS NOT NULL ORDER BY j.key",
+      "params": [
+        "id"
+      ]
+    },
+    "trend": {
+      "sql": "SELECT label, tasks_done, title FROM (SELECT r.start, CAST(strftime('%d', r.start) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', r.start) AS INTEGER) - 1) * 3 + 1, 3) AS label, 'Week of ' || CAST(strftime('%d', r.start) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', r.start) AS INTEGER) - 1) * 3 + 1, 3) || ': ' || r.tasks_done AS title, r.tasks_done, MAX(COALESCE(r.updated_at, r.created_at)) FROM reports r WHERE r._deleted IS NULL AND (r.period IN ('week', 'last_week') OR (r.period IS NULL AND julianday(r.end) - julianday(r.start) = 6)) GROUP BY r.start ORDER BY r.start DESC LIMIT 8) ORDER BY start",
+      "params": []
+    },
+    "summary": {
+      "sql": "SELECT n || CASE WHEN n = 1 THEN ' report' ELSE ' reports' END || CASE WHEN w >= 2 THEN ' · ' || CAST(round(avg_tasks) AS INTEGER) || ' tasks a week on average' ELSE '' END AS label FROM (SELECT (SELECT COUNT(*) FROM reports WHERE _deleted IS NULL) AS n, COUNT(*) AS w, AVG(tasks_done) AS avg_tasks FROM (SELECT r.tasks_done, MAX(COALESCE(r.updated_at, r.created_at)) FROM reports r WHERE r._deleted IS NULL AND (r.period IN ('week', 'last_week') OR (r.period IS NULL AND julianday(r.end) - julianday(r.start) = 6)) GROUP BY r.start)) WHERE n > 0",
+      "params": []
+    },
+    "skills": {
+      "sql": "SELECT id, name, prompt, model, period, sources, tags, kind, edited_builtin, is_builtin, sort, CASE COALESCE(NULLIF(period, ''), 'week') WHEN 'week' THEN 'This week so far' WHEN 'last_week' THEN 'Last week' WHEN '7d' THEN 'Last 7 days' WHEN 'month' THEN 'This month so far' WHEN 'last_month' THEN 'Last month' WHEN 'custom' THEN 'Custom dates' ELSE '' END AS period_label, replace(replace(replace(replace(replace(replace(sources, 'task_notes', 'TN'), 'open_tasks', 'OT'), 'tasks', 'done tasks'), 'TN', 'task notes'), 'OT', 'open tasks'), ',', ', ') AS sources_label, CASE WHEN is_builtin THEN 'Hide' ELSE 'Delete' END AS delete_label FROM (SELECT CASE WHEN s.builtin_key IS NOT NULL THEN 'builtin:' || s.builtin_key ELSE s.id END AS id, s.name AS name, COALESCE(s.prompt, '') AS prompt, COALESCE(s.model, '') AS model, COALESCE(s.period, '') AS period, COALESCE(s.sources, '') AS sources, COALESCE(s.tags, '') AS tags, CASE WHEN s.builtin_key IS NOT NULL THEN 'Edited starter' ELSE 'Yours' END AS kind, s.builtin_key IS NOT NULL AS edited_builtin, s.builtin_key IS NOT NULL AS is_builtin, 1 AS sort FROM skills s WHERE s._deleted IS NULL AND COALESCE(s.hidden, 0) = 0 UNION ALL SELECT b.id, b.name, b.prompt, '', b.period, b.sources, '', 'Starter', 0, 1, 0 FROM (SELECT 'manager' AS key, 'builtin:manager' AS id, 'Update for my manager' AS name, 'Write a status update for my manager.\nSections: Done (group related work and say what it achieved), In progress, Blockers or risks, Next week, Asks (only if something in the data needs a decision or help).\nUse short bullet points and a plain, confident tone. Lead with the most important work. Leave out personal tasks, habits and feelings. Keep it under 250 words.' AS prompt, 'last_week' AS period, 'tasks,task_notes,open_tasks' AS sources UNION ALL SELECT 'junior' AS key, 'builtin:junior' AS id, 'Notes for my junior' AS name, 'Write a review note for a junior teammate about the work below, so they can learn from it and review it.\nFor each notable piece of work: what was done, how it was approached, and why. Point out decisions, trade-offs and lessons from the task notes. End with two or three things worth trying or reading next.\nBe clear and encouraging; explain jargon briefly. Do not include personal tasks or habits.' AS prompt, 'last_week' AS period, 'tasks,task_notes' AS sources UNION ALL SELECT 'self' AS key, 'builtin:self' AS id, 'My own review' AS name, 'Write an honest review of my period for me alone.\nSections: What went well, What slipped (overdue or dropped work), Patterns (busy and quiet days, which tags took my time, habits kept or missed, compared with the period before), One or two changes to try next.\nBe direct and specific, cite the data, and do not flatter. Use my reflection if there is one.' AS prompt, 'week' AS period, 'tasks,task_notes,open_tasks,notes,habits' AS sources) b WHERE NOT EXISTS (SELECT 1 FROM skills s WHERE s._deleted IS NULL AND s.builtin_key = b.key)) ORDER BY sort, name",
+      "params": []
+    },
+    "skill_options": {
+      "sql": "SELECT id, name FROM (SELECT CASE WHEN s.builtin_key IS NOT NULL THEN 'builtin:' || s.builtin_key ELSE s.id END AS id, s.name AS name, COALESCE(s.prompt, '') AS prompt, COALESCE(s.model, '') AS model, COALESCE(s.period, '') AS period, COALESCE(s.sources, '') AS sources, COALESCE(s.tags, '') AS tags, CASE WHEN s.builtin_key IS NOT NULL THEN 'Edited starter' ELSE 'Yours' END AS kind, s.builtin_key IS NOT NULL AS edited_builtin, s.builtin_key IS NOT NULL AS is_builtin, 1 AS sort FROM skills s WHERE s._deleted IS NULL AND COALESCE(s.hidden, 0) = 0 UNION ALL SELECT b.id, b.name, b.prompt, '', b.period, b.sources, '', 'Starter', 0, 1, 0 FROM (SELECT 'manager' AS key, 'builtin:manager' AS id, 'Update for my manager' AS name, 'Write a status update for my manager.\nSections: Done (group related work and say what it achieved), In progress, Blockers or risks, Next week, Asks (only if something in the data needs a decision or help).\nUse short bullet points and a plain, confident tone. Lead with the most important work. Leave out personal tasks, habits and feelings. Keep it under 250 words.' AS prompt, 'last_week' AS period, 'tasks,task_notes,open_tasks' AS sources UNION ALL SELECT 'junior' AS key, 'builtin:junior' AS id, 'Notes for my junior' AS name, 'Write a review note for a junior teammate about the work below, so they can learn from it and review it.\nFor each notable piece of work: what was done, how it was approached, and why. Point out decisions, trade-offs and lessons from the task notes. End with two or three things worth trying or reading next.\nBe clear and encouraging; explain jargon briefly. Do not include personal tasks or habits.' AS prompt, 'last_week' AS period, 'tasks,task_notes' AS sources UNION ALL SELECT 'self' AS key, 'builtin:self' AS id, 'My own review' AS name, 'Write an honest review of my period for me alone.\nSections: What went well, What slipped (overdue or dropped work), Patterns (busy and quiet days, which tags took my time, habits kept or missed, compared with the period before), One or two changes to try next.\nBe direct and specific, cite the data, and do not flatter. Use my reflection if there is one.' AS prompt, 'week' AS period, 'tasks,task_notes,open_tasks,notes,habits' AS sources) b WHERE NOT EXISTS (SELECT 1 FROM skills s WHERE s._deleted IS NULL AND s.builtin_key = b.key)) ORDER BY sort, name",
+      "params": []
+    },
+    "skill": {
+      "sql": "SELECT id, name, prompt, model, period, sources, tags, kind, edited_builtin, is_builtin, sort, CASE COALESCE(NULLIF(period, ''), 'week') WHEN 'week' THEN 'This week so far' WHEN 'last_week' THEN 'Last week' WHEN '7d' THEN 'Last 7 days' WHEN 'month' THEN 'This month so far' WHEN 'last_month' THEN 'Last month' WHEN 'custom' THEN 'Custom dates' ELSE '' END AS period_label, replace(replace(replace(replace(replace(replace(sources, 'task_notes', 'TN'), 'open_tasks', 'OT'), 'tasks', 'done tasks'), 'TN', 'task notes'), 'OT', 'open tasks'), ',', ', ') AS sources_label, CASE WHEN is_builtin THEN 'Hide' ELSE 'Delete' END AS delete_label FROM (SELECT CASE WHEN s.builtin_key IS NOT NULL THEN 'builtin:' || s.builtin_key ELSE s.id END AS id, s.name AS name, COALESCE(s.prompt, '') AS prompt, COALESCE(s.model, '') AS model, COALESCE(s.period, '') AS period, COALESCE(s.sources, '') AS sources, COALESCE(s.tags, '') AS tags, CASE WHEN s.builtin_key IS NOT NULL THEN 'Edited starter' ELSE 'Yours' END AS kind, s.builtin_key IS NOT NULL AS edited_builtin, s.builtin_key IS NOT NULL AS is_builtin, 1 AS sort FROM skills s WHERE s._deleted IS NULL AND COALESCE(s.hidden, 0) = 0 UNION ALL SELECT b.id, b.name, b.prompt, '', b.period, b.sources, '', 'Starter', 0, 1, 0 FROM (SELECT 'manager' AS key, 'builtin:manager' AS id, 'Update for my manager' AS name, 'Write a status update for my manager.\nSections: Done (group related work and say what it achieved), In progress, Blockers or risks, Next week, Asks (only if something in the data needs a decision or help).\nUse short bullet points and a plain, confident tone. Lead with the most important work. Leave out personal tasks, habits and feelings. Keep it under 250 words.' AS prompt, 'last_week' AS period, 'tasks,task_notes,open_tasks' AS sources UNION ALL SELECT 'junior' AS key, 'builtin:junior' AS id, 'Notes for my junior' AS name, 'Write a review note for a junior teammate about the work below, so they can learn from it and review it.\nFor each notable piece of work: what was done, how it was approached, and why. Point out decisions, trade-offs and lessons from the task notes. End with two or three things worth trying or reading next.\nBe clear and encouraging; explain jargon briefly. Do not include personal tasks or habits.' AS prompt, 'last_week' AS period, 'tasks,task_notes' AS sources UNION ALL SELECT 'self' AS key, 'builtin:self' AS id, 'My own review' AS name, 'Write an honest review of my period for me alone.\nSections: What went well, What slipped (overdue or dropped work), Patterns (busy and quiet days, which tags took my time, habits kept or missed, compared with the period before), One or two changes to try next.\nBe direct and specific, cite the data, and do not flatter. Use my reflection if there is one.' AS prompt, 'week' AS period, 'tasks,task_notes,open_tasks,notes,habits' AS sources) b WHERE NOT EXISTS (SELECT 1 FROM skills s WHERE s._deleted IS NULL AND s.builtin_key = b.key)) WHERE id = ?1",
+      "params": [
+        "id"
+      ]
+    },
+    "schedules": {
+      "sql": "SELECT s.id, s.name, s.enabled, COALESCE(s.describe, '') AS describe, COALESCE(s.skill, '') AS skill, s.period, COALESCE(s.sources, '') AS sources, COALESCE(s.tags, '') AS tags, s.every, COALESCE(s.days, '') AS days, s.at, COALESCE(s.day, '1') AS day, COALESCE((SELECT k.name FROM (SELECT CASE WHEN s.builtin_key IS NOT NULL THEN 'builtin:' || s.builtin_key ELSE s.id END AS id, s.name AS name, COALESCE(s.prompt, '') AS prompt, COALESCE(s.model, '') AS model, COALESCE(s.period, '') AS period, COALESCE(s.sources, '') AS sources, COALESCE(s.tags, '') AS tags, CASE WHEN s.builtin_key IS NOT NULL THEN 'Edited starter' ELSE 'Yours' END AS kind, s.builtin_key IS NOT NULL AS edited_builtin, s.builtin_key IS NOT NULL AS is_builtin, 1 AS sort FROM skills s WHERE s._deleted IS NULL AND COALESCE(s.hidden, 0) = 0 UNION ALL SELECT b.id, b.name, b.prompt, '', b.period, b.sources, '', 'Starter', 0, 1, 0 FROM (SELECT 'manager' AS key, 'builtin:manager' AS id, 'Update for my manager' AS name, 'Write a status update for my manager.\nSections: Done (group related work and say what it achieved), In progress, Blockers or risks, Next week, Asks (only if something in the data needs a decision or help).\nUse short bullet points and a plain, confident tone. Lead with the most important work. Leave out personal tasks, habits and feelings. Keep it under 250 words.' AS prompt, 'last_week' AS period, 'tasks,task_notes,open_tasks' AS sources UNION ALL SELECT 'junior' AS key, 'builtin:junior' AS id, 'Notes for my junior' AS name, 'Write a review note for a junior teammate about the work below, so they can learn from it and review it.\nFor each notable piece of work: what was done, how it was approached, and why. Point out decisions, trade-offs and lessons from the task notes. End with two or three things worth trying or reading next.\nBe clear and encouraging; explain jargon briefly. Do not include personal tasks or habits.' AS prompt, 'last_week' AS period, 'tasks,task_notes' AS sources UNION ALL SELECT 'self' AS key, 'builtin:self' AS id, 'My own review' AS name, 'Write an honest review of my period for me alone.\nSections: What went well, What slipped (overdue or dropped work), Patterns (busy and quiet days, which tags took my time, habits kept or missed, compared with the period before), One or two changes to try next.\nBe direct and specific, cite the data, and do not flatter. Use my reflection if there is one.' AS prompt, 'week' AS period, 'tasks,task_notes,open_tasks,notes,habits' AS sources) b WHERE NOT EXISTS (SELECT 1 FROM skills s WHERE s._deleted IS NULL AND s.builtin_key = b.key)) k WHERE k.id = s.skill), 'No AI') AS skill_name, CASE s.period WHEN 'week' THEN 'This week so far' WHEN 'last_week' THEN 'Last week' WHEN '7d' THEN 'Last 7 days' WHEN 'month' THEN 'This month so far' WHEN 'last_month' THEN 'Last month' WHEN 'custom' THEN 'Custom dates' ELSE '' END AS period_label, COALESCE(s.describe, '') || ' · ' || COALESCE((SELECT k.name FROM (SELECT CASE WHEN s.builtin_key IS NOT NULL THEN 'builtin:' || s.builtin_key ELSE s.id END AS id, s.name AS name, COALESCE(s.prompt, '') AS prompt, COALESCE(s.model, '') AS model, COALESCE(s.period, '') AS period, COALESCE(s.sources, '') AS sources, COALESCE(s.tags, '') AS tags, CASE WHEN s.builtin_key IS NOT NULL THEN 'Edited starter' ELSE 'Yours' END AS kind, s.builtin_key IS NOT NULL AS edited_builtin, s.builtin_key IS NOT NULL AS is_builtin, 1 AS sort FROM skills s WHERE s._deleted IS NULL AND COALESCE(s.hidden, 0) = 0 UNION ALL SELECT b.id, b.name, b.prompt, '', b.period, b.sources, '', 'Starter', 0, 1, 0 FROM (SELECT 'manager' AS key, 'builtin:manager' AS id, 'Update for my manager' AS name, 'Write a status update for my manager.\nSections: Done (group related work and say what it achieved), In progress, Blockers or risks, Next week, Asks (only if something in the data needs a decision or help).\nUse short bullet points and a plain, confident tone. Lead with the most important work. Leave out personal tasks, habits and feelings. Keep it under 250 words.' AS prompt, 'last_week' AS period, 'tasks,task_notes,open_tasks' AS sources UNION ALL SELECT 'junior' AS key, 'builtin:junior' AS id, 'Notes for my junior' AS name, 'Write a review note for a junior teammate about the work below, so they can learn from it and review it.\nFor each notable piece of work: what was done, how it was approached, and why. Point out decisions, trade-offs and lessons from the task notes. End with two or three things worth trying or reading next.\nBe clear and encouraging; explain jargon briefly. Do not include personal tasks or habits.' AS prompt, 'last_week' AS period, 'tasks,task_notes' AS sources UNION ALL SELECT 'self' AS key, 'builtin:self' AS id, 'My own review' AS name, 'Write an honest review of my period for me alone.\nSections: What went well, What slipped (overdue or dropped work), Patterns (busy and quiet days, which tags took my time, habits kept or missed, compared with the period before), One or two changes to try next.\nBe direct and specific, cite the data, and do not flatter. Use my reflection if there is one.' AS prompt, 'week' AS period, 'tasks,task_notes,open_tasks,notes,habits' AS sources) b WHERE NOT EXISTS (SELECT 1 FROM skills s WHERE s._deleted IS NULL AND s.builtin_key = b.key)) k WHERE k.id = s.skill), 'No AI') || ' · ' || CASE s.period WHEN 'week' THEN 'This week so far' WHEN 'last_week' THEN 'Last week' WHEN '7d' THEN 'Last 7 days' WHEN 'month' THEN 'This month so far' WHEN 'last_month' THEN 'Last month' WHEN 'custom' THEN 'Custom dates' ELSE '' END AS subtitle, CASE WHEN NOT s.enabled THEN 'Off' WHEN s.last_status = 'done' THEN 'Last run done' WHEN s.last_status = 'failed' THEN 'Last run failed' WHEN s.last_status IN ('pending', 'queued') THEN 'Running' END AS status_chip, CASE WHEN s.last_status = 'failed' THEN 'danger' WHEN s.last_status = 'done' THEN 'accent' END AS status_tone, s.last_error, s.last_report, CASE WHEN s.enabled THEN 'Turn off' ELSE 'Turn on' END AS toggle_label FROM schedules s WHERE s._deleted IS NULL ORDER BY s.name",
+      "params": []
+    },
+    "schedule": {
+      "sql": "SELECT s.id, s.name, s.enabled, COALESCE(s.describe, '') AS describe, COALESCE(s.skill, '') AS skill, s.period, COALESCE(s.sources, '') AS sources, COALESCE(s.tags, '') AS tags, s.every, COALESCE(s.days, '') AS days, s.at, COALESCE(s.day, '1') AS day, COALESCE((SELECT k.name FROM (SELECT CASE WHEN s.builtin_key IS NOT NULL THEN 'builtin:' || s.builtin_key ELSE s.id END AS id, s.name AS name, COALESCE(s.prompt, '') AS prompt, COALESCE(s.model, '') AS model, COALESCE(s.period, '') AS period, COALESCE(s.sources, '') AS sources, COALESCE(s.tags, '') AS tags, CASE WHEN s.builtin_key IS NOT NULL THEN 'Edited starter' ELSE 'Yours' END AS kind, s.builtin_key IS NOT NULL AS edited_builtin, s.builtin_key IS NOT NULL AS is_builtin, 1 AS sort FROM skills s WHERE s._deleted IS NULL AND COALESCE(s.hidden, 0) = 0 UNION ALL SELECT b.id, b.name, b.prompt, '', b.period, b.sources, '', 'Starter', 0, 1, 0 FROM (SELECT 'manager' AS key, 'builtin:manager' AS id, 'Update for my manager' AS name, 'Write a status update for my manager.\nSections: Done (group related work and say what it achieved), In progress, Blockers or risks, Next week, Asks (only if something in the data needs a decision or help).\nUse short bullet points and a plain, confident tone. Lead with the most important work. Leave out personal tasks, habits and feelings. Keep it under 250 words.' AS prompt, 'last_week' AS period, 'tasks,task_notes,open_tasks' AS sources UNION ALL SELECT 'junior' AS key, 'builtin:junior' AS id, 'Notes for my junior' AS name, 'Write a review note for a junior teammate about the work below, so they can learn from it and review it.\nFor each notable piece of work: what was done, how it was approached, and why. Point out decisions, trade-offs and lessons from the task notes. End with two or three things worth trying or reading next.\nBe clear and encouraging; explain jargon briefly. Do not include personal tasks or habits.' AS prompt, 'last_week' AS period, 'tasks,task_notes' AS sources UNION ALL SELECT 'self' AS key, 'builtin:self' AS id, 'My own review' AS name, 'Write an honest review of my period for me alone.\nSections: What went well, What slipped (overdue or dropped work), Patterns (busy and quiet days, which tags took my time, habits kept or missed, compared with the period before), One or two changes to try next.\nBe direct and specific, cite the data, and do not flatter. Use my reflection if there is one.' AS prompt, 'week' AS period, 'tasks,task_notes,open_tasks,notes,habits' AS sources) b WHERE NOT EXISTS (SELECT 1 FROM skills s WHERE s._deleted IS NULL AND s.builtin_key = b.key)) k WHERE k.id = s.skill), 'No AI') AS skill_name, CASE s.period WHEN 'week' THEN 'This week so far' WHEN 'last_week' THEN 'Last week' WHEN '7d' THEN 'Last 7 days' WHEN 'month' THEN 'This month so far' WHEN 'last_month' THEN 'Last month' WHEN 'custom' THEN 'Custom dates' ELSE '' END AS period_label, COALESCE(s.describe, '') || ' · ' || COALESCE((SELECT k.name FROM (SELECT CASE WHEN s.builtin_key IS NOT NULL THEN 'builtin:' || s.builtin_key ELSE s.id END AS id, s.name AS name, COALESCE(s.prompt, '') AS prompt, COALESCE(s.model, '') AS model, COALESCE(s.period, '') AS period, COALESCE(s.sources, '') AS sources, COALESCE(s.tags, '') AS tags, CASE WHEN s.builtin_key IS NOT NULL THEN 'Edited starter' ELSE 'Yours' END AS kind, s.builtin_key IS NOT NULL AS edited_builtin, s.builtin_key IS NOT NULL AS is_builtin, 1 AS sort FROM skills s WHERE s._deleted IS NULL AND COALESCE(s.hidden, 0) = 0 UNION ALL SELECT b.id, b.name, b.prompt, '', b.period, b.sources, '', 'Starter', 0, 1, 0 FROM (SELECT 'manager' AS key, 'builtin:manager' AS id, 'Update for my manager' AS name, 'Write a status update for my manager.\nSections: Done (group related work and say what it achieved), In progress, Blockers or risks, Next week, Asks (only if something in the data needs a decision or help).\nUse short bullet points and a plain, confident tone. Lead with the most important work. Leave out personal tasks, habits and feelings. Keep it under 250 words.' AS prompt, 'last_week' AS period, 'tasks,task_notes,open_tasks' AS sources UNION ALL SELECT 'junior' AS key, 'builtin:junior' AS id, 'Notes for my junior' AS name, 'Write a review note for a junior teammate about the work below, so they can learn from it and review it.\nFor each notable piece of work: what was done, how it was approached, and why. Point out decisions, trade-offs and lessons from the task notes. End with two or three things worth trying or reading next.\nBe clear and encouraging; explain jargon briefly. Do not include personal tasks or habits.' AS prompt, 'last_week' AS period, 'tasks,task_notes' AS sources UNION ALL SELECT 'self' AS key, 'builtin:self' AS id, 'My own review' AS name, 'Write an honest review of my period for me alone.\nSections: What went well, What slipped (overdue or dropped work), Patterns (busy and quiet days, which tags took my time, habits kept or missed, compared with the period before), One or two changes to try next.\nBe direct and specific, cite the data, and do not flatter. Use my reflection if there is one.' AS prompt, 'week' AS period, 'tasks,task_notes,open_tasks,notes,habits' AS sources) b WHERE NOT EXISTS (SELECT 1 FROM skills s WHERE s._deleted IS NULL AND s.builtin_key = b.key)) k WHERE k.id = s.skill), 'No AI') || ' · ' || CASE s.period WHEN 'week' THEN 'This week so far' WHEN 'last_week' THEN 'Last week' WHEN '7d' THEN 'Last 7 days' WHEN 'month' THEN 'This month so far' WHEN 'last_month' THEN 'Last month' WHEN 'custom' THEN 'Custom dates' ELSE '' END AS subtitle, CASE WHEN NOT s.enabled THEN 'Off' WHEN s.last_status = 'done' THEN 'Last run done' WHEN s.last_status = 'failed' THEN 'Last run failed' WHEN s.last_status IN ('pending', 'queued') THEN 'Running' END AS status_chip, CASE WHEN s.last_status = 'failed' THEN 'danger' WHEN s.last_status = 'done' THEN 'accent' END AS status_tone, s.last_error, s.last_report, CASE WHEN s.enabled THEN 'Turn off' ELSE 'Turn on' END AS toggle_label FROM schedules s WHERE s._deleted IS NULL AND s.id = ?1",
+      "params": [
+        "id"
+      ]
+    }
+  },
+  "pages": [
+    {
+      "id": "main",
+      "title": "Reports",
+      "template": "ui/page-main.json"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "latest",
+      "title": "Latest review",
+      "template": "ui/widget-latest.json"
+    }
+  ],
+  "icon": "chart",
+  "color": "#6D28D9",
+  "permissions": [
+    "ai"
+  ]
+}

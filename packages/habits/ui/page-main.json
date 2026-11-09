@@ -1,0 +1,901 @@
+{
+  "state": {
+    "tab": "today",
+    "open": "",
+    "creating": "",
+    "newText": ""
+  },
+  "body": {
+    "type": "stack",
+    "gap": 16,
+    "children": [
+      {
+        "type": "heading",
+        "text": "Habits"
+      },
+      {
+        "type": "form",
+        "inline": true,
+        "submit_label": "Add habit",
+        "submit_icon": "plus",
+        "submit": {
+          "op": "save",
+          "args": {
+            "title": "{{form.title}}"
+          },
+          "success": "Added \u2014 set its days and target",
+          "reset": true,
+          "then": {
+            "state.open": "{{result.id}}"
+          }
+        },
+        "children": [
+          {
+            "type": "text-field",
+            "name": "title",
+            "label": "New habit",
+            "label_hidden": true,
+            "required": true,
+            "placeholder": "Add a habit, e.g. \u201cRead 20 minutes\u201d"
+          }
+        ]
+      },
+      {
+        "type": "tabs",
+        "bind": "state.tab",
+        "label": "Show",
+        "options": [
+          {
+            "value": "today",
+            "label": "Today"
+          },
+          {
+            "value": "insights",
+            "label": "Insights"
+          },
+          {
+            "value": "sleep",
+            "label": "Sleep"
+          }
+        ]
+      },
+      {
+        "type": "stack",
+        "gap": 16,
+        "if": "{{state.tab == today}}",
+        "children": [
+          {
+            "type": "list",
+            "query": "day_summary",
+            "params": {
+              "today": "{{$today}}"
+            },
+            "item": {
+              "type": "stack",
+              "gap": 10,
+              "if": "{{row.habits}}",
+              "children": [
+                {
+                  "type": "stack",
+                  "direction": "row",
+                  "justify": "between",
+                  "align": "center",
+                  "wrap": true,
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "heading",
+                      "level": 2,
+                      "text": "{{row.label}}"
+                    },
+                    {
+                      "type": "badge",
+                      "if": "{{row.top_streak}}",
+                      "text": "Best run now: {{row.top_streak}}"
+                    }
+                  ]
+                },
+                {
+                  "type": "progress",
+                  "value": "{{row.pct}}",
+                  "label": "Today's habits done"
+                }
+              ]
+            }
+          },
+          {
+            "type": "list",
+            "query": "today",
+            "group": "section",
+            "params": {
+              "today": "{{$today}}"
+            },
+            "empty": "No habits yet. Add one above \u2014 e.g. \u201cMorning walk\u201d or \u201cDrink water\u201d.",
+            "item": {
+              "type": "stack",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "item",
+                  "title": "{{row.title}}",
+                  "done": "{{row.is_done}}",
+                  "check": {
+                    "checked": "{{row.is_done}}",
+                    "action": {
+                      "op": "checkin",
+                      "args": {
+                        "id": "{{row.id}}",
+                        "done": "{{value}}"
+                      }
+                    }
+                  },
+                  "action": {
+                    "set": {
+                      "state.open": "{{row.id}}"
+                    }
+                  },
+                  "chips": [
+                    {
+                      "text": "{{row.streak_label}}",
+                      "icon": "flame",
+                      "tone": "accent"
+                    },
+                    {
+                      "text": "{{row.progress_label}}",
+                      "icon": "chart"
+                    },
+                    {
+                      "text": "{{row.skipped_label}}"
+                    },
+                    {
+                      "text": "{{row.schedule_label}}",
+                      "icon": "repeat"
+                    },
+                    {
+                      "text": "{{row.reminder}}",
+                      "icon": "bell"
+                    }
+                  ],
+                  "trailing": [
+                    {
+                      "type": "button",
+                      "if": "{{row.countable}}",
+                      "icon": "minus",
+                      "variant": "ghost",
+                      "aria_label": "One less for {{row.title}}",
+                      "action": {
+                        "op": "add",
+                        "args": {
+                          "id": "{{row.id}}",
+                          "by": -1
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "if": "{{row.countable}}",
+                      "icon": "plus",
+                      "variant": "ghost",
+                      "aria_label": "One more for {{row.title}}",
+                      "action": {
+                        "op": "add",
+                        "args": {
+                          "id": "{{row.id}}",
+                          "by": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "week-strip",
+                  "days": "{{row.week}}",
+                  "label": "{{row.title}}",
+                  "action": {
+                    "op": "checkin",
+                    "args": {
+                      "id": "{{row.id}}",
+                      "day": "{{day}}",
+                      "status": "{{next}}"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "type": "stack",
+        "gap": 16,
+        "if": "{{state.tab == insights}}",
+        "children": [
+          {
+            "type": "section",
+            "title": "Last 12 weeks",
+            "children": [
+              {
+                "type": "calendar-heatmap",
+                "query": "heatmap",
+                "params": {
+                  "today": "{{$today}}",
+                  "id": ""
+                },
+                "weeks": 12,
+                "label": "Habits completed per day, last 12 weeks"
+              }
+            ]
+          },
+          {
+            "type": "section",
+            "title": "Last 30 days",
+            "children": [
+              {
+                "type": "text",
+                "tone": "muted",
+                "text": "Share of scheduled days done (skipped days don't count against you)."
+              },
+              {
+                "type": "bar",
+                "query": "rates",
+                "params": {
+                  "today": "{{$today}}"
+                },
+                "label": "label",
+                "value": "pct",
+                "max": 100
+              }
+            ]
+          },
+          {
+            "type": "section",
+            "title": "Trash",
+            "collapsible": true,
+            "children": [
+              {
+                "type": "list",
+                "query": "trash",
+                "empty": "Trash is empty.",
+                "item": {
+                  "type": "stack",
+                  "direction": "row",
+                  "align": "center",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "text": "{{row.title}}",
+                      "tone": "muted",
+                      "grow": 1
+                    },
+                    {
+                      "type": "button",
+                      "label": "Restore",
+                      "aria_label": "Restore {{row.title}}",
+                      "action": {
+                        "op": "restore",
+                        "args": {
+                          "id": "{{row.id}}"
+                        },
+                        "success": "Restored"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "stack",
+        "gap": 16,
+        "if": "{{state.tab == sleep}}",
+        "children": [
+          {
+            "type": "card",
+            "children": [
+              {
+                "type": "heading",
+                "level": 2,
+                "text": "Log sleep"
+              },
+              {
+                "type": "form",
+                "submit_label": "Log sleep",
+                "submit": {
+                  "op": "sleep_save",
+                  "args": {
+                    "day": "{{form.day}}",
+                    "hours": "{{form.hours}}",
+                    "note": "{{form.note}}"
+                  },
+                  "success": "Sleep logged",
+                  "reset": true
+                },
+                "children": [
+                  {
+                    "type": "stack",
+                    "direction": "row",
+                    "gap": 12,
+                    "wrap": true,
+                    "children": [
+                      {
+                        "type": "number",
+                        "name": "hours",
+                        "label": "Hours",
+                        "min": 0.5,
+                        "max": 24,
+                        "step": 0.25,
+                        "required": true,
+                        "placeholder": "7.5",
+                        "grow": 1,
+                        "basis": 100
+                      },
+                      {
+                        "type": "date",
+                        "name": "day",
+                        "label": "Woke up on",
+                        "value": "{{$today}}",
+                        "grow": 1,
+                        "basis": 150
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text-field",
+                    "name": "note",
+                    "label": "Note",
+                    "placeholder": "Optional, e.g. woke up at 3"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "list",
+            "query": "sleep_stats",
+            "params": {
+              "today": "{{$today}}"
+            },
+            "item": {
+              "type": "stack",
+              "direction": "row",
+              "gap": 12,
+              "wrap": true,
+              "children": [
+                {
+                  "type": "stat",
+                  "value": "{{row.average}}",
+                  "label": "Average, last 7 nights"
+                },
+                {
+                  "type": "stat",
+                  "value": "{{row.longest}}",
+                  "label": "Longest"
+                },
+                {
+                  "type": "stat",
+                  "value": "{{row.nights}}",
+                  "label": "Nights logged"
+                }
+              ]
+            }
+          },
+          {
+            "type": "section",
+            "title": "Last 2 weeks",
+            "children": [
+              {
+                "type": "bar",
+                "query": "sleep_chart",
+                "params": {
+                  "today": "{{$today}}"
+                },
+                "label": "label",
+                "value": "hours",
+                "max": 10
+              }
+            ]
+          },
+          {
+            "type": "section",
+            "title": "Recent",
+            "collapsible": true,
+            "children": [
+              {
+                "type": "list",
+                "query": "sleep_recent",
+                "empty": "No sleep logged yet.",
+                "item": {
+                  "type": "item",
+                  "title": "{{row.duration}}",
+                  "subtitle": "{{row.note}}",
+                  "chips": [
+                    {
+                      "text": "{{row.label}}",
+                      "icon": "calendar"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "sheet",
+        "bind": "state.open",
+        "title": "{{row.title}}",
+        "query": "habit",
+        "params": {
+          "id": "{{state.open}}",
+          "today": "{{$today}}"
+        },
+        "children": [
+          {
+            "type": "stack",
+            "direction": "row",
+            "gap": 12,
+            "wrap": true,
+            "children": [
+              {
+                "type": "stat",
+                "value": "{{row.streak}}",
+                "label": "Current streak"
+              },
+              {
+                "type": "stat",
+                "value": "{{row.best}}",
+                "label": "Best streak"
+              },
+              {
+                "type": "stat",
+                "value": "{{row.rate30}}",
+                "label": "Last 30 days"
+              },
+              {
+                "type": "stat",
+                "value": "{{row.total}}",
+                "label": "Times done"
+              }
+            ]
+          },
+          {
+            "type": "section",
+            "title": "Last 2 weeks",
+            "children": [
+              {
+                "type": "text",
+                "tone": "muted",
+                "text": "Tap a day to mark it done or undo it."
+              },
+              {
+                "type": "week-strip",
+                "days": "{{row.week}}",
+                "label": "{{row.title}}",
+                "action": {
+                  "op": "checkin",
+                  "args": {
+                    "id": "{{row.id}}",
+                    "day": "{{day}}",
+                    "status": "{{next}}"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "stack",
+            "direction": "row",
+            "gap": 8,
+            "wrap": true,
+            "children": [
+              {
+                "type": "button",
+                "label": "Skip today",
+                "icon": "close",
+                "action": {
+                  "op": "checkin",
+                  "args": {
+                    "id": "{{row.id}}",
+                    "status": "skipped"
+                  },
+                  "success": "Skipped for today \u2014 your streak is safe"
+                }
+              },
+              {
+                "type": "button",
+                "label": "{{row.pause_label}}",
+                "icon": "{{row.pause_icon}}",
+                "action": {
+                  "op": "save",
+                  "args": {
+                    "id": "{{row.id}}",
+                    "paused": "{{!row.paused}}"
+                  },
+                  "success": "Saved"
+                }
+              }
+            ]
+          },
+          {
+            "type": "form",
+            "submit_label": "Save",
+            "submit": {
+              "op": "save",
+              "args": {
+                "id": "{{row.id}}",
+                "title": "{{form.title}}",
+                "weekdays": "{{form.weekdays}}",
+                "target": "{{form.target}}",
+                "unit": "{{form.unit}}",
+                "reminder": "{{form.reminder}}",
+                "notify_on": "{{form.notify_on}}",
+                "category": "{{form.category}}",
+                "notes": "{{form.notes}}"
+              },
+              "success": "Saved",
+              "then": {
+                "state.open": ""
+              }
+            },
+            "children": [
+              {
+                "type": "text-field",
+                "name": "title",
+                "label": "Name",
+                "required": true,
+                "value": "{{row.title}}"
+              },
+              {
+                "type": "choice",
+                "name": "weekdays",
+                "label": "Days",
+                "multiple": true,
+                "value": "{{row.weekdays}}",
+                "options": [
+                  {
+                    "value": 0,
+                    "label": "Mon"
+                  },
+                  {
+                    "value": 1,
+                    "label": "Tue"
+                  },
+                  {
+                    "value": 2,
+                    "label": "Wed"
+                  },
+                  {
+                    "value": 3,
+                    "label": "Thu"
+                  },
+                  {
+                    "value": 4,
+                    "label": "Fri"
+                  },
+                  {
+                    "value": 5,
+                    "label": "Sat"
+                  },
+                  {
+                    "value": 6,
+                    "label": "Sun"
+                  }
+                ]
+              },
+              {
+                "type": "stack",
+                "direction": "row",
+                "gap": 12,
+                "wrap": true,
+                "children": [
+                  {
+                    "type": "number",
+                    "name": "target",
+                    "label": "Times a day",
+                    "min": 1,
+                    "max": 1000,
+                    "step": 1,
+                    "value": "{{row.target}}",
+                    "grow": 1,
+                    "basis": 110
+                  },
+                  {
+                    "type": "text-field",
+                    "name": "unit",
+                    "label": "Unit",
+                    "placeholder": "e.g. glasses",
+                    "value": "{{row.unit}}",
+                    "grow": 1,
+                    "basis": 140
+                  }
+                ]
+              },
+              {
+                "type": "stack",
+                "direction": "row",
+                "gap": 12,
+                "wrap": true,
+                "children": [
+                  {
+                    "type": "time",
+                    "name": "reminder",
+                    "label": "Reminder",
+                    "value": "{{row.reminder}}",
+                    "grow": 1,
+                    "basis": 120
+                  },
+                  {
+                    "type": "select",
+                    "name": "notify_on",
+                    "label": "Remind on",
+                    "value": "{{row.notify_on}}",
+                    "grow": 1,
+                    "basis": 140,
+                    "options": [
+                      {
+                        "value": "phone",
+                        "label": "Phone"
+                      },
+                      {
+                        "value": "desktop",
+                        "label": "Desktop"
+                      },
+                      {
+                        "value": "both",
+                        "label": "Both"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "choice",
+                "name": "category",
+                "label": "Category",
+                "value": "{{row.category}}",
+                "options": [
+                  {
+                    "value": "health",
+                    "label": "Health"
+                  },
+                  {
+                    "value": "fitness",
+                    "label": "Fitness"
+                  },
+                  {
+                    "value": "mind",
+                    "label": "Mind"
+                  },
+                  {
+                    "value": "learning",
+                    "label": "Learning"
+                  },
+                  {
+                    "value": "work",
+                    "label": "Work"
+                  },
+                  {
+                    "value": "personal",
+                    "label": "Personal"
+                  }
+                ]
+              },
+              {
+                "type": "text-area",
+                "name": "notes",
+                "label": "Why this habit",
+                "rows": 2,
+                "placeholder": "A line to keep you going",
+                "value": "{{row.notes}}"
+              }
+            ]
+          },
+          {
+            "type": "section",
+            "title": "Last 12 weeks",
+            "children": [
+              {
+                "type": "calendar-heatmap",
+                "query": "heatmap",
+                "params": {
+                  "today": "{{$today}}",
+                  "id": "{{state.open}}"
+                },
+                "weeks": 12,
+                "label": "Days done, last 12 weeks"
+              }
+            ]
+          },
+          {
+            "type": "button",
+            "label": "Delete habit",
+            "icon": "trash",
+            "variant": "danger",
+            "action": {
+              "op": "delete",
+              "args": {
+                "id": "{{row.id}}"
+              },
+              "confirm": "Move {{row.title}} to trash? Its history is kept.",
+              "success": "Moved to trash",
+              "then": {
+                "state.open": ""
+              },
+              "undo": {
+                "op": "restore",
+                "args": {
+                  "id": "{{row.id}}"
+                },
+                "success": "Restored from trash"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "type": "sheet",
+        "bind": "state.creating",
+        "title": "New habit",
+        "children": [
+          {
+            "type": "form",
+            "submit_label": "Create habit",
+            "submit": {
+              "op": "save",
+              "args": {
+                "title": "{{form.title}}",
+                "weekdays": "{{form.weekdays}}",
+                "target": "{{form.target}}",
+                "unit": "{{form.unit}}",
+                "reminder": "{{form.reminder}}",
+                "notify_on": "{{form.notify_on}}"
+              },
+              "success": "Habit created",
+              "then": {
+                "state.creating": ""
+              }
+            },
+            "children": [
+              {
+                "type": "text-field",
+                "name": "title",
+                "label": "Name",
+                "required": true,
+                "value": "{{state.newText}}"
+              },
+              {
+                "type": "choice",
+                "name": "weekdays",
+                "label": "Days",
+                "multiple": true,
+                "value": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6
+                ],
+                "options": [
+                  {
+                    "value": 0,
+                    "label": "Mon"
+                  },
+                  {
+                    "value": 1,
+                    "label": "Tue"
+                  },
+                  {
+                    "value": 2,
+                    "label": "Wed"
+                  },
+                  {
+                    "value": 3,
+                    "label": "Thu"
+                  },
+                  {
+                    "value": 4,
+                    "label": "Fri"
+                  },
+                  {
+                    "value": 5,
+                    "label": "Sat"
+                  },
+                  {
+                    "value": 6,
+                    "label": "Sun"
+                  }
+                ]
+              },
+              {
+                "type": "stack",
+                "direction": "row",
+                "gap": 12,
+                "wrap": true,
+                "children": [
+                  {
+                    "type": "number",
+                    "name": "target",
+                    "label": "Times a day",
+                    "min": 1,
+                    "max": 1000,
+                    "step": 1,
+                    "value": 1,
+                    "grow": 1,
+                    "basis": 110
+                  },
+                  {
+                    "type": "text-field",
+                    "name": "unit",
+                    "label": "Unit",
+                    "placeholder": "e.g. glasses",
+                    "value": "",
+                    "grow": 1,
+                    "basis": 140
+                  }
+                ]
+              },
+              {
+                "type": "stack",
+                "direction": "row",
+                "gap": 12,
+                "wrap": true,
+                "children": [
+                  {
+                    "type": "time",
+                    "name": "reminder",
+                    "label": "Reminder",
+                    "value": "",
+                    "grow": 1,
+                    "basis": 120
+                  },
+                  {
+                    "type": "select",
+                    "name": "notify_on",
+                    "label": "Remind on",
+                    "value": "both",
+                    "grow": 1,
+                    "basis": 140,
+                    "options": [
+                      {
+                        "value": "phone",
+                        "label": "Phone"
+                      },
+                      {
+                        "value": "desktop",
+                        "label": "Desktop"
+                      },
+                      {
+                        "value": "both",
+                        "label": "Both"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "button",
+            "label": "Cancel",
+            "action": {
+              "set": {
+                "state.creating": ""
+              }
+            }
+          }
+        ],
+        "presentation": "modal"
+      }
+    ]
+  },
+  "creation": {
+    "operation": "save",
+    "bind": "state.creating",
+    "prefill": "state.newText"
+  }
+}

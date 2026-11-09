@@ -1,0 +1,622 @@
+{
+  "creation": {"operation": "create", "bind": "state.creating", "prefill": "state.newText"},
+  "state": {
+    "creating": "",
+    "newText": "", "view": "list", "filter": "today", "q": "", "open": "", "note_for": "" },
+  "body": {
+    "type": "stack", "gap": 16,
+    "children": [
+      { "type": "heading", "text": "To-do" },
+      {
+        "type": "form", "inline": true, "submit_label": "Add task", "submit_icon": "plus",
+        "submit": {
+          "op": "create", "args": { "title": "{{form.title}}" },
+          "success": "Added “{{result.title}}”", "reset": true
+        },
+        "children": [
+          {
+            "type": "text-field", "name": "title", "label": "New task", "label_hidden": true, "required": true,
+            "placeholder": "Add a task, e.g. “Call Sam tomorrow 6pm #work !high”"
+          }
+        ]
+      },
+      {
+        "type": "stack", "direction": "row", "wrap": true, "gap": 12, "align": "center", "justify": "between",
+        "children": [
+          {
+            "type": "tabs", "bind": "state.filter", "label": "Show",
+            "options": [
+              { "value": "today", "label": "Today" },
+              { "value": "upcoming", "label": "Upcoming" },
+              { "value": "all", "label": "All open" },
+              { "value": "everything", "label": "All tasks" },
+              { "value": "done", "label": "Done" }
+            ]
+          },
+          { "type": "search-field", "bind": "state.q", "label": "Search tasks", "label_hidden": true, "placeholder": "Search tasks", "grow": 1, "basis": 200 }
+        ]
+      },
+      {
+        "type": "tabs",
+        "bind": "state.view",
+        "label": "Task view",
+        "options": [
+          {
+            "value": "list",
+            "label": "List"
+          },
+          {
+            "value": "kanban",
+            "label": "Kanban"
+          },
+          {
+            "value": "matrix",
+            "label": "Eisenhower"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "tone": "muted",
+        "if": "{{state.view != list}}",
+        "text": "These views use the Show and Search filters above. Change the filters to see more tasks."
+      },
+      {
+        "type": "list", "query": "tasks", "if": "{{state.view == list}}", "group": "section", "group_tone": "section_tone",
+        "params": { "today": "{{$today}}", "filter": "{{state.filter}}", "q": "{{state.q}}" },
+        "empty": "Nothing here. Add a task above.",
+        "item": {
+          "type": "item", "title": "{{row.title}}", "subtitle": "{{row.notes}}", "done": "{{row.done}}", "flag": "{{row.priority}}",
+          "check": { "checked": "{{row.done}}", "action": { "op": "toggle", "args": { "id": "{{row.id}}", "done": "{{value}}" }, "then": { "state.note_for": "{{result.ask_note}}" } } },
+          "action": { "set": { "state.open": "{{row.id}}" } },
+          "chips": [
+            { "text": "{{row.due_label}}", "tone": "{{row.due_tone}}", "icon": "calendar" },
+            { "text": "{{row.repeat_label}}", "icon": "repeat" },
+            { "text": "{{row.steps_label}}", "icon": "steps" },
+            { "text": "{{row.tags}}", "icon": "tag" },
+            { "text": "{{row.note_chip}}", "icon": "note" }
+          ]
+        }
+      },
+      {
+        "type": "list",
+        "query": "tasks",
+        "params": {
+          "today": "{{$today}}",
+          "filter": "{{state.filter}}",
+          "q": "{{state.q}}"
+        },
+        "empty": "No tasks match these filters.",
+        "item": {
+          "type": "stack",
+          "gap": 0,
+          "children": [
+            {
+              "type": "item",
+              "title": "{{row.title}}",
+              "subtitle": "{{row.notes}}",
+              "done": "{{row.done}}",
+              "flag": "{{row.priority}}",
+              "check": {
+                "checked": "{{row.done}}",
+                "action": {
+                  "op": "toggle",
+                  "args": {
+                    "id": "{{row.id}}",
+                    "done": "{{value}}"
+                  },
+                  "then": {
+                    "state.note_for": "{{result.ask_note}}"
+                  }
+                }
+              },
+              "action": {
+                "set": {
+                  "state.open": "{{row.id}}"
+                }
+              },
+              "chips": [
+                {
+                  "text": "{{row.due_label}}",
+                  "tone": "{{row.due_tone}}",
+                  "icon": "calendar"
+                },
+                {
+                  "text": "{{row.repeat_label}}",
+                  "icon": "repeat"
+                },
+                {
+                  "text": "{{row.steps_label}}",
+                  "icon": "steps"
+                },
+                {
+                  "text": "{{row.tags}}",
+                  "icon": "tag"
+                },
+                {
+                  "text": "{{row.note_chip}}",
+                  "icon": "note"
+                }
+              ]
+            },
+            {
+              "type": "button",
+              "if": "{{!row.done}}",
+              "label": "{{row.move_label}}",
+              "variant": "ghost",
+              "aria_label": "{{row.move_label}}: {{row.title}}",
+              "action": {
+                "op": "update",
+                "args": {
+                  "id": "{{row.id}}",
+                  "in_progress": "{{!row.in_progress}}"
+                },
+                "success": "Task moved"
+              }
+            }
+          ]
+        },
+        "if": "{{state.view == kanban}}",
+        "layout": "board",
+        "column": "board_lane",
+        "columns": [
+          {
+            "value": "todo",
+            "label": "To do"
+          },
+          {
+            "value": "doing",
+            "label": "In progress"
+          },
+          {
+            "value": "done",
+            "label": "Done"
+          }
+        ],
+        "label": "Task Kanban"
+      },
+      {
+        "type": "text",
+        "tone": "muted",
+        "if": "{{state.view == matrix}}",
+        "text": "Open a task to set Urgent and Important. Tasks without either flag start in Eliminate; nothing is deleted."
+      },
+      {
+        "type": "list",
+        "query": "tasks",
+        "params": {
+          "today": "{{$today}}",
+          "filter": "{{state.filter}}",
+          "q": "{{state.q}}"
+        },
+        "empty": "No tasks match these filters.",
+        "item": {
+          "type": "item",
+          "title": "{{row.title}}",
+          "subtitle": "{{row.notes}}",
+          "done": "{{row.done}}",
+          "flag": "{{row.priority}}",
+          "check": {
+            "checked": "{{row.done}}",
+            "action": {
+              "op": "toggle",
+              "args": {
+                "id": "{{row.id}}",
+                "done": "{{value}}"
+              },
+              "then": {
+                "state.note_for": "{{result.ask_note}}"
+              }
+            }
+          },
+          "action": {
+            "set": {
+              "state.open": "{{row.id}}"
+            }
+          },
+          "chips": [
+            {
+              "text": "{{row.due_label}}",
+              "tone": "{{row.due_tone}}",
+              "icon": "calendar"
+            },
+            {
+              "text": "{{row.repeat_label}}",
+              "icon": "repeat"
+            },
+            {
+              "text": "{{row.steps_label}}",
+              "icon": "steps"
+            },
+            {
+              "text": "{{row.tags}}",
+              "icon": "tag"
+            },
+            {
+              "text": "{{row.note_chip}}",
+              "icon": "note"
+            }
+          ]
+        },
+        "if": "{{state.view == matrix}}",
+        "layout": "matrix",
+        "column": "matrix_lane",
+        "columns": [
+          {
+            "value": "do",
+            "label": "Do first",
+            "description": "Urgent and important"
+          },
+          {
+            "value": "schedule",
+            "label": "Schedule",
+            "description": "Important, not urgent"
+          },
+          {
+            "value": "delegate",
+            "label": "Delegate",
+            "description": "Urgent, not important"
+          },
+          {
+            "value": "eliminate",
+            "label": "Eliminate",
+            "description": "Neither urgent nor important"
+          }
+        ],
+        "label": "Eisenhower matrix"
+      },
+      {
+        "type": "button", "if": "{{state.filter == done}}", "label": "Clear completed", "variant": "ghost",
+        "action": { "op": "clear_done", "confirm": "Hide all completed tasks? They still count in your reviews.", "success": "Cleared {{result.cleared}} tasks" }
+      },
+      {
+        "type": "section", "title": "Task notes", "collapsible": true,
+        "children": [
+          { "type": "text", "tone": "muted", "text": "When you finish a task, you can note what came of it. Notes are kept with the task and in Notes, in the Tasks project: one note per task, with an entry each time a repeating task is done. Reports can use them." },
+          {
+            "type": "list", "query": "note_settings", "layout": "plain",
+            "item": {
+              "type": "form", "submit_label": "Save",
+              "submit": { "op": "note_settings", "args": { "ask": "{{form.ask}}", "tags": "{{form.tags}}" }, "success": "Saved" },
+              "children": [
+                {
+                  "type": "select", "name": "ask", "label": "Offer a note when I finish", "value": "{{row.ask}}",
+                  "options": [
+                    { "value": "always", "label": "Any task" },
+                    { "value": "tagged", "label": "Tasks with these tags" },
+                    { "value": "never", "label": "Never (add notes from the task)" }
+                  ]
+                },
+                { "type": "text-field", "name": "tags", "label": "Tags", "placeholder": "e.g. work, client", "value": "{{row.tags}}" }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "type": "sheet", "bind": "state.note_for", "title": "What came of it?", "query": "task", "params": { "id": "{{state.note_for}}" },
+        "children": [
+          { "type": "text", "tone": "muted", "text": "{{row.title}}" },
+          { "type": "markdown", "if": "{{row.last_note}}", "text": "**{{row.last_note_title}}:** {{row.last_note}}" },
+          {
+            "type": "form", "submit_label": "Save note",
+            "submit": { "op": "save_note", "args": { "id": "{{row.id}}", "text": "{{form.text}}" }, "success": "Note saved", "then": { "state.note_for": "" } },
+            "children": [
+              { "type": "text-area", "name": "text", "label": "Note", "label_hidden": true, "rows": 5, "required": true, "value": "{{row.done_note}}", "placeholder": "Result · what you learned · what’s next" }
+            ]
+          },
+          { "type": "button", "label": "Skip", "variant": "ghost", "action": { "set": { "state.note_for": "" } } }
+        ]
+      },
+      {
+        "type": "section", "title": "Trash", "collapsible": true,
+        "children": [
+          {
+            "type": "list", "query": "trash", "empty": "Trash is empty.",
+            "item": {
+              "type": "stack", "direction": "row", "align": "center", "gap": 12,
+              "children": [
+                { "type": "text", "text": "{{row.title}}", "tone": "muted", "grow": 1 },
+                {
+                  "type": "button", "label": "Restore", "aria_label": "Restore {{row.title}}",
+                  "action": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored" }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "type": "sheet", "bind": "state.open", "title": "Task", "query": "task", "params": { "id": "{{state.open}}" },
+        "children": [
+          {
+            "type": "form", "submit_label": "Save",
+            "submit": {
+              "op": "update",
+              "args": {
+                "id": "{{row.id}}", "title": "{{form.title}}", "notes": "{{form.notes}}", "due": "{{form.due}}",
+                "remind_time": "{{form.remind_time}}", "priority": "{{form.priority}}", "repeat": "{{form.repeat}}", "tags": "{{form.tags}}", "in_progress": "{{form.in_progress}}", "urgent": "{{form.urgent}}", "important": "{{form.important}}"
+              },
+              "success": "Saved", "then": { "state.open": "" }
+            },
+            "children": [
+              { "type": "text-field", "name": "title", "label": "Title", "required": true, "value": "{{row.title}}" },
+              { "type": "text-area", "name": "notes", "label": "Notes", "rows": 3, "value": "{{row.notes}}" },
+              {
+                "type": "stack", "direction": "row", "gap": 12, "wrap": true,
+                "children": [
+                  { "type": "date", "name": "due", "label": "Due", "value": "{{row.due}}", "grow": 1, "basis": 150 },
+                  { "type": "time", "name": "remind_time", "label": "Remind at", "value": "{{row.remind_time}}", "grow": 1, "basis": 120 }
+                ]
+              },
+              {
+                "type": "choice", "name": "priority", "label": "Priority", "value": "{{row.priority}}",
+                "options": [
+                  { "value": 0, "label": "None" },
+                  { "value": 1, "label": "Low" },
+                  { "value": 2, "label": "Medium" },
+                  { "value": 3, "label": "High" }
+                ]
+              },
+              {
+                "type": "section",
+                "title": "Workflow and attention",
+                "children": [
+                  {
+                    "type": "toggle",
+                    "name": "in_progress",
+                    "label": "In progress (when open)",
+                    "value": "{{row.in_progress}}"
+                  },
+                  {
+                    "type": "toggle",
+                    "name": "urgent",
+                    "label": "Urgent",
+                    "value": "{{row.urgent}}"
+                  },
+                  {
+                    "type": "toggle",
+                    "name": "important",
+                    "label": "Important",
+                    "value": "{{row.important}}"
+                  }
+                ]
+              },
+              {
+                "type": "select", "name": "repeat", "label": "Repeat", "value": "{{row.repeat}}",
+                "options": [
+                  { "value": "", "label": "Does not repeat" },
+                  { "value": "daily", "label": "Every day" },
+                  { "value": "weekdays", "label": "Every weekday" },
+                  { "value": "weekly", "label": "Every week" },
+                  { "value": "monthly", "label": "Every month" }
+                ]
+              },
+              { "type": "text-field", "name": "tags", "label": "Tags", "placeholder": "Comma separated", "value": "{{row.tags}}" }
+            ]
+          },
+          {
+            "type": "section", "title": "Steps",
+            "children": [
+              {
+                "type": "list", "query": "steps", "params": { "task_id": "{{state.open}}" }, "empty": "No steps yet.",
+                "item": {
+                  "type": "item", "title": "{{row.title}}", "done": "{{row.done}}",
+                  "check": { "checked": "{{row.done}}", "action": { "op": "toggle_step", "args": { "id": "{{row.id}}", "done": "{{value}}" } } },
+                  "trailing": [
+                    {
+                      "type": "button", "icon": "close", "variant": "ghost", "aria_label": "Remove step {{row.title}}",
+                      "action": { "op": "delete_step", "args": { "id": "{{row.id}}" } }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "form", "inline": true, "submit_label": "Add step", "submit_icon": "plus",
+                "submit": { "op": "add_step", "args": { "task_id": "{{row.id}}", "title": "{{form.title}}" }, "reset": true },
+                "children": [ { "type": "text-field", "name": "title", "label": "New step", "label_hidden": true, "placeholder": "Add a step", "required": true } ]
+              }
+            ]
+          },
+          {
+            "type": "section", "title": "Last time", "if": "{{row.last_note}}",
+            "children": [ { "type": "markdown", "text": "{{row.last_note}}" }, { "type": "text", "tone": "muted", "text": "{{row.last_note_title}}" } ]
+          },
+          {
+            "type": "section", "title": "What came of it", "if": "{{row.can_note}}",
+            "children": [
+              {
+                "type": "form", "submit_label": "Save note",
+                "submit": { "op": "save_note", "args": { "id": "{{row.id}}", "text": "{{form.text}}" }, "success": "Note saved" },
+                "children": [
+                  { "type": "text-area", "name": "text", "label": "Note", "label_hidden": true, "rows": 4, "value": "{{row.done_note}}", "placeholder": "Result · what you learned · what’s next" }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "stack", "direction": "row", "gap": 8, "wrap": true,
+            "children": [
+              {
+                "type": "button", "label": "{{row.done_label}}", "icon": "check",
+                "action": { "op": "toggle", "args": { "id": "{{row.id}}", "done": "{{!row.done}}" }, "then": { "state.open": "", "state.note_for": "{{result.ask_note}}" } }
+              },
+              {
+                "type": "button", "label": "Delete", "icon": "trash", "variant": "danger",
+                "action": { "op": "delete", "args": { "id": "{{row.id}}" }, "success": "Moved to trash", "undo": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored from trash" }, "then": { "state.open": "" } }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "sheet",
+        "bind": "state.creating",
+        "title": "New task",
+        "presentation": "modal",
+        "children": [
+          {
+            "type": "form",
+            "submit_label": "Create task",
+            "submit": {
+              "op": "create",
+              "args": {
+                "title": "{{form.title}}",
+                "notes": "{{form.notes}}",
+                "due": "{{form.due}}",
+                "remind_time": "{{form.remind_time}}",
+                "priority": "{{form.priority}}",
+                "repeat": "{{form.repeat}}",
+                "tags": "{{form.tags}}", "in_progress": "{{form.in_progress}}", "urgent": "{{form.urgent}}", "important": "{{form.important}}"
+              },
+              "success": "Task created",
+              "then": {
+                "state.creating": ""
+              }
+            },
+            "children": [
+              {
+                "type": "text-field",
+                "name": "title",
+                "label": "Title",
+                "required": true,
+                "value": "{{state.newText}}"
+              },
+              {
+                "type": "stack",
+                "direction": "row",
+                "gap": 12,
+                "wrap": true,
+                "children": [
+                  {
+                    "type": "date",
+                    "name": "due",
+                    "label": "Due",
+                    "value": "",
+                    "grow": 1,
+                    "basis": 150
+                  },
+                  {
+                    "type": "time",
+                    "name": "remind_time",
+                    "label": "Remind at",
+                    "value": "",
+                    "grow": 1,
+                    "basis": 120
+                  }
+                ]
+              },
+              {
+                "type": "choice",
+                "name": "priority",
+                "label": "Priority",
+                "value": 0,
+                "options": [
+                  {
+                    "value": 0,
+                    "label": "None"
+                  },
+                  {
+                    "value": 1,
+                    "label": "Low"
+                  },
+                  {
+                    "value": 2,
+                    "label": "Medium"
+                  },
+                  {
+                    "value": 3,
+                    "label": "High"
+                  }
+                ]
+              },
+              {
+                "type": "select",
+                "name": "repeat",
+                "label": "Repeat",
+                "value": "",
+                "options": [
+                  {
+                    "value": "",
+                    "label": "Does not repeat"
+                  },
+                  {
+                    "value": "daily",
+                    "label": "Every day"
+                  },
+                  {
+                    "value": "weekdays",
+                    "label": "Every weekday"
+                  },
+                  {
+                    "value": "weekly",
+                    "label": "Every week"
+                  },
+                  {
+                    "value": "monthly",
+                    "label": "Every month"
+                  }
+                ]
+              },
+              {
+                "type": "section",
+                "title": "Workflow and attention",
+                "children": [
+                  {
+                    "type": "toggle",
+                    "name": "in_progress",
+                    "label": "In progress (when open)",
+                    "value": false
+                  },
+                  {
+                    "type": "toggle",
+                    "name": "urgent",
+                    "label": "Urgent",
+                    "value": false
+                  },
+                  {
+                    "type": "toggle",
+                    "name": "important",
+                    "label": "Important",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "type": "section",
+                "title": "More details",
+                "collapsible": true,
+                "children": [
+                  {
+                    "type": "text-area",
+                    "name": "notes",
+                    "label": "Notes",
+                    "rows": 3,
+                    "value": ""
+                  },
+                  {
+                    "type": "text-field",
+                    "name": "tags",
+                    "label": "Tags",
+                    "placeholder": "Comma separated",
+                    "value": ""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "button",
+            "label": "Cancel",
+            "action": {
+              "set": {
+                "state.creating": ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "entry": {"bind": "state.open"}
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "key": "manager",
+    "name": "Update for my manager",
+    "period": "last_week",
+    "sources": "tasks,task_notes,open_tasks",
+    "prompt": "Write a status update for my manager.\nSections: Done (group related work and say what it achieved), In progress, Blockers or risks, Next week, Asks (only if something in the data needs a decision or help).\nUse short bullet points and a plain, confident tone. Lead with the most important work. Leave out personal tasks, habits and feelings. Keep it under 250 words."
+  },
+  {
+    "key": "junior",
+    "name": "Notes for my junior",
+    "period": "last_week",
+    "sources": "tasks,task_notes",
+    "prompt": "Write a review note for a junior teammate about the work below, so they can learn from it and review it.\nFor each notable piece of work: what was done, how it was approached, and why. Point out decisions, trade-offs and lessons from the task notes. End with two or three things worth trying or reading next.\nBe clear and encouraging; explain jargon briefly. Do not include personal tasks or habits."
+  },
+  {
+    "key": "self",
+    "name": "My own review",
+    "period": "week",
+    "sources": "tasks,task_notes,open_tasks,notes,habits",
+    "prompt": "Write an honest review of my period for me alone.\nSections: What went well, What slipped (overdue or dropped work), Patterns (busy and quiet days, which tags took my time, habits kept or missed, compared with the period before), One or two changes to try next.\nBe direct and specific, cite the data, and do not flatter. Use my reflection if there is one."
+  }
+]

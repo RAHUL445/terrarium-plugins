@@ -1,0 +1,62 @@
+{
+  "state": {},
+  "body": {
+    "type": "list",
+    "query": "tasks",
+    "params": {
+      "today": "{{$today}}",
+      "filter": "{{$config.filter}}",
+      "q": "{{$page.focus}}",
+      "tags": "{{$config.tags}}"
+    },
+    "limit": 6,
+    "empty": "Nothing due today. Use Quick add to plan your next task.",
+    "empty_focus": "No “{{$page.focus}}” tasks in this list. Tasks added from this page are tagged with it.",
+    "item": {
+      "type": "item",
+      "title": "{{row.title}}",
+      "done": "{{row.done}}",
+      "flag": "{{row.priority}}",
+      "check": {
+        "checked": "{{row.done}}",
+        "action": {
+          "op": "toggle",
+          "args": {
+            "id": "{{row.id}}",
+            "done": "{{value}}"
+          }
+        }
+      },
+      "chips": [
+        {
+          "text": "{{row.due_label}}",
+          "tone": "{{row.due_tone}}",
+          "icon": "calendar"
+        },
+        {
+          "text": "{{row.steps_label}}",
+          "icon": "steps"
+        }
+      ],
+      "action": {
+        "navigate": {
+          "item": "{{row.id}}"
+        }
+      }
+    }
+  },
+  "home": {
+    "order": 0
+  },
+  "rail": {
+    "default": false
+  },
+  "page": {
+    "size": { "default": [6, 4], "min": [3, 3], "max": [12, 10] },
+    "focus": { "suggest": "focus_suggestions" },
+    "config": {
+      "tags": { "type": "choice", "multiple": true, "label": "Tags", "suggest": "focus_suggestions", "prefix": "#", "default": "", "empty": "No tags yet. Add #tags to tasks to filter by them.", "help": "Tasks with any of these tags." },
+      "filter": { "type": "enum", "label": "Show", "values": ["today", "upcoming", "open", "done"], "labels": ["Due today", "Upcoming", "All open", "Done"], "default": "today" }
+    }
+  }
+}

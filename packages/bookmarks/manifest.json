@@ -1,0 +1,168 @@
+{
+  "id": "bookmarks",
+  "name": "Bookmarks",
+  "version": "0.2.0",
+  "api": "terrarium:plugin@0.1.0",
+  "description": "Save links with projects, tags and notes. Pin the ones you use most; filter by project or tag.",
+  "storage": {
+    "version": 2,
+    "tables": [
+      {
+        "name": "bookmarks",
+        "columns": [
+          {
+            "name": "url",
+            "type": "text"
+          },
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "tags",
+            "type": "text"
+          },
+          {
+            "name": "note",
+            "type": "text"
+          },
+          {
+            "name": "visits",
+            "type": "integer",
+            "rule": "counter"
+          },
+          {
+            "name": "project",
+            "type": "text"
+          },
+          {
+            "name": "pinned",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "created_at",
+            "type": "integer"
+          },
+          {
+            "name": "visited_at",
+            "type": "integer"
+          }
+        ]
+      }
+    ]
+  },
+  "operations": {
+    "create": {
+      "description": "Save a link. Takes url (with optional title), or text such as \"Rust book doc.rust-lang.org/book #rust\": the address is the link, #words are tags, other words the title. Optional tags, project, note, pinned. An address already saved returns that bookmark."
+    },
+    "update": {
+      "description": "Change a bookmark's url, title, project, tags, note or pinned."
+    },
+    "pin": {
+      "description": "Pin or unpin a bookmark (pinned: true/false); without pinned it flips."
+    },
+    "visit": {
+      "description": "Count a visit and remember when."
+    },
+    "delete": {
+      "description": "Move a bookmark to trash."
+    },
+    "restore": {
+      "description": "Bring a bookmark back from trash."
+    }
+  },
+  "queries": {
+    "tag_names": {
+      "sql": "WITH RECURSIVE s(tag, rest) AS (SELECT '', tags || ', ' FROM bookmarks WHERE _deleted IS NULL AND tags IS NOT NULL AND tags <> '' UNION ALL SELECT trim(substr(rest, 1, instr(rest, ', ') - 1)), substr(rest, instr(rest, ', ') + 2) FROM s WHERE rest <> '') SELECT tag AS value, COUNT(*) AS count FROM s WHERE tag <> '' GROUP BY tag ORDER BY count DESC, tag LIMIT 60",
+      "params": []
+    },
+    "focus_suggestions": {
+      "sql": "WITH RECURSIVE s(tag, rest) AS (SELECT '', tags || ', ' FROM bookmarks WHERE _deleted IS NULL AND tags IS NOT NULL AND tags <> '' UNION ALL SELECT trim(substr(rest, 1, instr(rest, ', ') - 1)), substr(rest, instr(rest, ', ') + 2) FROM s WHERE rest <> ''), names(value) AS (SELECT project FROM bookmarks WHERE _deleted IS NULL AND project IS NOT NULL AND project <> '' UNION ALL SELECT tag FROM s WHERE tag <> '') SELECT value, COUNT(*) AS count FROM names GROUP BY value ORDER BY count DESC, value LIMIT 30",
+      "params": []
+    },
+    "list": {
+      "sql": "SELECT id, url, title, CASE WHEN instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') > 0 THEN substr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, 1, instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') - 1) ELSE CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END END AS host, CASE WHEN instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') > 0 THEN substr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, 1, instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') - 1) ELSE CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END END || COALESCE(' · ' || NULLIF(trim(substr(replace(note, char(10), ' '), 1, 100)), ''), '') AS subtitle, project, tags, CASE WHEN tags IS NOT NULL AND tags <> '' THEN '#' || replace(tags, ', ', ' #') END AS tags_label, note, COALESCE(visits, 0) AS visits, CASE WHEN COALESCE(visits, 0) = 0 THEN NULL WHEN visits = 1 THEN '1 visit' ELSE visits || ' visits' END AS visits_label, pinned, CASE WHEN created_at IS NULL THEN NULL WHEN date((created_at + ?5) / 1000, 'unixepoch') = ?6 THEN strftime('%H:%M', (created_at + ?5) / 1000, 'unixepoch') WHEN date((created_at + ?5) / 1000, 'unixepoch') = date(?6, '-1 day') THEN 'Yesterday ' || strftime('%H:%M', (created_at + ?5) / 1000, 'unixepoch') WHEN date((created_at + ?5) / 1000, 'unixepoch') > date(?6, '-7 day') THEN CASE strftime('%w', (created_at + ?5) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END || ' ' || strftime('%H:%M', (created_at + ?5) / 1000, 'unixepoch') ELSE CAST(strftime('%d', (created_at + ?5) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (created_at + ?5) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((created_at + ?5) / 1000, 'unixepoch'), 1, 4) <> substr(?6, 1, 4) THEN ' ' || substr(date((created_at + ?5) / 1000, 'unixepoch'), 1, 4) ELSE '' END END AS added, CASE WHEN (SELECT COUNT(*) FROM bookmarks WHERE _deleted IS NULL AND (?1 IS NULL OR ?1 = '' OR title LIKE '%' || ?1 || '%' OR url LIKE '%' || ?1 || '%' OR tags LIKE '%' || ?1 || '%' OR note LIKE '%' || ?1 || '%' OR project LIKE '%' || ?1 || '%') AND (?2 IS NULL OR ?2 = '' OR project = ?2) AND (?3 IS NULL OR ?3 = '' OR instr(', ' || COALESCE(tags, '') || ', ', ', ' || ?3 || ', ') > 0) AND pinned = 1) = 0 THEN NULL WHEN pinned = 1 THEN 'Pinned' ELSE 'Bookmarks' END AS section FROM bookmarks WHERE _deleted IS NULL AND (?1 IS NULL OR ?1 = '' OR title LIKE '%' || ?1 || '%' OR url LIKE '%' || ?1 || '%' OR tags LIKE '%' || ?1 || '%' OR note LIKE '%' || ?1 || '%' OR project LIKE '%' || ?1 || '%') AND (?2 IS NULL OR ?2 = '' OR project = ?2) AND (?3 IS NULL OR ?3 = '' OR instr(', ' || COALESCE(tags, '') || ', ', ', ' || ?3 || ', ') > 0) ORDER BY pinned DESC, CASE ?4 WHEN 'visits' THEN -COALESCE(visits, 0) WHEN 'opened' THEN -COALESCE(visited_at, 0) ELSE 0 END, CASE WHEN ?4 = 'title' THEN lower(title) END, COALESCE(created_at, 0) DESC, id DESC LIMIT 500",
+      "params": [
+        "q",
+        "project",
+        "tag",
+        "sort",
+        "utc_offset_ms",
+        "today"
+      ]
+    },
+    "bookmark": {
+      "sql": "SELECT id, url, title, CASE WHEN instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') > 0 THEN substr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, 1, instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') - 1) ELSE CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END END AS host, COALESCE(tags, '') AS tags, COALESCE(project, '') AS project, COALESCE(note, '') AS note, pinned, NULLIF(substr(COALESCE(' · Added ' || CASE WHEN created_at IS NULL THEN NULL WHEN date((created_at + ?2) / 1000, 'unixepoch') = ?3 THEN strftime('%H:%M', (created_at + ?2) / 1000, 'unixepoch') WHEN date((created_at + ?2) / 1000, 'unixepoch') = date(?3, '-1 day') THEN 'Yesterday ' || strftime('%H:%M', (created_at + ?2) / 1000, 'unixepoch') WHEN date((created_at + ?2) / 1000, 'unixepoch') > date(?3, '-7 day') THEN CASE strftime('%w', (created_at + ?2) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END || ' ' || strftime('%H:%M', (created_at + ?2) / 1000, 'unixepoch') ELSE CAST(strftime('%d', (created_at + ?2) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (created_at + ?2) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((created_at + ?2) / 1000, 'unixepoch'), 1, 4) <> substr(?3, 1, 4) THEN ' ' || substr(date((created_at + ?2) / 1000, 'unixepoch'), 1, 4) ELSE '' END END, '') || COALESCE(' · ' || CASE WHEN COALESCE(visits, 0) = 0 THEN NULL WHEN visits = 1 THEN '1 visit' ELSE visits || ' visits' END, '') || COALESCE(' · Last opened ' || CASE WHEN visited_at IS NULL THEN NULL WHEN date((visited_at + ?2) / 1000, 'unixepoch') = ?3 THEN strftime('%H:%M', (visited_at + ?2) / 1000, 'unixepoch') WHEN date((visited_at + ?2) / 1000, 'unixepoch') = date(?3, '-1 day') THEN 'Yesterday ' || strftime('%H:%M', (visited_at + ?2) / 1000, 'unixepoch') WHEN date((visited_at + ?2) / 1000, 'unixepoch') > date(?3, '-7 day') THEN CASE strftime('%w', (visited_at + ?2) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END || ' ' || strftime('%H:%M', (visited_at + ?2) / 1000, 'unixepoch') ELSE CAST(strftime('%d', (visited_at + ?2) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (visited_at + ?2) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((visited_at + ?2) / 1000, 'unixepoch'), 1, 4) <> substr(?3, 1, 4) THEN ' ' || substr(date((visited_at + ?2) / 1000, 'unixepoch'), 1, 4) ELSE '' END END, ''), 4), '') AS info FROM bookmarks WHERE id = ?1 AND _deleted IS NULL",
+      "params": [
+        "id",
+        "utc_offset_ms",
+        "today"
+      ]
+    },
+    "projects": {
+      "sql": "SELECT '' AS project, 'All' AS label, COUNT(*) AS count, (?1 IS NULL OR ?1 = '') AS selected, 0 AS k FROM bookmarks WHERE _deleted IS NULL AND EXISTS (SELECT 1 FROM bookmarks WHERE _deleted IS NULL AND project IS NOT NULL AND project <> '') UNION ALL SELECT project, project, COUNT(*), project = ?1, 1 FROM bookmarks WHERE _deleted IS NULL AND project IS NOT NULL AND project <> '' GROUP BY project ORDER BY k, project",
+      "params": [
+        "project"
+      ]
+    },
+    "tags": {
+      "sql": "WITH RECURSIVE s(tag, rest) AS (SELECT '', tags || ', ' FROM bookmarks WHERE _deleted IS NULL AND tags IS NOT NULL AND tags <> '' AND (?1 IS NULL OR ?1 = '' OR project = ?1) UNION ALL SELECT substr(rest, 1, instr(rest, ', ') - 1), substr(rest, instr(rest, ', ') + 2) FROM s WHERE rest <> '') SELECT tag, '#' || tag AS label, COUNT(*) AS count, tag = ?2 AS selected, CASE WHEN tag = ?2 THEN '' ELSE tag END AS next FROM s WHERE tag <> '' GROUP BY tag ORDER BY tag = ?2 DESC, count DESC, tag LIMIT 40",
+      "params": [
+        "project",
+        "tag"
+      ]
+    },
+    "project_names": {
+      "sql": "SELECT DISTINCT project FROM bookmarks WHERE _deleted IS NULL AND project IS NOT NULL AND project <> '' ORDER BY project",
+      "params": []
+    },
+    "summary": {
+      "sql": "SELECT COUNT(*) || CASE COUNT(*) WHEN 1 THEN ' link' ELSE ' links' END || CASE WHEN SUM(pinned = 1) > 0 THEN ' · ' || SUM(pinned = 1) || ' pinned' ELSE '' END || CASE WHEN COUNT(DISTINCT NULLIF(project, '')) > 0 THEN ' · ' || COUNT(DISTINCT NULLIF(project, '')) || CASE COUNT(DISTINCT NULLIF(project, '')) WHEN 1 THEN ' project' ELSE ' projects' END ELSE '' END AS label FROM bookmarks WHERE _deleted IS NULL",
+      "params": []
+    },
+    "recent": {
+      "sql": "SELECT id, url, title, CASE WHEN instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') > 0 THEN substr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, 1, instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') - 1) ELSE CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END END AS host, pinned, CASE WHEN pinned = 1 THEN 'Pinned' END AS pin_label, CASE WHEN tags IS NOT NULL AND tags <> '' THEN '#' || replace(tags, ', ', ' #') END AS tags_label FROM bookmarks WHERE _deleted IS NULL AND (?1 IS NULL OR ltrim(?1, '#') = '' OR project = ltrim(?1, '#') COLLATE NOCASE OR instr(', ' || lower(COALESCE(tags, '')) || ', ', ', ' || lower(ltrim(?1, '#')) || ', ') > 0 OR title LIKE '%' || ltrim(?1, '#') || '%' OR note LIKE '%' || ltrim(?1, '#') || '%') AND (?2 IS NULL OR ?2 = '' OR project = ?2 COLLATE NOCASE) AND (?3 IS NULL OR ?3 = '' OR EXISTS (WITH RECURSIVE f(tag, rest) AS (SELECT '', ?3 || ',' UNION ALL SELECT lower(ltrim(trim(substr(rest, 1, instr(rest, ',') - 1)), '#')), substr(rest, instr(rest, ',') + 1) FROM f WHERE rest <> '') SELECT 1 FROM f WHERE tag <> '' AND instr(', ' || lower(COALESCE(tags, '')) || ', ', ', ' || tag || ', ') > 0)) ORDER BY pinned DESC, COALESCE(visits, 0) DESC, COALESCE(visited_at, 0) DESC, id DESC LIMIT 6",
+      "params": ["focus", "project", "tags"]
+    },
+    "trash": {
+      "sql": "SELECT id, title, CASE WHEN instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') > 0 THEN substr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, 1, instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') - 1) ELSE CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END END AS host FROM bookmarks WHERE _deleted IS NOT NULL ORDER BY _deleted DESC LIMIT 100",
+      "params": []
+    },
+    "search": {
+      "sql": "SELECT id, title, url, CASE WHEN instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') > 0 THEN substr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, 1, instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') - 1) ELSE CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END END || COALESCE(' · ' || NULLIF(project, ''), '') AS subtitle FROM bookmarks WHERE _deleted IS NULL AND (title LIKE '%' || ?1 || '%' OR url LIKE '%' || ?1 || '%' OR tags LIKE '%' || ?1 || '%' OR note LIKE '%' || ?1 || '%' OR project LIKE '%' || ?1 || '%') ORDER BY pinned DESC, COALESCE(visits, 0) DESC LIMIT 8",
+      "params": [
+        "q"
+      ]
+    }
+  },
+  "pages": [
+    {
+      "id": "main",
+      "title": "Bookmarks",
+      "template": "ui/page-main.json"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "recent",
+      "title": "Bookmarks",
+      "template": "ui/widget-recent.json"
+    }
+  ],
+  "limits": {
+    "fuel": 200000000,
+    "memory_mb": 16,
+    "timeout_ms": 2000
+  },
+  "icon": "bookmark",
+  "color": "#BE185D",
+  "search": "search",
+  "quick_actions": [
+    {
+      "label": "Save link",
+      "op": "create",
+      "arg": "text"
+    }
+  ]
+}

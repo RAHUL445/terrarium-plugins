@@ -1,0 +1,544 @@
+{
+  "creation": {"operation": "capture_text", "bind": "state.creating", "prefill": "state.newText"},
+  "state": {
+    "creating": "",
+    "newText": "",
+    "tab": "inbox",
+    "open": "",
+    "q": ""
+  },
+  "body": {
+    "type": "stack",
+    "gap": 16,
+    "children": [
+      {
+        "type": "heading",
+        "text": "Voice"
+      },
+      {
+        "type": "card",
+        "children": [
+          {
+            "type": "stack",
+            "gap": 14,
+            "children": [
+              {
+                "type": "audio-recorder",
+                "label": "Tap to record",
+                "hint": "Up to 3 minutes · transcribed on your computer",
+                "max_seconds": 180,
+                "action": {
+                  "op": "capture_audio",
+                  "args": {
+                    "audio": "{{value.audio}}",
+                    "mime": "{{value.mime}}",
+                    "duration_ms": "{{value.duration_ms}}"
+                  },
+                  "success": "Saved recording"
+                }
+              },
+              {
+                "type": "form",
+                "inline": true,
+                "submit_label": "Save",
+                "submit_icon": "plus",
+                "submit": {
+                  "op": "capture_text",
+                  "args": {
+                    "text": "{{form.text}}"
+                  },
+                  "success": "Saved to inbox",
+                  "reset": true
+                },
+                "children": [
+                  {
+                    "type": "text-field",
+                    "name": "text",
+                    "label": "Type a capture",
+                    "label_hidden": true,
+                    "required": true,
+                    "placeholder": "Or type a thought…"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "query": "summary",
+        "item": {
+          "type": "stack",
+          "direction": "row",
+          "align": "center",
+          "justify": "between",
+          "gap": 8,
+          "wrap": true,
+          "children": [
+            {
+              "type": "heading",
+              "level": 2,
+              "text": "{{row.label}}"
+            },
+            {
+              "type": "button",
+              "if": "{{row.waiting}}",
+              "label": "Transcribe now",
+              "icon": "mic",
+              "variant": "ghost",
+              "action": {
+                "op": "transcribe_pending",
+                "success": "Transcribed {{result.transcribed}}"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "tabs",
+        "bind": "state.tab",
+        "label": "Show",
+        "options": [
+          {
+            "value": "inbox",
+            "label": "Inbox"
+          },
+          {
+            "value": "history",
+            "label": "History"
+          },
+          {
+            "value": "trash",
+            "label": "Trash"
+          }
+        ]
+      },
+      {
+        "type": "stack",
+        "gap": 12,
+        "if": "{{state.tab == inbox}}",
+        "children": [
+          {
+            "type": "list",
+            "query": "inbox",
+            "group": "section",
+            "params": {
+              "utc_offset_ms": "{{$utc_offset_ms}}",
+              "today": "{{$today}}"
+            },
+            "empty": "Nothing to review. Record or type a thought above, then send it to To-do or Notes.",
+            "item": {
+              "type": "item",
+              "title": "{{row.title}}",
+              "subtitle": "{{row.snippet}}",
+              "action": {
+                "set": {
+                  "state.open": "{{row.id}}"
+                }
+              },
+              "chips": [
+                {
+                  "text": "{{row.at}}",
+                  "icon": "clock"
+                },
+                {
+                  "text": "{{row.length}}",
+                  "icon": "{{row.length_icon}}"
+                },
+                {
+                  "text": "{{row.error}}",
+                  "tone": "danger"
+                }
+              ],
+              "trailing": [
+                {
+                  "type": "button",
+                  "if": "{{row.is_ready}}",
+                  "icon": "check",
+                  "variant": "ghost",
+                  "aria_label": "Send “{{row.title}}” to To-do",
+                  "action": {
+                    "op": "send",
+                    "args": {
+                      "id": "{{row.id}}",
+                      "to": "todo"
+                    },
+                    "success": "{{result.message}}"
+                  }
+                },
+                {
+                  "type": "button",
+                  "if": "{{row.is_ready}}",
+                  "icon": "note",
+                  "variant": "ghost",
+                  "aria_label": "Send “{{row.title}}” to Notes",
+                  "action": {
+                    "op": "send",
+                    "args": {
+                      "id": "{{row.id}}",
+                      "to": "notes"
+                    },
+                    "success": "{{result.message}}"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "type": "stack",
+        "gap": 12,
+        "if": "{{state.tab == history}}",
+        "children": [
+          {
+            "type": "search-field",
+            "bind": "state.q",
+            "label": "Search captures",
+            "label_hidden": true,
+            "placeholder": "Search sent and kept captures"
+          },
+          {
+            "type": "list",
+            "query": "history",
+            "params": {
+              "q": "{{state.q}}",
+              "utc_offset_ms": "{{$utc_offset_ms}}",
+              "today": "{{$today}}"
+            },
+            "empty": "Captures you send or keep show up here.",
+            "item": {
+              "type": "item",
+              "title": "{{row.title}}",
+              "subtitle": "{{row.snippet}}",
+              "action": {
+                "set": {
+                  "state.open": "{{row.id}}"
+                }
+              },
+              "chips": [
+                {
+                  "text": "{{row.dest}}",
+                  "icon": "{{row.dest_icon}}",
+                  "tone": "{{row.dest_tone}}"
+                },
+                {
+                  "text": "{{row.at}}",
+                  "icon": "clock"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "type": "stack",
+        "gap": 12,
+        "if": "{{state.tab == trash}}",
+        "children": [
+          {
+            "type": "list",
+            "query": "trash",
+            "empty": "Trash is empty.",
+            "item": {
+              "type": "item",
+              "title": "{{row.title}}",
+              "trailing": [
+                {
+                  "type": "button",
+                  "label": "Restore",
+                  "icon": "undo",
+                  "variant": "ghost",
+                  "action": {
+                    "op": "restore",
+                    "args": {
+                      "id": "{{row.id}}"
+                    },
+                    "success": "Back in Voice"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "type": "sheet",
+        "bind": "state.open",
+        "title": "{{row.source_label}} {{row.at}}",
+        "query": "capture",
+        "params": {
+          "id": "{{state.open}}",
+          "utc_offset_ms": "{{$utc_offset_ms}}",
+          "today": "{{$today}}"
+        },
+        "children": [
+          {
+            "type": "text",
+            "if": "{{row.is_queued}}",
+            "tone": "muted",
+            "text": "Recording saved here. To transcribe it, keep the paired computer app open with its speech model available, and let both devices sync. You can keep using this device while it waits."
+          },
+          {
+            "type": "stack",
+            "direction": "row",
+            "gap": 8,
+            "wrap": true,
+            "children": [
+              {
+                "type": "badge",
+                "if": "{{row.length}}",
+                "text": "{{row.length}}"
+              },
+              {
+                "type": "badge",
+                "if": "{{row.is_queued}}",
+                "text": "Waiting for your computer"
+              },
+              {
+                "type": "badge",
+                "if": "{{row.is_failed}}",
+                "text": "Transcription failed"
+              },
+              {
+                "type": "badge",
+                "if": "{{row.done_label}}",
+                "text": "{{row.done_label}}"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "if": "{{row.is_queued}}",
+            "tone": "muted",
+            "text": "This recording is transcribed by your computer with the local speech model. It appears here as text once that's done."
+          },
+          {
+            "type": "stack",
+            "if": "{{row.is_failed}}",
+            "gap": 8,
+            "children": [
+              {
+                "type": "text",
+                "if": "{{row.error}}",
+                "tone": "muted",
+                "text": "{{row.error}}"
+              },
+              {
+                "type": "button",
+                "if": "{{row.has_audio}}",
+                "label": "Try again",
+                "icon": "undo",
+                "action": {
+                  "op": "retry",
+                  "args": {
+                    "id": "{{row.id}}"
+                  },
+                  "success": "Queued for transcription"
+                }
+              }
+            ]
+          },
+          {
+            "type": "form",
+            "if": "{{row.text}}",
+            "autosave": true,
+            "submit": {
+              "op": "edit",
+              "args": {
+                "id": "{{row.id}}",
+                "text": "{{form.text}}"
+              }
+            },
+            "children": [
+              {
+                "type": "text-area",
+                "name": "text",
+                "label": "Text",
+                "label_hidden": true,
+                "rows": 8,
+                "value": "{{row.text}}"
+              }
+            ]
+          },
+          {
+            "type": "stack",
+            "if": "{{row.is_ready}}",
+            "gap": 8,
+            "children": [
+              {
+                "type": "stack",
+                "direction": "row",
+                "gap": 8,
+                "wrap": true,
+                "children": [
+                  {
+                    "type": "button",
+                    "variant": "primary",
+                    "label": "Send to To-do",
+                    "icon": "check",
+                    "action": {
+                      "op": "send",
+                      "args": {
+                        "id": "{{row.id}}",
+                        "to": "todo"
+                      },
+                      "success": "{{result.message}}",
+                      "then": {
+                        "state.open": ""
+                      }
+                    }
+                  },
+                  {
+                    "type": "button",
+                    "if": "{{row.multi}}",
+                    "label": "One task per line",
+                    "icon": "steps",
+                    "action": {
+                      "op": "send",
+                      "args": {
+                        "id": "{{row.id}}",
+                        "to": "todo",
+                        "split": true
+                      },
+                      "success": "{{result.message}}",
+                      "then": {
+                        "state.open": ""
+                      }
+                    }
+                  },
+                  {
+                    "type": "button",
+                    "label": "Send to Notes",
+                    "icon": "note",
+                    "action": {
+                      "op": "send",
+                      "args": {
+                        "id": "{{row.id}}",
+                        "to": "notes"
+                      },
+                      "success": "{{result.message}}",
+                      "then": {
+                        "state.open": ""
+                      }
+                    }
+                  },
+                  {
+                    "type": "button",
+                    "label": "Keep",
+                    "icon": "archive",
+                    "action": {
+                      "op": "archive",
+                      "args": {
+                        "id": "{{row.id}}"
+                      },
+                      "success": "Kept in history",
+                      "then": {
+                        "state.open": ""
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "tone": "muted",
+                "text": "To-do reads dates, times, #tags and !priority from the text, e.g. “Call Sam tomorrow 6pm #work”. The first line becomes the task."
+              }
+            ]
+          },
+          {
+            "type": "stack",
+            "direction": "row",
+            "gap": 8,
+            "wrap": true,
+            "children": [
+              {
+                "type": "button",
+                "if": "{{row.is_done}}",
+                "label": "Back to inbox",
+                "icon": "undo",
+                "action": {
+                  "op": "reopen",
+                  "args": {
+                    "id": "{{row.id}}"
+                  },
+                  "success": "Back in the inbox"
+                }
+              },
+              {
+                "type": "button",
+                "label": "Delete",
+                "icon": "trash",
+                "variant": "danger",
+                "action": {
+                  "op": "delete",
+                  "args": {
+                    "id": "{{row.id}}"
+                  },
+                  "success": "Moved to trash",
+                  "then": {
+                    "state.open": ""
+                  },
+                  "undo": {
+                    "op": "restore",
+                    "args": {
+                      "id": "{{row.id}}"
+                    },
+                    "success": "Restored from trash"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "sheet",
+        "bind": "state.creating",
+        "title": "Capture text",
+        "presentation": "modal",
+        "children": [
+          {
+            "type": "form",
+            "children": [
+              {
+                "type": "text-area",
+                "name": "text",
+                "label": "Thought",
+                "rows": 8,
+                "required": true,
+                "value": "{{state.newText}}",
+                "placeholder": "Capture a thought\u2026"
+              }
+            ],
+            "submit": {
+              "args": {
+                "text": "{{form.text}}"
+              },
+              "op": "capture_text",
+              "success": "Saved to inbox",
+              "then": {
+                "state.creating": ""
+              }
+            },
+            "submit_label": "Save capture"
+          },
+          {
+            "type": "button",
+            "label": "Cancel",
+            "action": {
+              "set": {
+                "state.creating": ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "entry": {
+    "bind": "state.open"
+  }
+}

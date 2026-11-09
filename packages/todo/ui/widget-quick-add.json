@@ -1,0 +1,23 @@
+{
+  "state": {},
+  "body": {
+    "type": "stack", "gap": 6,
+    "children": [
+      {
+        "type": "form", "inline": true, "submit_label": "Add task", "submit_icon": "plus",
+        "submit": { "op": "create", "args": { "title": "{{form.title}}", "tags": "{{$page.focus}}, {{$config.tags}}" }, "success": "Added “{{result.title}}”", "reset": true },
+        "children": [
+          { "type": "text-field", "name": "title", "label": "New task", "label_hidden": true, "required": true, "placeholder": "Call Sam tomorrow 6pm #work" }
+        ]
+      },
+      { "type": "text", "tone": "muted", "text": "Dates, times, #tags, !high and “every week” are understood." }
+    ]
+  },
+  "home": {"order": 40},
+  "page": {
+    "size": { "default": [6, 2], "min": [3, 2], "max": [12, 3] },
+    "config": {
+      "tags": { "type": "choice", "multiple": true, "filter": false, "label": "Tag new tasks", "suggest": "focus_suggestions", "prefix": "#", "default": "", "empty": "No tags yet.", "help": "Added to every task saved here, with the page focus." }
+    }
+  }
+}

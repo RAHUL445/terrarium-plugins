@@ -1,0 +1,19 @@
+{
+  "state": {},
+  "body": {
+    "type": "list", "query": "recent", "params": { "focus": "{{$page.focus}}", "project": "{{$config.project}}" }, "empty": "No notes yet. Use Quick add → Quick note to save a thought.", "empty_focus": "No notes match “{{$page.focus}}” yet. Notes in that project, or mentioning it, show here.",
+    "item": {
+      "type": "item", "title": "{{row.title}}", "subtitle": "{{row.snippet}}",
+      "action": { "navigate": { "item": "{{row.id}}" } },
+      "chips": [ { "text": "{{row.project}}", "icon": "tag" } ]
+    }
+  },
+  "home": {"order": 30},
+  "page": {
+    "size": { "default": [6, 4], "min": [3, 3], "max": [12, 10] },
+    "focus": { "suggest": "focus_suggestions" },
+    "config": {
+      "project": { "type": "choice", "label": "Project", "any": "Any project", "suggest": "focus_suggestions", "default": "", "empty": "No projects yet." }
+    }
+  }
+}
