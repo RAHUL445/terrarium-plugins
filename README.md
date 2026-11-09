@@ -5,7 +5,7 @@
 <h1 align="center">Terrarium plugins</h1>
 
 <p align="center">
-  The first-party plugins for <a href="https://github.com/RAHUL445/terrarium">Terrarium</a>, a local-first plugin host.
+  Recommended plugins for <a href="https://github.com/RAHUL445/terrarium">Terrarium</a>, the extensible, local-first app host.
 </p>
 
 <p align="center">
@@ -14,6 +14,10 @@
   <img src="https://img.shields.io/badge/status-experimental-orange.svg" alt="Status: experimental">
 </p>
 
+Terrarium is a host; these plugins give it its features. They use only the
+public SDK and WIT contract, so they are also working examples for writing your
+own.
+
 Each plugin is a Rust crate compiled to a WebAssembly component, plus a
 manifest (storage schema, queries, permissions, schedules) and declarative UI
 templates. The Terrarium host runs them in a sandbox on macOS and Android and
@@ -21,13 +25,13 @@ syncs their data between devices.
 
 > **Status:** experimental source preview, not a production release.
 
-## Plugins
+## Recommended plugins
 
 | Plugin | What it does |
 | --- | --- |
 | [To-do](packages/todo) | Tasks with due dates, reminders, priorities, repeats and steps; list, board and matrix layouts |
 | [Notes](packages/notes) | Markdown notes in projects with checklists and autosave; edits on different devices merge |
-| [Habits](packages/habits) | Scheduled habits with check-ins, reminders and sleep logs |
+| [Habits](packages/habits) | Scheduled habits with check-ins, streaks, reminders and sleep logs |
 | [Bookmarks](packages/bookmarks) | Links with projects, tags and notes; pin the ones you use most |
 | [Voice](packages/voice) | Record or type quick captures, transcribed locally, then send them to To-do or Notes |
 | [Reports](packages/reports) | AI-written reviews of your tasks, habits and notes, on demand or on a schedule |

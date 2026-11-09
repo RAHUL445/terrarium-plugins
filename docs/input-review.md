@@ -1,6 +1,6 @@
 # Plugin input and capability review
 
-Reviewed the six first-party operation entry points, manifest capabilities and host integration boundaries. This is a scoped implementation review and regression suite, not an independent audit or fuzzing proof.
+Reviewed the six recommended plugins' operation entry points, manifest capabilities and host integration boundaries. This is a scoped implementation review and regression suite, not an independent audit or fuzzing proof.
 
 | Plugin | Privileged permission / declared interfaces used | Checked boundaries |
 | --- | --- | --- |
