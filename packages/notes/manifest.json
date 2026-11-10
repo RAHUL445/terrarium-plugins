@@ -46,28 +46,169 @@
   },
   "operations": {
     "create": {
-      "description": "Create a note: title (optional, defaults to the first line), body (Markdown), project, and focus (used as the project when none is given). Returns its id."
+      "description": "Create a note: title (optional, defaults to the first line), body (Markdown), project, and focus (used as the project when none is given). Returns its id.",
+      "effect": "write",
+      "params": {
+        "title": {
+          "type": "string",
+          "description": "Title; defaults to the first line of the body. Up to 200 characters."
+        },
+        "body": {
+          "type": "text",
+          "description": "Note text in Markdown; use '- [ ] item' for checklist lines."
+        },
+        "project": {
+          "type": "string",
+          "description": "Project to file the note in; matches an existing project ignoring case."
+        },
+        "focus": {
+          "type": "string",
+          "description": "Fallback project used when project is not given (the page focus)."
+        }
+      },
+      "examples": [
+        {
+          "title": "Trip packing",
+          "body": "- [ ] Passport\n- [ ] Charger\n- [ ] Rain jacket",
+          "project": "Travel"
+        }
+      ]
     },
     "update": {
-      "description": "Change a note's title (blank follows the first line), body, project or pinned flag."
+      "description": "Change a note's title (blank follows the first line), body, project or pinned flag.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The note to change."
+        },
+        "title": {
+          "type": "string",
+          "description": "New title; blank follows the first line of the body."
+        },
+        "body": {
+          "type": "text",
+          "description": "New Markdown text (replaces the whole body)."
+        },
+        "project": {
+          "type": "string",
+          "description": "New project; blank removes the note from its project."
+        },
+        "pinned": {
+          "type": "boolean",
+          "description": "Pin or unpin the note."
+        }
+      },
+      "examples": [
+        {
+          "id": "<note id>",
+          "pinned": true
+        }
+      ]
     },
     "delete": {
-      "description": "Move a note to trash."
+      "description": "Move a note to trash.",
+      "effect": "destructive",
+      "confirm": "Move this note to the trash?",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The note to move to trash."
+        }
+      }
     },
     "restore": {
-      "description": "Bring a note back from trash."
+      "description": "Bring a note back from trash.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The trashed note to bring back."
+        }
+      }
     },
     "to_task": {
-      "description": "Create a To-do task from a line of text."
+      "description": "Create a To-do task from a line of text.",
+      "effect": "write",
+      "params": {
+        "text": {
+          "type": "string",
+          "description": "The task text; a leading '- [ ]' checklist mark is dropped.",
+          "required": true
+        }
+      },
+      "examples": [
+        {
+          "text": "Book dentist appointment"
+        }
+      ]
     },
     "summary": {
-      "description": "Notes created or changed between local dates start and end."
+      "description": "Notes created or changed between local dates start and end.",
+      "effect": "read",
+      "cli": false,
+      "params": {
+        "start": {
+          "type": "date",
+          "required": true,
+          "description": "First local date of the range."
+        },
+        "end": {
+          "type": "date",
+          "required": true,
+          "description": "Last local date of the range (inclusive)."
+        }
+      }
     },
     "tidy": {
-      "description": "Move a note to trash if it is empty."
+      "description": "Move a note to trash if it is empty.",
+      "effect": "destructive",
+      "confirm": "Move this note to the trash if it is empty?",
+      "cli": false,
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The note to check."
+        }
+      }
     },
     "task_note": {
-      "description": "Save what came of a finished task in its note in the Tasks project: key (the task, or its repeating series), title, date (YYYY-MM-DD), text, tags. One note per key, newest entry first; replace (true when editing a saved note) swaps the entry with the same date. Returns its id."
+      "description": "Save what came of a finished task in its note in the Tasks project: key (the task, or its repeating series), title, date (YYYY-MM-DD), text, tags. One note per key, newest entry first; replace (true when editing a saved note) swaps the entry with the same date. Returns its id.",
+      "effect": "write",
+      "cli": false,
+      "params": {
+        "key": {
+          "type": "string",
+          "description": "The task id, or its repeating series id; one note per key.",
+          "required": true
+        },
+        "title": {
+          "type": "string",
+          "description": "Note title; defaults to 'Task'."
+        },
+        "date": {
+          "type": "date",
+          "required": true,
+          "description": "Completion date; heads the entry."
+        },
+        "text": {
+          "type": "text",
+          "required": true,
+          "description": "What came of the task (up to 20,000 characters)."
+        },
+        "tags": {
+          "type": "string",
+          "description": "Comma-separated tags, added only when the note is first created."
+        },
+        "replace": {
+          "type": "boolean",
+          "description": "True to replace the entry with the same date instead of adding one."
+        }
+      }
     }
   },
   "uses": [
@@ -85,7 +226,9 @@
   "queries": {
     "focus_suggestions": {
       "sql": "SELECT project AS value, COUNT(*) AS count FROM notes WHERE _deleted IS NULL AND project IS NOT NULL AND project <> '' AND project <> 'Tasks' GROUP BY project ORDER BY count DESC, project LIMIT 30",
-      "params": []
+      "params": [],
+      "description": "Projects in use (except Tasks) with their note counts, most used first.",
+      "cli": false
     },
     "list": {
       "sql": "SELECT id, title, project, pinned, trim(substr(replace(replace(replace(replace(replace(replace(replace(char(10) || substr(body, instr(body || char(10), char(10)) + 1), char(10) || '- [', char(10) || '['), char(10) || '- ', char(10)), char(10), ' '), '[ ] ', '☐ '), '[x] ', '☑ '), '**', ''), '#', ''), 1, 160)) AS snippet, CASE WHEN COALESCE(updated_at, created_at) IS NULL THEN NULL WHEN date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') = ?4 THEN strftime('%H:%M', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') WHEN date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') = date(?4, '-1 day') THEN 'Yesterday' WHEN date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') > date(?4, '-7 day') THEN CASE strftime('%w', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END ELSE CAST(strftime('%d', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch'), 1, 4) <> substr(?4, 1, 4) THEN ' ' || substr(date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch'), 1, 4) ELSE '' END END AS edited, CASE WHEN ((length(body) - length(replace(body, '- [x]', ''))) / 5) + ((length(body) - length(replace(body, '- [ ]', ''))) / 5) > 0 THEN ((length(body) - length(replace(body, '- [x]', ''))) / 5) || '/' || (((length(body) - length(replace(body, '- [x]', ''))) / 5) + ((length(body) - length(replace(body, '- [ ]', ''))) / 5)) END AS checklist, CASE WHEN (SELECT COUNT(*) FROM notes p WHERE p._deleted IS NULL AND p.pinned = 1) = 0 THEN NULL WHEN pinned = 1 THEN 'Pinned' ELSE 'Notes' END AS section FROM (SELECT * FROM notes WHERE _deleted IS NULL AND (?1 IS NULL OR ?1 = '' OR title LIKE '%' || ?1 || '%' OR body LIKE '%' || ?1 || '%' OR project LIKE '%' || ?1 || '%') AND ((COALESCE(?2, '') = '' AND COALESCE(project, '') <> 'Tasks') OR project = ?2) ORDER BY pinned DESC, COALESCE(updated_at, created_at) DESC LIMIT 300) AS notes ORDER BY pinned DESC, COALESCE(updated_at, created_at) DESC",
@@ -94,41 +237,92 @@
         "project",
         "utc_offset_ms",
         "today"
-      ]
+      ],
+      "description": "Notes newest first, pinned on top, with a snippet, edit time and checklist progress.",
+      "types": {
+        "q": {
+          "type": "string",
+          "description": "Text to find in title, body or project; empty matches all."
+        },
+        "project": {
+          "type": "string",
+          "description": "Only this project (exact name); empty shows all projects except Tasks, 'Tasks' shows task notes."
+        }
+      }
     },
     "note": {
       "sql": "SELECT id, CASE WHEN title = 'Untitled' OR title = trim(ltrim(trim(substr(body, 1, instr(body || char(10), char(10)) - 1)), '#')) THEN '' ELSE title END AS title, body, COALESCE(project, '') AS project, pinned FROM notes WHERE id = ?1 AND _deleted IS NULL",
       "params": [
         "id"
-      ]
+      ],
+      "description": "One note with its title (blank when it just follows the first line), body, project and pinned flag.",
+      "types": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The note."
+        }
+      }
     },
     "projects": {
       "sql": "SELECT '' AS project, 'All' AS label, COUNT(*) AS count, (?1 IS NULL OR ?1 = '') AS selected FROM notes WHERE _deleted IS NULL AND COALESCE(project, '') <> 'Tasks' UNION ALL SELECT project, project, COUNT(*), project = ?1 FROM notes WHERE _deleted IS NULL AND project IS NOT NULL AND project <> '' GROUP BY project ORDER BY 1",
       "params": [
         "project"
-      ]
+      ],
+      "description": "Projects with note counts, plus an 'All' row; the given project is marked selected.",
+      "types": {
+        "project": {
+          "type": "string",
+          "description": "The currently selected project; empty selects All."
+        }
+      }
     },
     "pinned": {
       "sql": "SELECT id, title FROM notes WHERE _deleted IS NULL AND pinned = 1 ORDER BY title LIMIT 8",
-      "params": []
+      "params": [],
+      "description": "Up to 8 pinned notes by title."
     },
     "trash": {
       "sql": "SELECT id, title FROM notes WHERE _deleted IS NOT NULL AND NOT (title = 'Untitled' AND trim(COALESCE(body, '')) = '') ORDER BY _deleted DESC LIMIT 100",
-      "params": []
+      "params": [],
+      "description": "Notes in the trash, most recently deleted first (empty notes left out)."
     },
     "search": {
       "sql": "SELECT id, title, COALESCE(project, trim(substr(replace(replace(replace(replace(replace(replace(replace(char(10) || substr(body, instr(body || char(10), char(10)) + 1), char(10) || '- [', char(10) || '['), char(10) || '- ', char(10)), char(10), ' '), '[ ] ', '☐ '), '[x] ', '☑ '), '**', ''), '#', ''), 1, 160))) AS subtitle FROM notes WHERE _deleted IS NULL AND (title LIKE '%' || ?1 || '%' OR body LIKE '%' || ?1 || '%') ORDER BY pinned DESC, COALESCE(updated_at, created_at) DESC LIMIT 8",
       "params": [
         "q"
-      ]
+      ],
+      "description": "Up to 8 notes whose title or body contains the text.",
+      "types": {
+        "q": {
+          "type": "string",
+          "description": "Text to find."
+        }
+      },
+      "cli": false
     },
     "project_names": {
       "sql": "SELECT DISTINCT project FROM notes WHERE _deleted IS NULL AND project IS NOT NULL AND project <> '' ORDER BY project",
-      "params": []
+      "params": [],
+      "description": "Names of all projects that have notes, including Tasks."
     },
     "recent": {
       "sql": "SELECT id, title, pinned, trim(substr(replace(replace(replace(replace(replace(replace(replace(char(10) || substr(body, instr(body || char(10), char(10)) + 1), char(10) || '- [', char(10) || '['), char(10) || '- ', char(10)), char(10), ' '), '[ ] ', '☐ '), '[x] ', '☑ '), '**', ''), '#', ''), 1, 160)) AS snippet, project FROM notes WHERE _deleted IS NULL AND COALESCE(project, '') <> 'Tasks' AND (?1 IS NULL OR ?1 = '' OR project = ?1 COLLATE NOCASE OR title LIKE '%' || ?1 || '%' OR body LIKE '%' || ?1 || '%') AND (?2 IS NULL OR ?2 = '' OR project = ?2 COLLATE NOCASE) ORDER BY pinned DESC, COALESCE(updated_at, created_at) DESC LIMIT 5",
-      "params": ["focus", "project"]
+      "params": [
+        "focus",
+        "project"
+      ],
+      "description": "The 5 most recent notes (pinned first), excluding task notes.",
+      "types": {
+        "focus": {
+          "type": "string",
+          "description": "Page focus: matches a project name (ignoring case) or text in title or body; empty matches all."
+        },
+        "project": {
+          "type": "string",
+          "description": "Only this project (ignoring case); empty for any."
+        }
+      }
     }
   },
   "pages": [
@@ -159,5 +353,8 @@
       "op": "create",
       "arg": "body"
     }
-  ]
+  ],
+  "open": {
+    "page": "main"
+  }
 }
