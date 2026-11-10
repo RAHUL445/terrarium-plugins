@@ -1,7 +1,7 @@
 {
   "id": "reports",
   "name": "Reports",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "api": "terrarium:plugin@0.1.0",
   "description": "Reviews of any range from your tasks, task notes, habits and notes; written by AI with skills you choose, on demand or on a schedule.",
   "storage": {

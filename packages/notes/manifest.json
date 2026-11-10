@@ -1,7 +1,7 @@
 {
   "id": "notes",
   "name": "Notes",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "api": "terrarium:plugin@0.1.0",
   "description": "Markdown notes in projects, with checklists and autosave; edits on different devices merge. Notes saved from finished tasks live in the Tasks project.",
   "storage": {

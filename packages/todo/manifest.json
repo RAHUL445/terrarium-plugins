@@ -1,7 +1,7 @@
 {
   "id": "todo",
   "name": "To-do",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "api": "terrarium:plugin@0.1.0",
   "description": "Tasks with due dates, reminders, priorities, repeats and steps.",
   "storage": {

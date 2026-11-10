@@ -1,7 +1,7 @@
 {
   "id": "bookmarks",
   "name": "Bookmarks",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "api": "terrarium:plugin@0.1.0",
   "description": "Save links with projects, tags and notes. Pin the ones you use most; filter by project or tag.",
   "storage": {

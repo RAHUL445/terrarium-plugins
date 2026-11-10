@@ -1,7 +1,7 @@
 {
   "id": "voice",
   "name": "Voice",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "api": "terrarium:plugin@0.1.0",
   "description": "Record or type quick captures, transcribed locally on your computer. Review them, then send to To-do (one task or one per line) or Notes.",
   "storage": {

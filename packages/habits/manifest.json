@@ -1,7 +1,7 @@
 {
   "id": "habits",
   "name": "Habits",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "api": "terrarium:plugin@0.1.0",
   "description": "Scheduled habits with check-ins, reminders and sleep logs.",
   "storage": {
