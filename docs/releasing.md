@@ -24,3 +24,14 @@ The plugin API is `terrarium:plugin@0.1.0`; a matching API string alone does not
 prove compatibility. Do not distribute WASM or model binaries until the
 artifact license, provenance and platform gates in the [roadmap](roadmap.md)
 are reviewed.
+
+When refreshing the SDK for declared events, upgrade every host/device before
+publishing event-enabled packages. The API stays `terrarium:plugin@0.1.0`, but
+older hosts reject `events` declarations/imports. Existing components continue
+to load on the new host. Never strip declarations for an older host.
+
+A host checkout that cannot yet be committed may export with
+`python3 scripts/export-sdk.py --output <new-dir> --development` for local
+validation. Such snapshots carry `source_dirty: true` and must not be released.
+After committing the host, re-export without that option and replace the SDK
+and lock together before committing the plugins snapshot.

@@ -7,7 +7,7 @@
 //! repeating series, with an entry for each time it was done.
 
 use serde_json::{json, Map, Value};
-use terrarium_guest::{clock, interop, storage, Args, Error, Plugin, Result};
+use terrarium_guest::{clock, events, interop, storage, Args, Error, Plugin, Result};
 
 mod quick;
 
@@ -306,7 +306,7 @@ fn toggle(args: &Args) -> Result<Value> {
     let id = args.str("id")?;
     let done = args.bool("done")?;
     let current = storage::query(
-        "SELECT done FROM tasks WHERE id = ?1 AND _deleted IS NULL",
+        "SELECT done, title, tags FROM tasks WHERE id = ?1 AND _deleted IS NULL",
         &[json!(id)],
     )?;
     let current = current
@@ -338,6 +338,15 @@ fn toggle(args: &Args) -> Result<Value> {
     if !done {
         return Ok(Value::Null);
     }
+    events::emit(
+        "task_done",
+        &json!({
+            "task_id": id,
+            "title": current["title"],
+            "tags": current["tags"],
+            "completed_date": clock::today("")?,
+        }),
+    )?;
     let ask_note = asks_note(id)?.then(|| id.to_string());
     let rows = storage::query(
         "SELECT title, notes, due, tags, priority, repeat, remind_time, urgent, important, COALESCE(series, id) AS series FROM tasks \

@@ -1,7 +1,7 @@
 {
   "id": "habits",
   "name": "Habits",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "api": "terrarium:plugin@0.1.0",
   "description": "Scheduled habits with check-ins, reminders and sleep logs.",
   "storage": {
@@ -527,5 +527,34 @@
       "kind": "Habit",
       "icon": "target"
     }
-  ]
+  ],
+  "events": {
+    "checked_in": {
+      "description": "A habit was checked in for a day.",
+      "payload": {
+        "habit_id": {
+          "type": "id",
+          "required": true
+        },
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "day": {
+          "type": "date",
+          "required": true
+        },
+        "status": {
+          "type": "enum",
+          "values": [
+            "done",
+            "partial",
+            "skipped",
+            "cleared"
+          ],
+          "required": true
+        }
+      }
+    }
+  }
 }

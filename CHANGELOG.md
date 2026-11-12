@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- To-do 0.5.0 emits `task_done` on real task completion; Habits 0.3.0 emits
+  `checked_in` on effective check-in changes, without notes. Repeating the same
+  day/status check-in is harmless. Upgrade Terrarium on every device before
+  installing or syncing these event-enabled packages, then review automations
+  on the chosen execution device.
+
 - First public source preview of the six first-party plugins: To-do, Notes,
   Habits, Bookmarks, Voice and Reports.
 - Release bundle builder with SDK verification and digest pinning.

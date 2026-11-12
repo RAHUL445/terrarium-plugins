@@ -6,7 +6,7 @@
 //! and turned into system notifications by the host.
 
 use serde_json::{json, Map, Value};
-use terrarium_guest::{clock, storage, Args, Error, Plugin, Result};
+use terrarium_guest::{clock, events, storage, Args, Error, Plugin, Result};
 
 struct Habits;
 
@@ -240,7 +240,41 @@ fn record(
     if let Some(note) = text(args, "note", 2000, "Note", false)? {
         values.insert("note".into(), json!(note));
     }
+    // A retry of the same daily state must not append or emit again. Notes
+    // may still be edited; counted increments remain changes even above target.
+    let latest = storage::query(
+        "SELECT id, status, count, note FROM checkins WHERE habit_id = ?1 AND day = ?2 ORDER BY id DESC LIMIT 1",
+        &[json!(habit), json!(day)],
+    )?;
+    let habit_rows = storage::query(
+        "SELECT title, COALESCE(target, 1) AS target FROM habits WHERE id = ?1",
+        &[json!(habit)],
+    )?;
+    let habit_row = &habit_rows[0];
+    let target = habit_row["target"].as_i64().unwrap_or(1).max(1);
+    let effective_count = |status: &str, count: Option<i64>| {
+        count.unwrap_or(if status == "done" { target } else { 0 })
+    };
+    let changed = latest.first().is_none_or(|r| {
+        r["status"] != status
+            || effective_count(r["status"].as_str().unwrap_or(""), r["count"].as_i64())
+                != effective_count(status, count)
+    });
+    if let Some(previous) = latest.first() {
+        if !changed && (values.get("note").is_none() || values.get("note") == previous.get("note"))
+        {
+            return Ok(json!({ "id": previous["id"], "status": status, "count": count }));
+        }
+    }
     let id = storage::insert("checkins", &values)?;
+    if changed {
+        events::emit(
+            "checked_in",
+            &json!({
+                "habit_id": habit, "title": habit_row["title"], "day": day, "status": status,
+            }),
+        )?;
+    }
     Ok(json!({ "id": id, "status": status, "count": count }))
 }
 

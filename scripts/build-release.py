@@ -40,7 +40,7 @@ def export(terra, output):
         stage.mkdir()
         lock = {'format': 1, 'api': API, 'plugins_commit': subprocess.check_output(
             ['git', '-C', str(ROOT), 'rev-parse', 'HEAD'], text=True).strip(),
-            'source_dirty': bool(subprocess.check_output(['git', '-C', str(ROOT), 'status', '--porcelain'])),
+            'source_dirty': bool(sdk['source'].get('source_dirty')) or bool(subprocess.check_output(['git', '-C', str(ROOT), 'status', '--porcelain'])),
             'sdk': sdk['source'], 'plugins': []}
         for source in packages:
             manifest = json.loads(source.read_text())

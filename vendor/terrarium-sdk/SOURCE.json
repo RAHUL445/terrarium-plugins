@@ -1,4 +1,5 @@
 {
-  "host_commit": "16a25a90eac326d034bf08e1a7969ceceb98b451",
-  "api": "terrarium:plugin@0.1.0"
+  "host_commit": "0e51387709feb28fa92641d54cf032f66f989d7d",
+  "api": "terrarium:plugin@0.1.0",
+  "source_dirty": true
 }
