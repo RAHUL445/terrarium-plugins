@@ -8,13 +8,15 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed in UI review round 2
 
+- Unsaved Bookmarks and other quick-entry drafts can be kept while navigating between apps (host fix).
 - Bookmarks updates the All count even when no project has been assigned.
-- Feeds shows article dates and sources, opens titles, and uses explicit read actions, one Refresh button and consistent filters.
+- Feeds shows locale dates without times, distinguishes unread articles, omits repeated grouped sources, and uses article links, explicit read actions, one Refresh button and consistent filters.
 - Bookmarks merges its count into the filters and shows project/tag save hints only when selected.
 - Bookmarks and Reports display local times consistently.
 - Reports and Voice show one empty message per section, and empty sleep charts explain that nothing is logged.
 - To-do uses compact board actions, accurate filter help and an Unsorted matrix group.
 - Today starts with its No date group collapsed and remembers expansion in the saved view.
+- Habits provides titled choices for automation check-ins and the Gym example.
 - Habits keeps completed titles readable and shows percentage units in insights.
 - The Home habit widget explains how to add habits instead of showing an empty grid.
 - Task search includes due dates, tags and a note excerpt to distinguish similar titles.

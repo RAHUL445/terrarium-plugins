@@ -1,7 +1,7 @@
 {
   "id": "feeds",
   "name": "Feeds",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "api": "terrarium:plugin@0.1.0",
   "description": "Read RSS and Atom feeds. Can send data it can read to any public website, including sites you have not added.",
   "permissions": [
