@@ -233,6 +233,42 @@
           "type": "string",
           "description": "\"visits\" (most visited), \"opened\" (recently opened), \"title\" (A-Z); anything else or empty sorts newest first."
         }
+      },
+      "view": {
+        "title": "Bookmarks",
+        "params": {
+          "q": "",
+          "project": "",
+          "tag": "",
+          "sort": ""
+        },
+        "columns": [
+          {
+            "key": "title",
+            "label": "Title",
+            "type": "string"
+          },
+          {
+            "key": "host",
+            "label": "Site",
+            "type": "string"
+          },
+          {
+            "key": "tags_label",
+            "label": "Tags",
+            "type": "string"
+          },
+          {
+            "key": "visits",
+            "label": "Visits",
+            "type": "integer"
+          },
+          {
+            "key": "added",
+            "label": "Added",
+            "type": "string"
+          }
+        ]
       }
     },
     "bookmark": {

@@ -249,6 +249,31 @@
         }
       ]
     },
+    "move": {
+      "description": "Move a task to a board lane (todo, doing, done) or a matrix quadrant (do, schedule, delegate, eliminate).",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The task."
+        },
+        "lane": {
+          "type": "enum",
+          "required": true,
+          "values": [
+            "todo",
+            "doing",
+            "done",
+            "do",
+            "schedule",
+            "delegate",
+            "eliminate"
+          ],
+          "description": "Where to move it."
+        }
+      }
+    },
     "toggle": {
       "description": "Mark a task done or not done. Finishing a repeating task creates the next one. Returns ask_note (the task id) when a note should be offered.",
       "effect": "write",
@@ -458,6 +483,83 @@
           "type": "string",
           "description": "Comma-separated tags; tasks with any of them match (# optional)."
         }
+      },
+      "view": {
+        "title": "Tasks",
+        "title_column": "title",
+        "params": {
+          "filter": "everything",
+          "q": "",
+          "tags": ""
+        },
+        "columns": [
+          {
+            "key": "title",
+            "label": "Task",
+            "type": "string"
+          },
+          {
+            "key": "due",
+            "label": "Due",
+            "type": "date"
+          },
+          {
+            "key": "board_lane",
+            "label": "Status",
+            "type": "enum",
+            "values": [
+              "todo",
+              "doing",
+              "done"
+            ],
+            "labels": [
+              "To do",
+              "In progress",
+              "Done"
+            ],
+            "move": {
+              "op": "move",
+              "args": {
+                "id": "{{row.id}}",
+                "lane": "{{value}}"
+              }
+            }
+          },
+          {
+            "key": "matrix_lane",
+            "label": "Quadrant",
+            "type": "enum",
+            "values": [
+              "do",
+              "schedule",
+              "delegate",
+              "eliminate"
+            ],
+            "labels": [
+              "Do first",
+              "Schedule",
+              "Delegate",
+              "Eliminate"
+            ],
+            "move": {
+              "op": "move",
+              "args": {
+                "id": "{{row.id}}",
+                "lane": "{{value}}"
+              }
+            }
+          },
+          {
+            "key": "priority",
+            "label": "Priority",
+            "type": "integer"
+          },
+          {
+            "key": "tags",
+            "label": "Tags",
+            "type": "string"
+          }
+        ]
       }
     },
     "trash": {

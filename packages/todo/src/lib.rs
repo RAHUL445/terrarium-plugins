@@ -21,6 +21,7 @@ impl Plugin for Todo {
         match operation {
             "create" => create(&args),
             "update" => update(&args),
+            "move" => move_task(&args),
             "toggle" => toggle(&args),
             "delete" => {
                 storage::delete(TABLE, args.str("id")?)?;
@@ -204,6 +205,51 @@ fn attention_fields(args: &Args, values: &mut Map<String, Value>) -> Result<()> 
         }
     }
     Ok(())
+}
+
+/// Board lanes set done/in progress (finishing goes through `toggle`, so
+/// repeats and notes behave the same); quadrants set urgent/important.
+fn move_task(args: &Args) -> Result<Value> {
+    let id = args.str("id")?;
+    let lane = args.str("lane")?;
+    let rows = storage::query("SELECT done FROM tasks WHERE id = ?1 AND _deleted IS NULL", &[json!(id)])?;
+    let task = rows
+        .first()
+        .ok_or_else(|| Error::invalid("That task no longer exists"))?;
+    let is_done = task["done"]
+        .as_bool()
+        .unwrap_or_else(|| task["done"].as_i64() == Some(1));
+    match lane {
+        "todo" | "doing" => {
+            if is_done {
+                toggle(&Args(json!({"id": id, "done": false}).as_object().cloned().unwrap_or_default()))?;
+            }
+            let mut values = Map::new();
+            values.insert("in_progress".into(), json!(lane == "doing"));
+            storage::update(TABLE, id, &values)?;
+            Ok(Value::Null)
+        }
+        "done" => toggle(&Args(
+            json!({"id": id, "done": true})
+                .as_object()
+                .cloned()
+                .unwrap_or_default(),
+        )),
+        "do" | "schedule" | "delegate" | "eliminate" => {
+            let (urgent, important) = match lane {
+                "do" => (true, true),
+                "schedule" => (false, true),
+                "delegate" => (true, false),
+                _ => (false, false),
+            };
+            let mut values = Map::new();
+            values.insert("urgent".into(), json!(urgent));
+            values.insert("important".into(), json!(important));
+            storage::update(TABLE, id, &values)?;
+            Ok(Value::Null)
+        }
+        _ => Err(Error::invalid("Unknown lane")),
+    }
 }
 
 /// Marks a task done or not done. Finishing a repeating task also creates

@@ -248,6 +248,35 @@
           "type": "string",
           "description": "Only this project (exact name); empty shows all projects except Tasks, 'Tasks' shows task notes."
         }
+      },
+      "view": {
+        "title": "Notes",
+        "params": {
+          "q": "",
+          "project": ""
+        },
+        "columns": [
+          {
+            "key": "title",
+            "label": "Title",
+            "type": "string"
+          },
+          {
+            "key": "project",
+            "label": "Project",
+            "type": "string"
+          },
+          {
+            "key": "pinned",
+            "label": "Pinned",
+            "type": "boolean"
+          },
+          {
+            "key": "edited",
+            "label": "Edited",
+            "type": "string"
+          }
+        ]
       }
     },
     "note": {

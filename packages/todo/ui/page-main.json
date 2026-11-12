@@ -159,6 +159,13 @@
         "if": "{{state.view == kanban}}",
         "layout": "board",
         "column": "board_lane",
+        "move": {
+          "op": "move",
+          "args": {
+            "id": "{{row.id}}",
+            "lane": "{{value}}"
+          }
+        },
         "columns": [
           {
             "value": "todo",
@@ -241,6 +248,13 @@
         "if": "{{state.view == matrix}}",
         "layout": "matrix",
         "column": "matrix_lane",
+        "move": {
+          "op": "move",
+          "args": {
+            "id": "{{row.id}}",
+            "lane": "{{value}}"
+          }
+        },
         "columns": [
           {
             "value": "do",
