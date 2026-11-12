@@ -1,7 +1,7 @@
 {
   "id": "habits",
   "name": "Habits",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "api": "terrarium:plugin@0.1.0",
   "description": "Scheduled habits with check-ins, reminders and sleep logs.",
   "storage": {
@@ -450,6 +450,29 @@
         "today"
       ],
       "description": "Active habits scheduled for today or already checked in today."
+    },
+    "search": {
+      "sql": "SELECT id, title, COALESCE(NULLIF(category, ''), CASE WHEN paused THEN 'Paused' END) AS subtitle FROM habits WHERE _deleted IS NULL AND (title LIKE '%' || ?1 || '%' OR notes LIKE '%' || ?1 || '%' OR category LIKE '%' || ?1 || '%') ORDER BY paused, title LIMIT 8",
+      "params": [
+        "q"
+      ],
+      "description": "Habits whose name, category or notes contain the text.",
+      "types": {
+        "q": {
+          "type": "string",
+          "required": true,
+          "description": "Text to find."
+        }
+      },
+      "cli": false
+    },
+    "ref_habits": {
+      "sql": "SELECT id, title, category AS subtitle, paused AS done FROM habits WHERE _deleted IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "params": [
+        "ids"
+      ],
+      "cli": false,
+      "description": "Habits by id, for links."
     }
   },
   "reminders": {
@@ -495,5 +518,14 @@
   ],
   "open": {
     "page": "main"
-  }
+  },
+  "search": "search",
+  "refs": [
+    {
+      "table": "habits",
+      "resolve": "ref_habits",
+      "kind": "Habit",
+      "icon": "target"
+    }
+  ]
 }

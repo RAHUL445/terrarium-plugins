@@ -1,7 +1,7 @@
 {
   "id": "todo",
   "name": "To-do",
-  "version": "0.4.1",
+  "version": "0.4.3",
   "api": "terrarium:plugin@0.1.0",
   "description": "Tasks with due dates, reminders, priorities, repeats and steps.",
   "storage": {
@@ -496,7 +496,7 @@
       "cli": false
     },
     "task": {
-      "sql": "SELECT COALESCE(t.in_progress, 0) AS in_progress, COALESCE(t.urgent, 0) AS urgent, COALESCE(t.important, 0) AS important, t.id, t.title, COALESCE(t.notes, '') AS notes, t.due, COALESCE(t.tags, '') AS tags, COALESCE(t.priority, 0) AS priority, COALESCE(t.repeat, '') AS repeat, t.remind_time, t.done, CASE WHEN t.done = 1 THEN 'Mark not done' ELSE 'Mark done' END AS done_label, COALESCE(t.done_note, '') AS done_note, t.done = 1 AS can_note, (SELECT p.done_note FROM tasks p WHERE p._deleted IS NULL AND p.id <> t.id AND p.done = 1 AND p.done_note IS NOT NULL AND COALESCE(p.series, p.id) = COALESCE(t.series, t.id) ORDER BY p.completed_at DESC LIMIT 1) AS last_note, (SELECT 'Last time (' || date(p.completed_at / 1000, 'unixepoch') || ')' FROM tasks p WHERE p._deleted IS NULL AND p.id <> t.id AND p.done = 1 AND p.done_note IS NOT NULL AND COALESCE(p.series, p.id) = COALESCE(t.series, t.id) ORDER BY p.completed_at DESC LIMIT 1) AS last_note_title FROM tasks t WHERE t.id = ?1 AND t._deleted IS NULL",
+      "sql": "SELECT COALESCE(t.in_progress, 0) AS in_progress, COALESCE(t.urgent, 0) AS urgent, COALESCE(t.important, 0) AS important, t.id, t.title, t.note_id, COALESCE(t.notes, '') AS notes, t.due, COALESCE(t.tags, '') AS tags, COALESCE(t.priority, 0) AS priority, COALESCE(t.repeat, '') AS repeat, t.remind_time, t.done, CASE WHEN t.done = 1 THEN 'Mark not done' ELSE 'Mark done' END AS done_label, COALESCE(t.done_note, '') AS done_note, t.done = 1 AS can_note, (SELECT p.done_note FROM tasks p WHERE p._deleted IS NULL AND p.id <> t.id AND p.done = 1 AND p.done_note IS NOT NULL AND COALESCE(p.series, p.id) = COALESCE(t.series, t.id) ORDER BY p.completed_at DESC LIMIT 1) AS last_note, (SELECT 'Last time (' || date(p.completed_at / 1000, 'unixepoch') || ')' FROM tasks p WHERE p._deleted IS NULL AND p.id <> t.id AND p.done = 1 AND p.done_note IS NOT NULL AND COALESCE(p.series, p.id) = COALESCE(t.series, t.id) ORDER BY p.completed_at DESC LIMIT 1) AS last_note_title FROM tasks t WHERE t.id = ?1 AND t._deleted IS NULL",
       "params": [
         "id"
       ],
@@ -542,6 +542,22 @@
       "sql": "SELECT COALESCE((SELECT ask_note FROM settings WHERE _deleted IS NULL ORDER BY id LIMIT 1), 'always') AS ask, COALESCE((SELECT note_tags FROM settings WHERE _deleted IS NULL ORDER BY id LIMIT 1), '') AS tags",
       "params": [],
       "description": "Current settings for offering a note on finishing a task."
+    },
+    "index_tasks": {
+      "sql": "SELECT id, title, substr(COALESCE(notes, ''), 1, 20000) AS body, tags AS keywords, CASE WHEN done = 1 THEN 'Done' ELSE COALESCE(due, tags) END AS subtitle FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "params": [
+        "ids"
+      ],
+      "description": "Tasks by id, for the host's search index.",
+      "cli": false
+    },
+    "ref_tasks": {
+      "sql": "SELECT id, title, CASE WHEN done = 1 THEN 'Done' ELSE due END AS subtitle, done FROM tasks WHERE _deleted IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "params": [
+        "ids"
+      ],
+      "cli": false,
+      "description": "Tasks by id, for links."
     }
   },
   "reminders": {
@@ -591,5 +607,20 @@
   ],
   "open": {
     "page": "main"
-  }
+  },
+  "index": [
+    {
+      "table": "tasks",
+      "query": "index_tasks",
+      "kind": "Task"
+    }
+  ],
+  "refs": [
+    {
+      "table": "tasks",
+      "resolve": "ref_tasks",
+      "kind": "Task",
+      "icon": "check"
+    }
+  ]
 }

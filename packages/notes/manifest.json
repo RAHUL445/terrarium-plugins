@@ -1,7 +1,7 @@
 {
   "id": "notes",
   "name": "Notes",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "api": "terrarium:plugin@0.1.0",
   "description": "Markdown notes in projects, with checklists and autosave; edits on different devices merge. Notes saved from finished tasks live in the Tasks project.",
   "storage": {
@@ -323,6 +323,22 @@
           "description": "Only this project (ignoring case); empty for any."
         }
       }
+    },
+    "index_notes": {
+      "sql": "SELECT id, title, substr(body, 1, 20000) AS body, project AS keywords, COALESCE(project, trim(substr(replace(replace(replace(replace(replace(replace(replace(char(10) || substr(body, instr(body || char(10), char(10)) + 1), char(10) || '- [', char(10) || '['), char(10) || '- ', char(10)), char(10), ' '), '[ ] ', '☐ '), '[x] ', '☑ '), '**', ''), '#', ''), 1, 160))) AS subtitle FROM notes WHERE _deleted IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "params": [
+        "ids"
+      ],
+      "description": "Notes by id, for the host's search index.",
+      "cli": false
+    },
+    "ref_notes": {
+      "sql": "SELECT id, title, project AS subtitle FROM notes WHERE _deleted IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "params": [
+        "ids"
+      ],
+      "cli": false,
+      "description": "Notes by id, for links."
     }
   },
   "pages": [
@@ -356,5 +372,20 @@
   ],
   "open": {
     "page": "main"
-  }
+  },
+  "index": [
+    {
+      "table": "notes",
+      "query": "index_notes",
+      "kind": "Note"
+    }
+  ],
+  "refs": [
+    {
+      "table": "notes",
+      "resolve": "ref_notes",
+      "kind": "Note",
+      "icon": "note"
+    }
+  ]
 }

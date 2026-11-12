@@ -1986,5 +1986,8 @@
     ]
    }
   ]
+ },
+ "entry": {
+  "bind": "state.open"
  }
 }

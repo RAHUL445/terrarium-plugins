@@ -897,5 +897,8 @@
     "operation": "save",
     "bind": "state.creating",
     "prefill": "state.newText"
+  },
+  "entry": {
+    "bind": "state.open"
   }
 }

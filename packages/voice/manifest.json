@@ -1,7 +1,7 @@
 {
   "id": "voice",
   "name": "Voice",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "api": "terrarium:plugin@0.1.0",
   "description": "Record or type quick captures, transcribed locally on your computer. Review them, then send to To-do (one task or one per line) or Notes.",
   "storage": {
@@ -306,6 +306,22 @@
         }
       },
       "cli": false
+    },
+    "index_captures": {
+      "sql": "SELECT id, CASE WHEN text IS NULL OR trim(text) = '' THEN CASE status WHEN 'queued' THEN 'Recording' ELSE 'Recording (no text)' END WHEN length(trim(substr(text, 1, instr(text || char(10), char(10)) - 1))) > 90 THEN substr(trim(substr(text, 1, instr(text || char(10), char(10)) - 1)), 1, 88) || '…' ELSE trim(substr(text, 1, instr(text || char(10), char(10)) - 1)) END AS title, text AS body, CASE status WHEN 'sent' THEN 'Sent to ' || CASE sent_to WHEN 'todo' THEN 'To-do' WHEN 'notes' THEN 'Notes' WHEN 'todo-lines' THEN 'To-do' ELSE 'Kept' END WHEN 'archived' THEN 'Kept' ELSE 'In Voice inbox' END AS subtitle FROM captures WHERE _deleted IS NULL AND text IS NOT NULL AND trim(text) <> '' AND id IN (SELECT value FROM json_each(?1))",
+      "params": [
+        "ids"
+      ],
+      "description": "Captures by id, for the host's search index.",
+      "cli": false
+    },
+    "ref_captures": {
+      "sql": "SELECT id, CASE WHEN text IS NULL OR trim(text) = '' THEN CASE status WHEN 'queued' THEN 'Recording' ELSE 'Recording (no text)' END WHEN length(trim(substr(text, 1, instr(text || char(10), char(10)) - 1))) > 90 THEN substr(trim(substr(text, 1, instr(text || char(10), char(10)) - 1)), 1, 88) || '…' ELSE trim(substr(text, 1, instr(text || char(10), char(10)) - 1)) END AS title, CASE status WHEN 'sent' THEN 'Sent to ' || CASE sent_to WHEN 'todo' THEN 'To-do' WHEN 'notes' THEN 'Notes' WHEN 'todo-lines' THEN 'To-do' ELSE 'Kept' END WHEN 'archived' THEN 'Kept' ELSE 'In Voice inbox' END AS subtitle FROM captures WHERE _deleted IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "params": [
+        "ids"
+      ],
+      "cli": false,
+      "description": "Captures by id, for links."
     }
   },
   "limits": {
@@ -343,5 +359,20 @@
       "arg": "text"
     }
   ],
-  "search": "search"
+  "search": "search",
+  "index": [
+    {
+      "table": "captures",
+      "query": "index_captures",
+      "kind": "Capture"
+    }
+  ],
+  "refs": [
+    {
+      "table": "captures",
+      "resolve": "ref_captures",
+      "kind": "Capture",
+      "icon": "mic"
+    }
+  ]
 }

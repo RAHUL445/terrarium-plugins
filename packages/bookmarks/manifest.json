@@ -1,7 +1,7 @@
 {
   "id": "bookmarks",
   "name": "Bookmarks",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "api": "terrarium:plugin@0.1.0",
   "description": "Save links with projects, tags and notes. Pin the ones you use most; filter by project or tag.",
   "storage": {
@@ -334,6 +334,22 @@
         }
       },
       "cli": false
+    },
+    "index_bookmarks": {
+      "sql": "SELECT id, title, note AS body, COALESCE(tags, '') || ' ' || COALESCE(project, '') || ' ' || url AS keywords, CASE WHEN instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') > 0 THEN substr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, 1, instr(CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END, '/') - 1) ELSE CASE WHEN substr(substr(url, instr(url, '://') + 3), 1, 4) = 'www.' THEN substr(substr(url, instr(url, '://') + 3), 5) ELSE substr(url, instr(url, '://') + 3) END END || COALESCE(' · ' || NULLIF(project, ''), '') AS subtitle FROM bookmarks WHERE _deleted IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "params": [
+        "ids"
+      ],
+      "description": "Bookmarks by id, for the host's search index.",
+      "cli": false
+    },
+    "ref_bookmarks": {
+      "sql": "SELECT id, title, url AS subtitle FROM bookmarks WHERE _deleted IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "params": [
+        "ids"
+      ],
+      "cli": false,
+      "description": "Bookmarks by id, for links."
     }
   },
   "pages": [
@@ -367,5 +383,20 @@
   ],
   "open": {
     "page": "main"
-  }
+  },
+  "index": [
+    {
+      "table": "bookmarks",
+      "query": "index_bookmarks",
+      "kind": "Bookmark"
+    }
+  ],
+  "refs": [
+    {
+      "table": "bookmarks",
+      "resolve": "ref_bookmarks",
+      "kind": "Bookmark",
+      "icon": "bookmark"
+    }
+  ]
 }

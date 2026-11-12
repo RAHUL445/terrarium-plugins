@@ -1,7 +1,7 @@
 {
   "id": "reports",
   "name": "Reports",
-  "version": "0.3.2",
+  "version": "0.3.4",
   "api": "terrarium:plugin@0.1.0",
   "description": "Reviews of any range from your tasks, task notes, habits and notes; written by AI with skills you choose, on demand or on a schedule.",
   "storage": {
@@ -822,6 +822,29 @@
           "required": true
         }
       }
+    },
+    "search": {
+      "sql": "SELECT id, title, start || ' – ' || \"end\" AS subtitle FROM reports WHERE _deleted IS NULL AND (title LIKE '%' || ?1 || '%' OR summary LIKE '%' || ?1 || '%' OR label LIKE '%' || ?1 || '%') ORDER BY created_at DESC LIMIT 8",
+      "params": [
+        "q"
+      ],
+      "description": "Reports whose title, summary or label contain the text.",
+      "types": {
+        "q": {
+          "type": "string",
+          "required": true,
+          "description": "Text to find."
+        }
+      },
+      "cli": false
+    },
+    "ref_reports": {
+      "sql": "SELECT id, title, start || ' – ' || \"end\" AS subtitle FROM reports WHERE _deleted IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "params": [
+        "ids"
+      ],
+      "cli": false,
+      "description": "Reports by id, for links."
     }
   },
   "pages": [
@@ -845,5 +868,14 @@
   ],
   "open": {
     "page": "main"
-  }
+  },
+  "search": "search",
+  "refs": [
+    {
+      "table": "reports",
+      "resolve": "ref_reports",
+      "kind": "Report",
+      "icon": "chart"
+    }
+  ]
 }

@@ -57,7 +57,7 @@
         ]
       },
       {
-        "type": "sheet", "bind": "state.open", "size": "large", "title": "Note", "query": "note", "params": { "id": "{{state.open}}" },
+        "type": "sheet", "bind": "state.open", "size": "large", "title": "Note", "table": "notes", "query": "note", "params": { "id": "{{state.open}}" },
         "on_close": { "op": "tidy", "args": { "id": "{{row.id}}" } },
         "children": [
           {
@@ -93,7 +93,9 @@
                 "action": { "op": "delete", "args": { "id": "{{row.id}}" }, "success": "Moved to trash", "undo": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored from trash" }, "then": { "state.open": "" } }
               }
             ]
-          }
+          },
+          { "type": "ref-picker", "label": "Link to…", "action": { "link": { "from": "{{row.$ref}}", "to": "{{value.ref}}" }, "success": "Linked" } },
+          { "type": "backlinks", "ref": "{{row.$ref}}", "title": "Linked from", "empty": "Nothing links to this note yet." }
         ]
       },
       {

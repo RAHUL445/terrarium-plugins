@@ -327,7 +327,7 @@
         ]
       },
       {
-        "type": "sheet", "bind": "state.open", "title": "Task", "query": "task", "params": { "id": "{{state.open}}" },
+        "type": "sheet", "bind": "state.open", "title": "Task", "table": "tasks", "query": "task", "params": { "id": "{{state.open}}" },
         "children": [
           {
             "type": "form", "submit_label": "Save",
@@ -395,6 +395,7 @@
               { "type": "text-field", "name": "tags", "label": "Tags", "placeholder": "Comma separated", "value": "{{row.tags}}" }
             ]
           },
+          { "type": "ref", "ref": "notes/notes/{{row.note_id}}", "label": "Note", "if": "{{row.note_id}}" },
           {
             "type": "section", "title": "Steps",
             "children": [
@@ -446,7 +447,8 @@
                 "action": { "op": "delete", "args": { "id": "{{row.id}}" }, "success": "Moved to trash", "undo": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored from trash" }, "then": { "state.open": "" } }
               }
             ]
-          }
+          },
+          { "type": "backlinks", "ref": "{{row.$ref}}", "empty": "Nothing links to this task yet." }
         ]
       },
       {
