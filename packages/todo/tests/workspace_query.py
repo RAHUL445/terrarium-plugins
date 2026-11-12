@@ -7,12 +7,31 @@ class WorkspaceQuery(OrganizationQuery):
 
     def workspace(self, *, filter='everything', q=None, tags=None, lists=None,
                   groups=None, statuses=None, tags_mode='any', category=None,
-                  sort='manual', grouping='list'):
+                  sort='manual', grouping='list', page_focus=None):
         return self.query('workspace_tasks', self.TODAY, filter, q, tags, lists,
-                          groups, statuses, tags_mode, category, sort, grouping)
+                          groups, statuses, tags_mode, category, sort, grouping, page_focus)
+
+    def test_page_focus_intersects_saved_search_before_limit(self):
+        for i in range(550):
+            self.add_task(f'noise-{i}', title='review unrelated')
+        self.add_task('target', title='review', notes='launch')
+        self.add_task('only-focus', title='launch')
+        rows = self.workspace(q='review', page_focus='launch')
+        self.assertEqual([row['id'] for row in rows], ['target'])
 
     def add_task(self, id, title=None, **values):
         self.insert('tasks', id=id, title=title or id, **values)
+
+    def test_board_choices_retain_archived_and_missing_assignments(self):
+        self.insert('task_lists', id='old-list', name='Old', archived=1)
+        self.insert('task_groups', id='old-group', name='Old group', archived=1)
+        self.insert('task_statuses', id='old-status', name='Old status', category='active', archived=1)
+        self.add_task('archived', list_id='old-list', group_id='old-group', status_id='old-status')
+        self.add_task('missing', list_id='missing-list', group_id='missing-group', status_id='missing-status')
+        for kind in ['list', 'group', 'status']:
+            choices = {row['value']: row['label'] for row in self.query('view_' + kind + '_choices')}
+            self.assertIn('archived', choices['old-' + kind])
+            self.assertIn('Unavailable', choices['missing-' + kind])
 
     def test_my_day_includes_today_and_earlier_plans_only(self):
         for id, planned_for in [('earlier', '2026-11-11'), ('today', self.TODAY),

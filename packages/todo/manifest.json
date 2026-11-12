@@ -862,7 +862,7 @@
       "cli": false
     },
     "task_statuses": {
-      "sql": "SELECT id, list_id, name, color, category, ready, position, archived FROM task_statuses WHERE _deleted IS NULL AND list_id IS NULLIF(?1, '') ORDER BY position, name, id",
+      "sql": "SELECT CASE category WHEN 'not_started' THEN 'Not started' WHEN 'active' THEN 'Active' ELSE 'Completed' END AS category_label, id, list_id, name, color, category, ready, position, archived FROM task_statuses WHERE _deleted IS NULL AND list_id IS NULLIF(?1, '') ORDER BY position, name, id",
       "params": [
         "list_id"
       ],
@@ -1082,7 +1082,7 @@
       "cli": false
     },
     "workspace_tasks": {
-      "sql": "SELECT id, list_id, group_id, status_id, planned_for, sort_order, list_name, group_name, status_name, status_category, workflow_id, CASE ?11 WHEN 'list' THEN list_name WHEN 'group' THEN group_name WHEN 'status' THEN status_name WHEN 'none' THEN '' ELSE CASE WHEN planned_for IS NOT NULL AND planned_for < ?1 THEN 'Earlier plans' WHEN planned_for = ?1 THEN 'Planned today' ELSE list_name END END AS workspace_group, title, notes, due, tags, COALESCE(in_progress, 0) AS in_progress, COALESCE(urgent, 0) AS urgent, COALESCE(important, 0) AS important, CASE WHEN done = 1 THEN 'done' WHEN in_progress = 1 THEN 'doing' ELSE 'todo' END AS board_lane, CASE WHEN in_progress = 1 THEN 'Move to To do' ELSE 'Start task' END AS move_label, CASE WHEN urgent = 1 AND important = 1 THEN 'do' WHEN important = 1 THEN 'schedule' WHEN urgent = 1 THEN 'delegate' ELSE 'eliminate' END AS matrix_lane, COALESCE(priority, 0) AS priority, repeat, remind_time, done, CASE WHEN due IS NULL THEN 'No date' WHEN d = 0 THEN 'Today' WHEN d = 1 THEN 'Tomorrow' WHEN d = -1 THEN 'Yesterday' WHEN d BETWEEN 2 AND 6 THEN CASE strftime('%w', due) WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END ELSE CAST(strftime('%d', due) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', due) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(due, 1, 4) <> substr(?1, 1, 4) THEN ' ' || substr(due, 1, 4) ELSE '' END END || CASE WHEN remind_time IS NOT NULL THEN ' ' || remind_time ELSE '' END AS due_label, CASE WHEN done = 0 AND d < 0 THEN 'danger' WHEN done = 0 AND d = 0 THEN 'accent' END AS due_tone, CASE WHEN done = 1 THEN 'Completed' WHEN due IS NULL THEN 'No date' WHEN d < 0 THEN 'Overdue' WHEN d = 0 THEN 'Today' WHEN d = 1 THEN 'Tomorrow' WHEN d <= 6 THEN CASE strftime('%w', due) WHEN '0' THEN 'Sunday' WHEN '1' THEN 'Monday' WHEN '2' THEN 'Tuesday' WHEN '3' THEN 'Wednesday' WHEN '4' THEN 'Thursday' WHEN '5' THEN 'Friday' ELSE 'Saturday' END ELSE 'Later' END AS section, CASE WHEN done = 0 AND d < 0 THEN 'danger' END AS section_tone, CASE repeat WHEN 'daily' THEN 'Daily' WHEN 'weekdays' THEN 'Weekdays' WHEN 'weekly' THEN 'Weekly' WHEN 'monthly' THEN 'Monthly' END AS repeat_label, CASE WHEN steps_total > 0 THEN steps_done || '/' || steps_total END AS steps_label, CASE WHEN done_note IS NOT NULL THEN 'Note' END AS note_chip FROM (SELECT t.*, COALESCE((SELECT name FROM task_lists l WHERE l.id=t.list_id AND l._deleted IS NULL), 'Inbox') AS list_name, COALESCE((SELECT name FROM task_groups g WHERE g.id=t.group_id AND g.list_id IS t.list_id AND g._deleted IS NULL), 'Ungrouped') AS group_name, COALESCE((SELECT name FROM task_statuses s WHERE s.id=t.status_id AND s.list_id IS t.list_id AND s._deleted IS NULL AND s.category=CASE WHEN t.done=1 THEN 'completed' WHEN t.in_progress=1 THEN 'active' ELSE 'not_started' END), CASE WHEN t.done=1 THEN 'Done' WHEN t.in_progress=1 THEN 'In progress' ELSE 'To pick' END) AS status_name, CASE WHEN t.done=1 THEN 'completed' WHEN t.in_progress=1 THEN 'active' ELSE 'not_started' END AS status_category, COALESCE(t.status_id, CASE WHEN t.done=1 THEN '@completed' WHEN t.in_progress=1 THEN '@active' ELSE '@not_started' END) AS workflow_id, COALESCE((SELECT ready FROM task_statuses s WHERE s.id=t.status_id AND s.list_id IS t.list_id AND s._deleted IS NULL), 1) AS ready,  CAST(julianday(t.due) - julianday(?1) AS INTEGER) AS d, (SELECT COUNT(*) FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS steps_total, (SELECT COUNT(*) FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL AND s.done = 1) AS steps_done FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL) WHERE (?3 IS NULL OR ?3 = '' OR title LIKE '%' || ?3 || '%' OR tags LIKE '%' || ?3 || '%' OR notes LIKE '%' || ?3 || '%') AND (?4 IS NULL OR ?4 = '' OR EXISTS (WITH RECURSIVE f(tag, rest) AS (SELECT '', ?4 || ',' UNION ALL SELECT lower(ltrim(trim(substr(rest, 1, instr(rest, ',') - 1)), '#')), substr(rest, instr(rest, ',') + 1) FROM f WHERE rest <> '') SELECT 1 FROM f WHERE tag <> '' AND instr(', ' || lower(COALESCE(tags, '')) || ', ', ', ' || tag || ', ') > 0))  AND (?5 IS NULL OR ?5 = '' OR instr(',' || ?5 || ',', ',' || COALESCE(list_id, '@inbox') || ',') > 0) AND (?6 IS NULL OR ?6 = '' OR instr(',' || ?6 || ',', ',' || COALESCE(group_id, '@ungrouped') || ',') > 0) AND (?7 IS NULL OR ?7 = '' OR instr(',' || ?7 || ',', ',' || COALESCE(workflow_id, '') || ',') > 0) AND (?9 IS NULL OR ?9 = '' OR status_category = ?9) AND (?8 IS NULL OR ?8 <> 'all' OR NOT EXISTS (WITH RECURSIVE f(tag, rest) AS (SELECT '', COALESCE(?4, '') || ',' UNION ALL SELECT lower(ltrim(trim(substr(rest, 1, instr(rest, ',') - 1)), '#')), substr(rest, instr(rest, ',') + 1) FROM f WHERE rest <> '') SELECT 1 FROM f WHERE tag <> '' AND instr(', ' || lower(COALESCE(tags, '')) || ', ', ', ' || tag || ', ') = 0)) AND CASE ?2 WHEN 'my_day' THEN done = 0 AND planned_for IS NOT NULL AND planned_for <= ?1 WHEN 'inbox' THEN done = 0 AND list_id IS NULL WHEN 'ready' THEN done = 0 AND ready = 1 AND (planned_for IS NULL OR planned_for <= ?1) WHEN 'today' THEN done = 0 AND d <= 0 WHEN 'upcoming' THEN done = 0 AND d > 0 WHEN 'done' THEN done = 1 WHEN 'everything' THEN 1 ELSE done = 0 END ORDER BY CASE WHEN ?10 = 'manual' THEN sort_order END, CASE WHEN ?10 = 'title' THEN title END COLLATE NOCASE, CASE WHEN ?10 = 'priority' THEN -COALESCE(priority,0) END, CASE WHEN done = 1 THEN 6 WHEN due IS NULL THEN 5 WHEN d < 0 THEN 0 WHEN d = 0 THEN 1 WHEN d <= 6 THEN 2 ELSE 4 END, due, COALESCE(priority, 0) DESC, CASE WHEN done = 1 THEN -completed_at END, id DESC LIMIT 500",
+      "sql": "SELECT id, COALESCE(list_id, '') AS list_key, COALESCE(group_id, '') AS group_key, list_id, group_id, status_id, planned_for, sort_order, list_name, group_name, status_name, status_category, workflow_id, CASE ?11 WHEN 'list' THEN list_name WHEN 'group' THEN group_name WHEN 'status' THEN status_name WHEN 'none' THEN '' ELSE CASE WHEN planned_for IS NOT NULL AND planned_for < ?1 THEN 'Earlier plans' WHEN planned_for = ?1 THEN 'Planned today' ELSE list_name END END AS workspace_group, title, notes, due, tags, COALESCE(in_progress, 0) AS in_progress, COALESCE(urgent, 0) AS urgent, COALESCE(important, 0) AS important, CASE WHEN done = 1 THEN 'done' WHEN in_progress = 1 THEN 'doing' ELSE 'todo' END AS board_lane, CASE WHEN in_progress = 1 THEN 'Move to To do' ELSE 'Start task' END AS move_label, CASE WHEN urgent = 1 AND important = 1 THEN 'do' WHEN important = 1 THEN 'schedule' WHEN urgent = 1 THEN 'delegate' ELSE 'eliminate' END AS matrix_lane, COALESCE(priority, 0) AS priority, repeat, remind_time, done, CASE WHEN due IS NULL THEN 'No date' WHEN d = 0 THEN 'Today' WHEN d = 1 THEN 'Tomorrow' WHEN d = -1 THEN 'Yesterday' WHEN d BETWEEN 2 AND 6 THEN CASE strftime('%w', due) WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END ELSE CAST(strftime('%d', due) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', due) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(due, 1, 4) <> substr(?1, 1, 4) THEN ' ' || substr(due, 1, 4) ELSE '' END END || CASE WHEN remind_time IS NOT NULL THEN ' ' || remind_time ELSE '' END AS due_label, CASE WHEN done = 0 AND d < 0 THEN 'danger' WHEN done = 0 AND d = 0 THEN 'accent' END AS due_tone, CASE WHEN done = 1 THEN 'Completed' WHEN due IS NULL THEN 'No date' WHEN d < 0 THEN 'Overdue' WHEN d = 0 THEN 'Today' WHEN d = 1 THEN 'Tomorrow' WHEN d <= 6 THEN CASE strftime('%w', due) WHEN '0' THEN 'Sunday' WHEN '1' THEN 'Monday' WHEN '2' THEN 'Tuesday' WHEN '3' THEN 'Wednesday' WHEN '4' THEN 'Thursday' WHEN '5' THEN 'Friday' ELSE 'Saturday' END ELSE 'Later' END AS section, CASE WHEN done = 0 AND d < 0 THEN 'danger' END AS section_tone, CASE repeat WHEN 'daily' THEN 'Daily' WHEN 'weekdays' THEN 'Weekdays' WHEN 'weekly' THEN 'Weekly' WHEN 'monthly' THEN 'Monthly' END AS repeat_label, CASE WHEN steps_total > 0 THEN steps_done || '/' || steps_total END AS steps_label, CASE WHEN done_note IS NOT NULL THEN 'Note' END AS note_chip FROM (SELECT t.*, COALESCE((SELECT name FROM task_lists l WHERE l.id=t.list_id AND l._deleted IS NULL), 'Inbox') AS list_name, COALESCE((SELECT name FROM task_groups g WHERE g.id=t.group_id AND g.list_id IS t.list_id AND g._deleted IS NULL), 'Ungrouped') AS group_name, COALESCE((SELECT name FROM task_statuses s WHERE s.id=t.status_id AND s.list_id IS t.list_id AND s._deleted IS NULL AND s.category=CASE WHEN t.done=1 THEN 'completed' WHEN t.in_progress=1 THEN 'active' ELSE 'not_started' END), CASE WHEN t.done=1 THEN 'Done' WHEN t.in_progress=1 THEN 'In progress' ELSE 'To pick' END) AS status_name, CASE WHEN t.done=1 THEN 'completed' WHEN t.in_progress=1 THEN 'active' ELSE 'not_started' END AS status_category, COALESCE(t.status_id, CASE WHEN t.done=1 THEN '@completed' WHEN t.in_progress=1 THEN '@active' ELSE '@not_started' END) AS workflow_id, COALESCE((SELECT ready FROM task_statuses s WHERE s.id=t.status_id AND s.list_id IS t.list_id AND s._deleted IS NULL), 1) AS ready,  CAST(julianday(t.due) - julianday(?1) AS INTEGER) AS d, (SELECT COUNT(*) FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS steps_total, (SELECT COUNT(*) FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL AND s.done = 1) AS steps_done FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL) WHERE (?3 IS NULL OR ?3 = '' OR title LIKE '%' || ?3 || '%' OR tags LIKE '%' || ?3 || '%' OR notes LIKE '%' || ?3 || '%') AND (?4 IS NULL OR ?4 = '' OR EXISTS (WITH RECURSIVE f(tag, rest) AS (SELECT '', ?4 || ',' UNION ALL SELECT lower(ltrim(trim(substr(rest, 1, instr(rest, ',') - 1)), '#')), substr(rest, instr(rest, ',') + 1) FROM f WHERE rest <> '') SELECT 1 FROM f WHERE tag <> '' AND instr(', ' || lower(COALESCE(tags, '')) || ', ', ', ' || tag || ', ') > 0))  AND (?5 IS NULL OR ?5 = '' OR instr(',' || ?5 || ',', ',' || COALESCE(list_id, '@inbox') || ',') > 0) AND (?6 IS NULL OR ?6 = '' OR instr(',' || ?6 || ',', ',' || COALESCE(group_id, '@ungrouped') || ',') > 0) AND (?7 IS NULL OR ?7 = '' OR instr(',' || ?7 || ',', ',' || COALESCE(workflow_id, '') || ',') > 0) AND (?9 IS NULL OR ?9 = '' OR status_category = ?9) AND (?8 IS NULL OR ?8 <> 'all' OR NOT EXISTS (WITH RECURSIVE f(tag, rest) AS (SELECT '', COALESCE(?4, '') || ',' UNION ALL SELECT lower(ltrim(trim(substr(rest, 1, instr(rest, ',') - 1)), '#')), substr(rest, instr(rest, ',') + 1) FROM f WHERE rest <> '') SELECT 1 FROM f WHERE tag <> '' AND instr(', ' || lower(COALESCE(tags, '')) || ', ', ', ' || tag || ', ') = 0)) AND (?12 IS NULL OR ?12='' OR title LIKE '%' || ?12 || '%' OR notes LIKE '%' || ?12 || '%' OR tags LIKE '%' || ?12 || '%') AND CASE ?2 WHEN 'my_day' THEN done = 0 AND planned_for IS NOT NULL AND planned_for <= ?1 WHEN 'inbox' THEN done = 0 AND list_id IS NULL WHEN 'ready' THEN done = 0 AND ready = 1 AND (planned_for IS NULL OR planned_for <= ?1) WHEN 'today' THEN done = 0 AND d <= 0 WHEN 'upcoming' THEN done = 0 AND d > 0 WHEN 'done' THEN done = 1 WHEN 'everything' THEN 1 ELSE done = 0 END ORDER BY CASE WHEN ?10 = 'manual' THEN sort_order END, CASE WHEN ?10 = 'title' THEN title END COLLATE NOCASE, CASE WHEN ?10 = 'priority' THEN -COALESCE(priority,0) END, CASE WHEN done = 1 THEN 6 WHEN due IS NULL THEN 5 WHEN d < 0 THEN 0 WHEN d = 0 THEN 1 WHEN d <= 6 THEN 2 ELSE 4 END, due, COALESCE(priority, 0) DESC, CASE WHEN done = 1 THEN -completed_at END, id DESC LIMIT 500",
       "params": [
         "today",
         "filter",
@@ -1094,10 +1094,172 @@
         "tags_mode",
         "category",
         "sort",
-        "grouping"
+        "grouping",
+        "page_focus"
       ],
       "description": "Tasks for capture and focus. My Day includes unfinished earlier plans; dates, organization and tag filters run before the result limit.",
-      "cli": false
+      "cli": false,
+      "view": {
+        "title": "Task workspace",
+        "title_column": "title",
+        "params": {
+          "filter": "all",
+          "q": "",
+          "tags": "",
+          "lists": "",
+          "groups": "",
+          "statuses": "",
+          "tags_mode": "any",
+          "category": "",
+          "sort": "manual",
+          "grouping": "none",
+          "page_focus": ""
+        },
+        "columns": [
+          {
+            "key": "title",
+            "label": "Task",
+            "type": "string"
+          },
+          {
+            "key": "list_key",
+            "label": "List",
+            "type": "enum",
+            "choices_query": "view_list_choices",
+            "move": {
+              "op": "organize",
+              "args": {
+                "id": "{{row.id}}",
+                "list_id": "{{value}}"
+              }
+            }
+          },
+          {
+            "key": "group_key",
+            "label": "Group",
+            "type": "enum",
+            "choices_query": "view_group_choices",
+            "move": {
+              "op": "organize",
+              "args": {
+                "id": "{{row.id}}",
+                "group_id": "{{value}}"
+              }
+            }
+          },
+          {
+            "key": "workflow_id",
+            "label": "Status",
+            "type": "enum",
+            "choices_query": "view_status_choices",
+            "move": {
+              "op": "organize",
+              "args": {
+                "id": "{{row.id}}",
+                "status_id": "{{value}}"
+              }
+            }
+          },
+          {
+            "key": "due",
+            "label": "Due",
+            "type": "date"
+          },
+          {
+            "key": "planned_for",
+            "label": "Plan for",
+            "type": "date"
+          },
+          {
+            "key": "priority",
+            "label": "Priority",
+            "type": "integer"
+          },
+          {
+            "key": "tags",
+            "label": "Tags",
+            "type": "string"
+          }
+        ],
+        "filters": [
+          {
+            "param": "lists",
+            "label": "Lists",
+            "multiple": true,
+            "choices_query": "filter_list_choices"
+          },
+          {
+            "param": "groups",
+            "label": "Groups",
+            "multiple": true,
+            "choices_query": "filter_group_choices"
+          },
+          {
+            "param": "statuses",
+            "label": "Statuses",
+            "multiple": true,
+            "choices_query": "view_status_choices"
+          },
+          {
+            "param": "category",
+            "label": "Status category",
+            "values": [
+              "",
+              "not_started",
+              "active",
+              "completed"
+            ],
+            "labels": [
+              "Any",
+              "Not started",
+              "Active",
+              "Completed"
+            ]
+          },
+          {
+            "param": "filter",
+            "label": "Show",
+            "values": [
+              "everything",
+              "all",
+              "my_day",
+              "ready",
+              "today",
+              "upcoming",
+              "done"
+            ],
+            "labels": [
+              "All tasks",
+              "Open tasks",
+              "My Day",
+              "Ready to pick",
+              "Due / overdue",
+              "Upcoming",
+              "Done"
+            ]
+          },
+          {
+            "param": "tags",
+            "label": "Tags"
+          },
+          {
+            "param": "tags_mode",
+            "label": "Match tags",
+            "values": [
+              "any",
+              "all"
+            ],
+            "labels": [
+              "Any tag",
+              "All tags"
+            ]
+          },
+          {
+            "param": "q",
+            "label": "Search"
+          }
+        ]
+      }
     },
     "list_choices": {
       "sql": "SELECT id AS value, name AS label FROM task_lists WHERE _deleted IS NULL AND archived = 0 ORDER BY position,name,id",
@@ -1161,6 +1323,31 @@
       "params": [
         "id"
       ],
+      "cli": false
+    },
+    "view_list_choices": {
+      "sql": "SELECT '' AS value,'Inbox' AS label UNION ALL SELECT id,name || CASE WHEN archived=1 THEN ' (archived)' ELSE '' END FROM task_lists WHERE _deleted IS NULL UNION SELECT DISTINCT list_id, 'Unavailable list' FROM tasks WHERE _deleted IS NULL AND list_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM task_lists l WHERE l.id=tasks.list_id AND l._deleted IS NULL)",
+      "params": [],
+      "cli": false
+    },
+    "view_group_choices": {
+      "sql": "SELECT '' AS value,'Ungrouped' AS label UNION ALL SELECT d.id AS value, d.name || ' (' || COALESCE(l.name, 'Inbox') || ')' || CASE WHEN d.archived=1 THEN ' (archived)' ELSE '' END AS label FROM task_groups d LEFT JOIN task_lists l ON l.id=d.list_id AND l._deleted IS NULL WHERE d._deleted IS NULL UNION SELECT DISTINCT group_id, 'Unavailable group' FROM tasks WHERE _deleted IS NULL AND group_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM task_groups d WHERE d.id=tasks.group_id AND d._deleted IS NULL)",
+      "params": [],
+      "cli": false
+    },
+    "view_status_choices": {
+      "sql": "SELECT '@not_started' AS value,'To pick (default)' AS label UNION ALL SELECT '@active','In progress (default)' UNION ALL SELECT '@completed','Done (default)' UNION ALL SELECT d.id AS value, d.name || ' (' || COALESCE(l.name, 'Inbox') || ')' || CASE WHEN d.archived=1 THEN ' (archived)' ELSE '' END AS label FROM task_statuses d LEFT JOIN task_lists l ON l.id=d.list_id AND l._deleted IS NULL WHERE d._deleted IS NULL UNION SELECT DISTINCT status_id, 'Unavailable status' FROM tasks WHERE _deleted IS NULL AND status_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM task_statuses d WHERE d.id=tasks.status_id AND d._deleted IS NULL)",
+      "params": [],
+      "cli": false
+    },
+    "filter_list_choices": {
+      "sql": "SELECT '@inbox' AS value,'Inbox' AS label UNION ALL SELECT id,name FROM task_lists WHERE _deleted IS NULL AND archived=0",
+      "params": [],
+      "cli": false
+    },
+    "filter_group_choices": {
+      "sql": "SELECT '@ungrouped' AS value,'Ungrouped' AS label UNION ALL SELECT d.id AS value, d.name || ' (' || COALESCE(l.name, 'Inbox') || ')' AS label FROM task_groups d LEFT JOIN task_lists l ON l.id=d.list_id AND l._deleted IS NULL WHERE d._deleted IS NULL AND d.archived=0",
+      "params": [],
       "cli": false
     }
   },

@@ -28,7 +28,8 @@
     "edit_status": "",
     "new_group": "",
     "new_status": "",
-    "new_list": ""
+    "new_list": "",
+    "workspace_mode": "tasks"
   },
   "body": {
     "type": "stack",
@@ -134,807 +135,834 @@
               ]
             },
             {
-              "type": "stack",
-              "direction": "row",
-              "wrap": true,
-              "gap": 12,
-              "align": "center",
-              "justify": "between",
-              "children": [
+              "type": "tabs",
+              "label": "Workspace",
+              "bind": "state.workspace_mode",
+              "options": [
                 {
-                  "type": "tabs",
-                  "bind": "state.filter",
-                  "label": "Show",
-                  "options": [
-                    {
-                      "value": "my_day",
-                      "label": "My Day"
-                    },
-                    {
-                      "value": "inbox",
-                      "label": "Inbox"
-                    },
-                    {
-                      "value": "ready",
-                      "label": "Ready to pick"
-                    },
-                    {
-                      "value": "today",
-                      "label": "Due / overdue"
-                    },
-                    {
-                      "value": "upcoming",
-                      "label": "Upcoming"
-                    },
-                    {
-                      "value": "all",
-                      "label": "All open"
-                    },
-                    {
-                      "value": "done",
-                      "label": "Done"
-                    }
-                  ]
+                  "value": "tasks",
+                  "label": "Capture and focus"
                 },
                 {
-                  "type": "search-field",
-                  "bind": "state.q",
-                  "label": "Search tasks",
-                  "label_hidden": true,
-                  "placeholder": "Search tasks",
-                  "grow": 1,
-                  "basis": 200
+                  "value": "views",
+                  "label": "Saved views"
                 }
               ]
             },
             {
-              "type": "text",
-              "if": "{{state.filter == my_day}}",
-              "tone": "muted",
-              "text": "Your chosen work, including unfinished earlier plans. Planning does not change a deadline or reminder."
-            },
-            {
-              "type": "section",
-              "title": "Filter and arrange",
-              "collapsible": true,
+              "type": "stack",
+              "if": "{{state.workspace_mode == tasks}}",
+              "gap": 12,
               "children": [
                 {
-                  "type": "select",
-                  "label": "Group",
-                  "options": [
+                  "type": "stack",
+                  "direction": "row",
+                  "wrap": true,
+                  "gap": 12,
+                  "align": "center",
+                  "justify": "between",
+                  "children": [
                     {
-                      "value": "",
-                      "label": "Any group"
+                      "type": "tabs",
+                      "bind": "state.filter",
+                      "label": "Show",
+                      "options": [
+                        {
+                          "value": "my_day",
+                          "label": "My Day"
+                        },
+                        {
+                          "value": "inbox",
+                          "label": "Inbox"
+                        },
+                        {
+                          "value": "ready",
+                          "label": "Ready to pick"
+                        },
+                        {
+                          "value": "today",
+                          "label": "Due / overdue"
+                        },
+                        {
+                          "value": "upcoming",
+                          "label": "Upcoming"
+                        },
+                        {
+                          "value": "all",
+                          "label": "All open"
+                        },
+                        {
+                          "value": "done",
+                          "label": "Done"
+                        }
+                      ]
                     },
                     {
-                      "value": "@ungrouped",
-                      "label": "Ungrouped"
+                      "type": "search-field",
+                      "bind": "state.q",
+                      "label": "Search tasks",
+                      "label_hidden": true,
+                      "placeholder": "Search tasks",
+                      "grow": 1,
+                      "basis": 200
                     }
-                  ],
-                  "bind": "state.groups",
-                  "options_query": {
-                    "query": "all_group_choices",
-                    "params": {}
-                  }
+                  ]
                 },
                 {
-                  "type": "select",
-                  "label": "Status",
-                  "options": [
+                  "type": "text",
+                  "if": "{{state.filter == my_day}}",
+                  "tone": "muted",
+                  "text": "Your chosen work, including unfinished earlier plans. Planning does not change a deadline or reminder."
+                },
+                {
+                  "type": "section",
+                  "title": "Filter and arrange",
+                  "collapsible": true,
+                  "children": [
                     {
-                      "value": "",
-                      "label": "Any status"
+                      "type": "select",
+                      "label": "Group",
+                      "options": [
+                        {
+                          "value": "",
+                          "label": "Any group"
+                        },
+                        {
+                          "value": "@ungrouped",
+                          "label": "Ungrouped"
+                        }
+                      ],
+                      "bind": "state.groups",
+                      "options_query": {
+                        "query": "all_group_choices",
+                        "params": {}
+                      }
                     },
                     {
-                      "value": "@not_started",
-                      "label": "To pick (default)"
+                      "type": "select",
+                      "label": "Status",
+                      "options": [
+                        {
+                          "value": "",
+                          "label": "Any status"
+                        },
+                        {
+                          "value": "@not_started",
+                          "label": "To pick (default)"
+                        },
+                        {
+                          "value": "@active",
+                          "label": "In progress (default)"
+                        },
+                        {
+                          "value": "@completed",
+                          "label": "Done (default)"
+                        }
+                      ],
+                      "bind": "state.statuses",
+                      "options_query": {
+                        "query": "all_status_choices",
+                        "params": {}
+                      }
                     },
                     {
-                      "value": "@active",
-                      "label": "In progress (default)"
+                      "type": "search-field",
+                      "bind": "state.tags",
+                      "label": "Tags",
+                      "placeholder": "work, review"
                     },
                     {
-                      "value": "@completed",
-                      "label": "Done (default)"
+                      "type": "select",
+                      "label": "Match tags",
+                      "options": [
+                        {
+                          "value": "any",
+                          "label": "Any tag"
+                        },
+                        {
+                          "value": "all",
+                          "label": "All tags"
+                        }
+                      ],
+                      "bind": "state.tags_mode"
+                    },
+                    {
+                      "type": "select",
+                      "label": "Group by",
+                      "options": [
+                        {
+                          "value": "list",
+                          "label": "List"
+                        },
+                        {
+                          "value": "group",
+                          "label": "Group"
+                        },
+                        {
+                          "value": "status",
+                          "label": "Status"
+                        },
+                        {
+                          "value": "date",
+                          "label": "Plan"
+                        },
+                        {
+                          "value": "none",
+                          "label": "None"
+                        }
+                      ],
+                      "bind": "state.grouping"
+                    },
+                    {
+                      "type": "select",
+                      "label": "Sort by",
+                      "options": [
+                        {
+                          "value": "manual",
+                          "label": "Manual order"
+                        },
+                        {
+                          "value": "due",
+                          "label": "Due date"
+                        },
+                        {
+                          "value": "priority",
+                          "label": "Priority"
+                        },
+                        {
+                          "value": "title",
+                          "label": "Title"
+                        }
+                      ],
+                      "bind": "state.sort"
+                    },
+                    {
+                      "type": "button",
+                      "label": "Clear filters",
+                      "variant": "ghost",
+                      "action": {
+                        "set": {
+                          "state.lists": "",
+                          "state.groups": "",
+                          "state.statuses": "",
+                          "state.tags": "",
+                          "state.category": ""
+                        }
+                      }
                     }
-                  ],
-                  "bind": "state.statuses",
-                  "options_query": {
-                    "query": "all_status_choices",
-                    "params": {}
-                  }
+                  ]
                 },
                 {
-                  "type": "search-field",
-                  "bind": "state.tags",
-                  "label": "Tags",
-                  "placeholder": "work, review"
-                },
-                {
-                  "type": "select",
-                  "label": "Match tags",
-                  "options": [
-                    {
-                      "value": "any",
-                      "label": "Any tag"
-                    },
-                    {
-                      "value": "all",
-                      "label": "All tags"
-                    }
-                  ],
-                  "bind": "state.tags_mode"
-                },
-                {
-                  "type": "select",
-                  "label": "Group by",
+                  "type": "tabs",
+                  "bind": "state.view",
+                  "label": "Task view",
                   "options": [
                     {
                       "value": "list",
                       "label": "List"
                     },
                     {
-                      "value": "group",
-                      "label": "Group"
+                      "value": "kanban",
+                      "label": "Kanban"
                     },
                     {
-                      "value": "status",
-                      "label": "Status"
-                    },
-                    {
-                      "value": "date",
-                      "label": "Plan"
-                    },
-                    {
-                      "value": "none",
-                      "label": "None"
+                      "value": "matrix",
+                      "label": "Eisenhower"
                     }
-                  ],
-                  "bind": "state.grouping"
+                  ]
                 },
                 {
-                  "type": "select",
-                  "label": "Sort by",
-                  "options": [
-                    {
-                      "value": "manual",
-                      "label": "Manual order"
-                    },
-                    {
-                      "value": "due",
-                      "label": "Due date"
-                    },
-                    {
-                      "value": "priority",
-                      "label": "Priority"
-                    },
-                    {
-                      "value": "title",
-                      "label": "Title"
-                    }
-                  ],
-                  "bind": "state.sort"
+                  "type": "list",
+                  "query": "workspace_tasks",
+                  "if": "{{state.view == list}}",
+                  "group": "workspace_group",
+                  "params": {
+                    "filter": "{{state.filter}}",
+                    "q": "{{state.q}}",
+                    "tags": "{{state.tags}}",
+                    "lists": "{{state.lists}}",
+                    "groups": "{{state.groups}}",
+                    "statuses": "{{state.statuses}}",
+                    "tags_mode": "{{state.tags_mode}}",
+                    "category": "{{state.category}}",
+                    "sort": "{{state.sort}}",
+                    "grouping": "{{state.grouping}}",
+                    "today": "{{$today}}"
+                  },
+                  "select": {
+                    "label": "Select tasks",
+                    "actions": [
+                      {
+                        "label": "Complete",
+                        "icon": "check",
+                        "op": "toggle",
+                        "args": {
+                          "done": true
+                        },
+                        "success": "{{count}} tasks completed"
+                      },
+                      {
+                        "label": "Plan today",
+                        "icon": "calendar",
+                        "op": "update",
+                        "args": {
+                          "planned_for": "{{$today}}"
+                        },
+                        "success": "Planned {{count}} tasks for today"
+                      },
+                      {
+                        "label": "Remove plan",
+                        "op": "update",
+                        "args": {
+                          "planned_for": ""
+                        },
+                        "success": "Removed plans for {{count}} tasks"
+                      },
+                      {
+                        "label": "Start",
+                        "icon": "play",
+                        "op": "update",
+                        "args": {
+                          "in_progress": true
+                        },
+                        "success": "{{count}} tasks started"
+                      },
+                      {
+                        "label": "Add tag",
+                        "icon": "tag",
+                        "op": "add_tag",
+                        "ask": {
+                          "name": "tag",
+                          "label": "Tag",
+                          "title": "Add a tag to {{count}} tasks"
+                        },
+                        "success": "Tagged {{count}} tasks"
+                      },
+                      {
+                        "label": "Delete",
+                        "icon": "trash",
+                        "variant": "danger",
+                        "op": "delete",
+                        "confirm": "Move {{count}} tasks to the trash?",
+                        "success": "Moved {{count}} tasks to the trash",
+                        "undo": {
+                          "op": "restore",
+                          "success": "Restored {{count}} tasks"
+                        }
+                      }
+                    ]
+                  },
+                  "empty": "Nothing here. Add a task above.",
+                  "item": {
+                    "type": "stack",
+                    "gap": 0,
+                    "children": [
+                      {
+                        "type": "item",
+                        "title": "{{row.title}}",
+                        "subtitle": "{{row.notes}}",
+                        "done": "{{row.done}}",
+                        "flag": "{{row.priority}}",
+                        "check": {
+                          "checked": "{{row.done}}",
+                          "action": {
+                            "op": "toggle",
+                            "args": {
+                              "id": "{{row.id}}",
+                              "done": "{{value}}"
+                            },
+                            "then": {},
+                            "success": "{{result.message}}",
+                            "followup": {
+                              "label": "Add note",
+                              "action": {
+                                "set": {
+                                  "state.note_for": "{{result.ask_note}}"
+                                }
+                              },
+                              "if": "{{result.ask_note}}"
+                            }
+                          }
+                        },
+                        "action": {
+                          "set": {
+                            "state.open": "{{row.id}}"
+                          }
+                        },
+                        "chips": [
+                          {
+                            "text": "{{row.status_name}}"
+                          },
+                          {
+                            "text": "{{row.group_name}}"
+                          },
+                          {
+                            "text": "{{row.planned_for}}",
+                            "icon": "calendar"
+                          },
+                          {
+                            "text": "{{row.due_label}}",
+                            "tone": "{{row.due_tone}}",
+                            "icon": "calendar"
+                          },
+                          {
+                            "text": "{{row.repeat_label}}",
+                            "icon": "repeat"
+                          },
+                          {
+                            "text": "{{row.steps_label}}",
+                            "icon": "steps"
+                          },
+                          {
+                            "text": "{{row.tags}}",
+                            "icon": "tag"
+                          },
+                          {
+                            "text": "{{row.note_chip}}",
+                            "icon": "note"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "button",
+                        "label": "Plan today",
+                        "variant": "ghost",
+                        "action": {
+                          "op": "update",
+                          "args": {
+                            "id": "{{row.id}}",
+                            "planned_for": "{{$today}}"
+                          },
+                          "success": "Planned for today"
+                        },
+                        "if": "{{!row.done}}"
+                      }
+                    ]
+                  }
                 },
                 {
-                  "type": "button",
-                  "label": "Clear filters",
-                  "variant": "ghost",
-                  "action": {
-                    "set": {
-                      "state.lists": "",
-                      "state.groups": "",
-                      "state.statuses": "",
-                      "state.tags": "",
-                      "state.category": ""
+                  "type": "list",
+                  "query": "workspace_tasks",
+                  "params": {
+                    "filter": "{{state.filter}}",
+                    "q": "{{state.q}}",
+                    "tags": "{{state.tags}}",
+                    "lists": "{{state.lists}}",
+                    "groups": "{{state.groups}}",
+                    "statuses": "{{state.statuses}}",
+                    "tags_mode": "{{state.tags_mode}}",
+                    "category": "{{state.category}}",
+                    "sort": "{{state.sort}}",
+                    "grouping": "{{state.grouping}}",
+                    "today": "{{$today}}"
+                  },
+                  "select": {
+                    "label": "Select tasks",
+                    "actions": [
+                      {
+                        "label": "Complete",
+                        "icon": "check",
+                        "op": "toggle",
+                        "args": {
+                          "done": true
+                        },
+                        "success": "{{count}} tasks completed"
+                      },
+                      {
+                        "label": "Plan today",
+                        "icon": "calendar",
+                        "op": "update",
+                        "args": {
+                          "planned_for": "{{$today}}"
+                        },
+                        "success": "Planned {{count}} tasks for today"
+                      },
+                      {
+                        "label": "Remove plan",
+                        "op": "update",
+                        "args": {
+                          "planned_for": ""
+                        },
+                        "success": "Removed plans for {{count}} tasks"
+                      },
+                      {
+                        "label": "Start",
+                        "icon": "play",
+                        "op": "update",
+                        "args": {
+                          "in_progress": true
+                        },
+                        "success": "{{count}} tasks started"
+                      },
+                      {
+                        "label": "Add tag",
+                        "icon": "tag",
+                        "op": "add_tag",
+                        "ask": {
+                          "name": "tag",
+                          "label": "Tag",
+                          "title": "Add a tag to {{count}} tasks"
+                        },
+                        "success": "Tagged {{count}} tasks"
+                      },
+                      {
+                        "label": "Delete",
+                        "icon": "trash",
+                        "variant": "danger",
+                        "op": "delete",
+                        "confirm": "Move {{count}} tasks to the trash?",
+                        "success": "Moved {{count}} tasks to the trash",
+                        "undo": {
+                          "op": "restore",
+                          "success": "Restored {{count}} tasks"
+                        }
+                      }
+                    ]
+                  },
+                  "empty": "No tasks match these filters.",
+                  "item": {
+                    "type": "stack",
+                    "gap": 0,
+                    "children": [
+                      {
+                        "type": "item",
+                        "title": "{{row.title}}",
+                        "subtitle": "{{row.notes}}",
+                        "done": "{{row.done}}",
+                        "flag": "{{row.priority}}",
+                        "check": {
+                          "checked": "{{row.done}}",
+                          "action": {
+                            "op": "toggle",
+                            "args": {
+                              "id": "{{row.id}}",
+                              "done": "{{value}}"
+                            },
+                            "then": {},
+                            "success": "{{result.message}}",
+                            "followup": {
+                              "label": "Add note",
+                              "action": {
+                                "set": {
+                                  "state.note_for": "{{result.ask_note}}"
+                                }
+                              },
+                              "if": "{{result.ask_note}}"
+                            }
+                          }
+                        },
+                        "action": {
+                          "set": {
+                            "state.open": "{{row.id}}"
+                          }
+                        },
+                        "chips": [
+                          {
+                            "text": "{{row.status_name}}"
+                          },
+                          {
+                            "text": "{{row.group_name}}"
+                          },
+                          {
+                            "text": "{{row.planned_for}}",
+                            "icon": "calendar"
+                          },
+                          {
+                            "text": "{{row.due_label}}",
+                            "tone": "{{row.due_tone}}",
+                            "icon": "calendar"
+                          },
+                          {
+                            "text": "{{row.repeat_label}}",
+                            "icon": "repeat"
+                          },
+                          {
+                            "text": "{{row.steps_label}}",
+                            "icon": "steps"
+                          },
+                          {
+                            "text": "{{row.tags}}",
+                            "icon": "tag"
+                          },
+                          {
+                            "text": "{{row.note_chip}}",
+                            "icon": "note"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "button",
+                        "if": "{{!row.done}}",
+                        "variant": "ghost",
+                        "aria_label": "{{row.move_label}}",
+                        "action": {
+                          "op": "update",
+                          "args": {
+                            "id": "{{row.id}}",
+                            "in_progress": "{{!row.in_progress}}"
+                          },
+                          "success": "Task moved"
+                        },
+                        "icon": "play"
+                      },
+                      {
+                        "type": "button",
+                        "label": "Plan today",
+                        "variant": "ghost",
+                        "action": {
+                          "op": "update",
+                          "args": {
+                            "id": "{{row.id}}",
+                            "planned_for": "{{$today}}"
+                          },
+                          "success": "Planned for today"
+                        },
+                        "if": "{{!row.done}}"
+                      }
+                    ]
+                  },
+                  "if": "{{state.view == kanban}}",
+                  "layout": "board",
+                  "column": "board_lane",
+                  "move": {
+                    "op": "move",
+                    "args": {
+                      "id": "{{row.id}}",
+                      "lane": "{{value}}"
                     }
+                  },
+                  "columns": [
+                    {
+                      "value": "todo",
+                      "label": "To do"
+                    },
+                    {
+                      "value": "doing",
+                      "label": "In progress"
+                    },
+                    {
+                      "value": "done",
+                      "label": "Done"
+                    }
+                  ],
+                  "label": "Task Kanban",
+                  "collapse_group": {
+                    "value": "No date",
+                    "when": "{{state.filter == today}}",
+                    "bind": "state.undatedExpanded"
+                  }
+                },
+                {
+                  "type": "list",
+                  "query": "workspace_tasks",
+                  "params": {
+                    "filter": "{{state.filter}}",
+                    "q": "{{state.q}}",
+                    "tags": "{{state.tags}}",
+                    "lists": "{{state.lists}}",
+                    "groups": "{{state.groups}}",
+                    "statuses": "{{state.statuses}}",
+                    "tags_mode": "{{state.tags_mode}}",
+                    "category": "{{state.category}}",
+                    "sort": "{{state.sort}}",
+                    "grouping": "{{state.grouping}}",
+                    "today": "{{$today}}"
+                  },
+                  "select": {
+                    "label": "Select tasks",
+                    "actions": [
+                      {
+                        "label": "Complete",
+                        "icon": "check",
+                        "op": "toggle",
+                        "args": {
+                          "done": true
+                        },
+                        "success": "{{count}} tasks completed"
+                      },
+                      {
+                        "label": "Plan today",
+                        "icon": "calendar",
+                        "op": "update",
+                        "args": {
+                          "planned_for": "{{$today}}"
+                        },
+                        "success": "Planned {{count}} tasks for today"
+                      },
+                      {
+                        "label": "Remove plan",
+                        "op": "update",
+                        "args": {
+                          "planned_for": ""
+                        },
+                        "success": "Removed plans for {{count}} tasks"
+                      },
+                      {
+                        "label": "Start",
+                        "icon": "play",
+                        "op": "update",
+                        "args": {
+                          "in_progress": true
+                        },
+                        "success": "{{count}} tasks started"
+                      },
+                      {
+                        "label": "Add tag",
+                        "icon": "tag",
+                        "op": "add_tag",
+                        "ask": {
+                          "name": "tag",
+                          "label": "Tag",
+                          "title": "Add a tag to {{count}} tasks"
+                        },
+                        "success": "Tagged {{count}} tasks"
+                      },
+                      {
+                        "label": "Delete",
+                        "icon": "trash",
+                        "variant": "danger",
+                        "op": "delete",
+                        "confirm": "Move {{count}} tasks to the trash?",
+                        "success": "Moved {{count}} tasks to the trash",
+                        "undo": {
+                          "op": "restore",
+                          "success": "Restored {{count}} tasks"
+                        }
+                      }
+                    ]
+                  },
+                  "empty": "No tasks match these filters.",
+                  "item": {
+                    "type": "stack",
+                    "gap": 0,
+                    "children": [
+                      {
+                        "type": "item",
+                        "title": "{{row.title}}",
+                        "subtitle": "{{row.notes}}",
+                        "done": "{{row.done}}",
+                        "flag": "{{row.priority}}",
+                        "check": {
+                          "checked": "{{row.done}}",
+                          "action": {
+                            "op": "toggle",
+                            "args": {
+                              "id": "{{row.id}}",
+                              "done": "{{value}}"
+                            },
+                            "then": {},
+                            "success": "{{result.message}}",
+                            "followup": {
+                              "label": "Add note",
+                              "action": {
+                                "set": {
+                                  "state.note_for": "{{result.ask_note}}"
+                                }
+                              },
+                              "if": "{{result.ask_note}}"
+                            }
+                          }
+                        },
+                        "action": {
+                          "set": {
+                            "state.open": "{{row.id}}"
+                          }
+                        },
+                        "chips": [
+                          {
+                            "text": "{{row.status_name}}"
+                          },
+                          {
+                            "text": "{{row.group_name}}"
+                          },
+                          {
+                            "text": "{{row.planned_for}}",
+                            "icon": "calendar"
+                          },
+                          {
+                            "text": "{{row.due_label}}",
+                            "tone": "{{row.due_tone}}",
+                            "icon": "calendar"
+                          },
+                          {
+                            "text": "{{row.repeat_label}}",
+                            "icon": "repeat"
+                          },
+                          {
+                            "text": "{{row.steps_label}}",
+                            "icon": "steps"
+                          },
+                          {
+                            "text": "{{row.tags}}",
+                            "icon": "tag"
+                          },
+                          {
+                            "text": "{{row.note_chip}}",
+                            "icon": "note"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "button",
+                        "label": "Plan today",
+                        "variant": "ghost",
+                        "action": {
+                          "op": "update",
+                          "args": {
+                            "id": "{{row.id}}",
+                            "planned_for": "{{$today}}"
+                          },
+                          "success": "Planned for today"
+                        },
+                        "if": "{{!row.done}}"
+                      }
+                    ]
+                  },
+                  "if": "{{state.view == matrix}}",
+                  "layout": "matrix",
+                  "column": "matrix_lane",
+                  "move": {
+                    "op": "move",
+                    "args": {
+                      "id": "{{row.id}}",
+                      "lane": "{{value}}"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "value": "do",
+                      "label": "Do first",
+                      "description": "Urgent and important"
+                    },
+                    {
+                      "value": "schedule",
+                      "label": "Schedule",
+                      "description": "Important, not urgent"
+                    },
+                    {
+                      "value": "delegate",
+                      "label": "Delegate",
+                      "description": "Urgent, not important"
+                    },
+                    {
+                      "value": "eliminate",
+                      "label": "Unsorted",
+                      "description": "Tasks waiting to be sorted"
+                    }
+                  ],
+                  "label": "Eisenhower matrix",
+                  "collapse_group": {
+                    "value": "No date",
+                    "when": "{{state.filter == today}}",
+                    "bind": "state.undatedExpanded"
                   }
                 }
               ]
             },
             {
-              "type": "tabs",
-              "bind": "state.view",
-              "label": "Task view",
-              "options": [
-                {
-                  "value": "list",
-                  "label": "List"
-                },
-                {
-                  "value": "kanban",
-                  "label": "Kanban"
-                },
-                {
-                  "value": "matrix",
-                  "label": "Eisenhower"
-                }
-              ]
-            },
-            {
-              "type": "list",
-              "query": "workspace_tasks",
-              "if": "{{state.view == list}}",
-              "group": "workspace_group",
-              "params": {
-                "filter": "{{state.filter}}",
-                "q": "{{state.q}}",
-                "tags": "{{state.tags}}",
-                "lists": "{{state.lists}}",
-                "groups": "{{state.groups}}",
-                "statuses": "{{state.statuses}}",
-                "tags_mode": "{{state.tags_mode}}",
-                "category": "{{state.category}}",
-                "sort": "{{state.sort}}",
-                "grouping": "{{state.grouping}}",
-                "today": "{{$today}}"
-              },
-              "select": {
-                "label": "Select tasks",
-                "actions": [
-                  {
-                    "label": "Complete",
-                    "icon": "check",
-                    "op": "toggle",
-                    "args": {
-                      "done": true
-                    },
-                    "success": "{{count}} tasks completed"
-                  },
-                  {
-                    "label": "Plan today",
-                    "icon": "calendar",
-                    "op": "update",
-                    "args": {
-                      "planned_for": "{{$today}}"
-                    },
-                    "success": "Planned {{count}} tasks for today"
-                  },
-                  {
-                    "label": "Remove plan",
-                    "op": "update",
-                    "args": {
-                      "planned_for": ""
-                    },
-                    "success": "Removed plans for {{count}} tasks"
-                  },
-                  {
-                    "label": "Start",
-                    "icon": "play",
-                    "op": "update",
-                    "args": {
-                      "in_progress": true
-                    },
-                    "success": "{{count}} tasks started"
-                  },
-                  {
-                    "label": "Add tag",
-                    "icon": "tag",
-                    "op": "add_tag",
-                    "ask": {
-                      "name": "tag",
-                      "label": "Tag",
-                      "title": "Add a tag to {{count}} tasks"
-                    },
-                    "success": "Tagged {{count}} tasks"
-                  },
-                  {
-                    "label": "Delete",
-                    "icon": "trash",
-                    "variant": "danger",
-                    "op": "delete",
-                    "confirm": "Move {{count}} tasks to the trash?",
-                    "success": "Moved {{count}} tasks to the trash",
-                    "undo": {
-                      "op": "restore",
-                      "success": "Restored {{count}} tasks"
-                    }
-                  }
-                ]
-              },
-              "empty": "Nothing here. Add a task above.",
-              "item": {
-                "type": "stack",
-                "gap": 0,
-                "children": [
-                  {
-                    "type": "item",
-                    "title": "{{row.title}}",
-                    "subtitle": "{{row.notes}}",
-                    "done": "{{row.done}}",
-                    "flag": "{{row.priority}}",
-                    "check": {
-                      "checked": "{{row.done}}",
-                      "action": {
-                        "op": "toggle",
-                        "args": {
-                          "id": "{{row.id}}",
-                          "done": "{{value}}"
-                        },
-                        "then": {},
-                        "success": "{{result.message}}",
-                        "followup": {
-                          "label": "Add note",
-                          "action": {
-                            "set": {
-                              "state.note_for": "{{result.ask_note}}"
-                            }
-                          },
-                          "if": "{{result.ask_note}}"
-                        }
-                      }
-                    },
-                    "action": {
-                      "set": {
-                        "state.open": "{{row.id}}"
-                      }
-                    },
-                    "chips": [
-                      {
-                        "text": "{{row.status_name}}"
-                      },
-                      {
-                        "text": "{{row.group_name}}"
-                      },
-                      {
-                        "text": "{{row.planned_for}}",
-                        "icon": "calendar"
-                      },
-                      {
-                        "text": "{{row.due_label}}",
-                        "tone": "{{row.due_tone}}",
-                        "icon": "calendar"
-                      },
-                      {
-                        "text": "{{row.repeat_label}}",
-                        "icon": "repeat"
-                      },
-                      {
-                        "text": "{{row.steps_label}}",
-                        "icon": "steps"
-                      },
-                      {
-                        "text": "{{row.tags}}",
-                        "icon": "tag"
-                      },
-                      {
-                        "text": "{{row.note_chip}}",
-                        "icon": "note"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "button",
-                    "label": "Plan today",
-                    "variant": "ghost",
-                    "action": {
-                      "op": "update",
-                      "args": {
-                        "id": "{{row.id}}",
-                        "planned_for": "{{$today}}"
-                      },
-                      "success": "Planned for today"
-                    },
-                    "if": "{{!row.done}}"
-                  }
-                ]
-              }
-            },
-            {
-              "type": "list",
-              "query": "workspace_tasks",
-              "params": {
-                "filter": "{{state.filter}}",
-                "q": "{{state.q}}",
-                "tags": "{{state.tags}}",
-                "lists": "{{state.lists}}",
-                "groups": "{{state.groups}}",
-                "statuses": "{{state.statuses}}",
-                "tags_mode": "{{state.tags_mode}}",
-                "category": "{{state.category}}",
-                "sort": "{{state.sort}}",
-                "grouping": "{{state.grouping}}",
-                "today": "{{$today}}"
-              },
-              "select": {
-                "label": "Select tasks",
-                "actions": [
-                  {
-                    "label": "Complete",
-                    "icon": "check",
-                    "op": "toggle",
-                    "args": {
-                      "done": true
-                    },
-                    "success": "{{count}} tasks completed"
-                  },
-                  {
-                    "label": "Plan today",
-                    "icon": "calendar",
-                    "op": "update",
-                    "args": {
-                      "planned_for": "{{$today}}"
-                    },
-                    "success": "Planned {{count}} tasks for today"
-                  },
-                  {
-                    "label": "Remove plan",
-                    "op": "update",
-                    "args": {
-                      "planned_for": ""
-                    },
-                    "success": "Removed plans for {{count}} tasks"
-                  },
-                  {
-                    "label": "Start",
-                    "icon": "play",
-                    "op": "update",
-                    "args": {
-                      "in_progress": true
-                    },
-                    "success": "{{count}} tasks started"
-                  },
-                  {
-                    "label": "Add tag",
-                    "icon": "tag",
-                    "op": "add_tag",
-                    "ask": {
-                      "name": "tag",
-                      "label": "Tag",
-                      "title": "Add a tag to {{count}} tasks"
-                    },
-                    "success": "Tagged {{count}} tasks"
-                  },
-                  {
-                    "label": "Delete",
-                    "icon": "trash",
-                    "variant": "danger",
-                    "op": "delete",
-                    "confirm": "Move {{count}} tasks to the trash?",
-                    "success": "Moved {{count}} tasks to the trash",
-                    "undo": {
-                      "op": "restore",
-                      "success": "Restored {{count}} tasks"
-                    }
-                  }
-                ]
-              },
-              "empty": "No tasks match these filters.",
-              "item": {
-                "type": "stack",
-                "gap": 0,
-                "children": [
-                  {
-                    "type": "item",
-                    "title": "{{row.title}}",
-                    "subtitle": "{{row.notes}}",
-                    "done": "{{row.done}}",
-                    "flag": "{{row.priority}}",
-                    "check": {
-                      "checked": "{{row.done}}",
-                      "action": {
-                        "op": "toggle",
-                        "args": {
-                          "id": "{{row.id}}",
-                          "done": "{{value}}"
-                        },
-                        "then": {},
-                        "success": "{{result.message}}",
-                        "followup": {
-                          "label": "Add note",
-                          "action": {
-                            "set": {
-                              "state.note_for": "{{result.ask_note}}"
-                            }
-                          },
-                          "if": "{{result.ask_note}}"
-                        }
-                      }
-                    },
-                    "action": {
-                      "set": {
-                        "state.open": "{{row.id}}"
-                      }
-                    },
-                    "chips": [
-                      {
-                        "text": "{{row.status_name}}"
-                      },
-                      {
-                        "text": "{{row.group_name}}"
-                      },
-                      {
-                        "text": "{{row.planned_for}}",
-                        "icon": "calendar"
-                      },
-                      {
-                        "text": "{{row.due_label}}",
-                        "tone": "{{row.due_tone}}",
-                        "icon": "calendar"
-                      },
-                      {
-                        "text": "{{row.repeat_label}}",
-                        "icon": "repeat"
-                      },
-                      {
-                        "text": "{{row.steps_label}}",
-                        "icon": "steps"
-                      },
-                      {
-                        "text": "{{row.tags}}",
-                        "icon": "tag"
-                      },
-                      {
-                        "text": "{{row.note_chip}}",
-                        "icon": "note"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "button",
-                    "if": "{{!row.done}}",
-                    "variant": "ghost",
-                    "aria_label": "{{row.move_label}}",
-                    "action": {
-                      "op": "update",
-                      "args": {
-                        "id": "{{row.id}}",
-                        "in_progress": "{{!row.in_progress}}"
-                      },
-                      "success": "Task moved"
-                    },
-                    "icon": "play"
-                  },
-                  {
-                    "type": "button",
-                    "label": "Plan today",
-                    "variant": "ghost",
-                    "action": {
-                      "op": "update",
-                      "args": {
-                        "id": "{{row.id}}",
-                        "planned_for": "{{$today}}"
-                      },
-                      "success": "Planned for today"
-                    },
-                    "if": "{{!row.done}}"
-                  }
-                ]
-              },
-              "if": "{{state.view == kanban}}",
-              "layout": "board",
-              "column": "board_lane",
-              "move": {
-                "op": "move",
-                "args": {
-                  "id": "{{row.id}}",
-                  "lane": "{{value}}"
-                }
-              },
-              "columns": [
-                {
-                  "value": "todo",
-                  "label": "To do"
-                },
-                {
-                  "value": "doing",
-                  "label": "In progress"
-                },
-                {
-                  "value": "done",
-                  "label": "Done"
-                }
-              ],
-              "label": "Task Kanban",
-              "collapse_group": {
-                "value": "No date",
-                "when": "{{state.filter == today}}",
-                "bind": "state.undatedExpanded"
-              }
-            },
-            {
-              "type": "list",
-              "query": "workspace_tasks",
-              "params": {
-                "filter": "{{state.filter}}",
-                "q": "{{state.q}}",
-                "tags": "{{state.tags}}",
-                "lists": "{{state.lists}}",
-                "groups": "{{state.groups}}",
-                "statuses": "{{state.statuses}}",
-                "tags_mode": "{{state.tags_mode}}",
-                "category": "{{state.category}}",
-                "sort": "{{state.sort}}",
-                "grouping": "{{state.grouping}}",
-                "today": "{{$today}}"
-              },
-              "select": {
-                "label": "Select tasks",
-                "actions": [
-                  {
-                    "label": "Complete",
-                    "icon": "check",
-                    "op": "toggle",
-                    "args": {
-                      "done": true
-                    },
-                    "success": "{{count}} tasks completed"
-                  },
-                  {
-                    "label": "Plan today",
-                    "icon": "calendar",
-                    "op": "update",
-                    "args": {
-                      "planned_for": "{{$today}}"
-                    },
-                    "success": "Planned {{count}} tasks for today"
-                  },
-                  {
-                    "label": "Remove plan",
-                    "op": "update",
-                    "args": {
-                      "planned_for": ""
-                    },
-                    "success": "Removed plans for {{count}} tasks"
-                  },
-                  {
-                    "label": "Start",
-                    "icon": "play",
-                    "op": "update",
-                    "args": {
-                      "in_progress": true
-                    },
-                    "success": "{{count}} tasks started"
-                  },
-                  {
-                    "label": "Add tag",
-                    "icon": "tag",
-                    "op": "add_tag",
-                    "ask": {
-                      "name": "tag",
-                      "label": "Tag",
-                      "title": "Add a tag to {{count}} tasks"
-                    },
-                    "success": "Tagged {{count}} tasks"
-                  },
-                  {
-                    "label": "Delete",
-                    "icon": "trash",
-                    "variant": "danger",
-                    "op": "delete",
-                    "confirm": "Move {{count}} tasks to the trash?",
-                    "success": "Moved {{count}} tasks to the trash",
-                    "undo": {
-                      "op": "restore",
-                      "success": "Restored {{count}} tasks"
-                    }
-                  }
-                ]
-              },
-              "empty": "No tasks match these filters.",
-              "item": {
-                "type": "stack",
-                "gap": 0,
-                "children": [
-                  {
-                    "type": "item",
-                    "title": "{{row.title}}",
-                    "subtitle": "{{row.notes}}",
-                    "done": "{{row.done}}",
-                    "flag": "{{row.priority}}",
-                    "check": {
-                      "checked": "{{row.done}}",
-                      "action": {
-                        "op": "toggle",
-                        "args": {
-                          "id": "{{row.id}}",
-                          "done": "{{value}}"
-                        },
-                        "then": {},
-                        "success": "{{result.message}}",
-                        "followup": {
-                          "label": "Add note",
-                          "action": {
-                            "set": {
-                              "state.note_for": "{{result.ask_note}}"
-                            }
-                          },
-                          "if": "{{result.ask_note}}"
-                        }
-                      }
-                    },
-                    "action": {
-                      "set": {
-                        "state.open": "{{row.id}}"
-                      }
-                    },
-                    "chips": [
-                      {
-                        "text": "{{row.status_name}}"
-                      },
-                      {
-                        "text": "{{row.group_name}}"
-                      },
-                      {
-                        "text": "{{row.planned_for}}",
-                        "icon": "calendar"
-                      },
-                      {
-                        "text": "{{row.due_label}}",
-                        "tone": "{{row.due_tone}}",
-                        "icon": "calendar"
-                      },
-                      {
-                        "text": "{{row.repeat_label}}",
-                        "icon": "repeat"
-                      },
-                      {
-                        "text": "{{row.steps_label}}",
-                        "icon": "steps"
-                      },
-                      {
-                        "text": "{{row.tags}}",
-                        "icon": "tag"
-                      },
-                      {
-                        "text": "{{row.note_chip}}",
-                        "icon": "note"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "button",
-                    "label": "Plan today",
-                    "variant": "ghost",
-                    "action": {
-                      "op": "update",
-                      "args": {
-                        "id": "{{row.id}}",
-                        "planned_for": "{{$today}}"
-                      },
-                      "success": "Planned for today"
-                    },
-                    "if": "{{!row.done}}"
-                  }
-                ]
-              },
-              "if": "{{state.view == matrix}}",
-              "layout": "matrix",
-              "column": "matrix_lane",
-              "move": {
-                "op": "move",
-                "args": {
-                  "id": "{{row.id}}",
-                  "lane": "{{value}}"
-                }
-              },
-              "columns": [
-                {
-                  "value": "do",
-                  "label": "Do first",
-                  "description": "Urgent and important"
-                },
-                {
-                  "value": "schedule",
-                  "label": "Schedule",
-                  "description": "Important, not urgent"
-                },
-                {
-                  "value": "delegate",
-                  "label": "Delegate",
-                  "description": "Urgent, not important"
-                },
-                {
-                  "value": "eliminate",
-                  "label": "Unsorted",
-                  "description": "Tasks waiting to be sorted"
-                }
-              ],
-              "label": "Eisenhower matrix",
-              "collapse_group": {
-                "value": "No date",
-                "when": "{{state.filter == today}}",
-                "bind": "state.undatedExpanded"
-              }
+              "type": "view-library",
+              "if": "{{state.workspace_mode == views}}",
+              "query": "workspace_tasks"
             }
           ]
         }
@@ -1939,7 +1967,7 @@
             "item": {
               "type": "item",
               "title": "{{row.name}}",
-              "subtitle": "{{row.category}}",
+              "subtitle": "{{row.category_label}}",
               "action": {
                 "set": {
                   "state.edit_status": "{{row.id}}"

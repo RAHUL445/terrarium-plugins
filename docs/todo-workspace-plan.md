@@ -118,8 +118,35 @@ M2 adds the host-themed capture/focus workspace, My Day with earlier unfinished
 plans, explicit capture destination, Plan today and bulk planning, organization
 forms, and list/group/status management. The workspace query filters organization
 and tags before its result limit. Query behavior tests, renderer contract tests,
-and all ten focused runtime tests pass. Browser/mobile visual verification is
-still pending. Shared named views and final polish remain the next milestones.
+and all ten focused runtime tests pass. Browser verification in a disposable
+preview confirmed Inbox capture, Plan today/My Day, list creation and default
+statuses. A 390px viewport stacks the workspace without document overflow;
+native mobile behavior remains unverified.
+
+M3 adds host-owned saved views and references from page View widgets. The
+builder exposes multi-list/group/status filters, tags any/all, search, layouts,
+sorting and grouping. Apply previews; Save changes edits the shared definition;
+Save as new creates an independent definition. Page focus intersects saved
+search in SQL before the 500-row cap. Dynamic enum choices preserve archived
+and unavailable assignments on boards; attempts to assign an unavailable
+definition remain validated by the plugin. Built-in workflow lanes use the
+same completion and recurrence path as custom statuses.
+
+Browser verification confirmed saving a two-list tagged view, adding its
+reference to Home, changing the definition to a status board, and seeing the
+page reference update. Shared-view persistence/migration, invalid filters,
+space boundaries, reference refresh/disposal and organization query semantics
+have automated coverage. The full host JavaScript run passed all 299 tests
+after fixture paths were made compatible with `TERRA_PLUGIN_SOURCE`; all 28
+query tests and 17 host page-storage tests passed. No owner data was used.
+
+M4 remains: compact/collapsible view controls, density/visible-field choices,
+friendlier multi-selects on touch, inline steps, undo, and complete keyboard/
+native mobile workflow verification. Details currently use the existing task
+sheet, not a persistent side pane. Views still have a 500-row result cap;
+display sorting operates on that result set, not a paginated full collection.
+Mixed-version sync, full organization export and live migration are not yet
+verified. Draft view edits survive refresh but are not durable across navigation.
 
 Implementation and test outcomes are recorded with each milestone commit.
 Native UI, mobile, multi-device sync, and user-data migration require separate

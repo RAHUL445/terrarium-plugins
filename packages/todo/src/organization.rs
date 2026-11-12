@@ -207,12 +207,22 @@ pub fn organize(args: &Args) -> Result<Value> {
         }
     }
     let explicit_status = args.get("status_id").is_some();
+    let builtin_category = match args.opt_str("status_id") {
+        Some("@not_started") => Some("not_started"),
+        Some("@active") => Some("active"),
+        Some("@completed") => Some("completed"),
+        _ => None,
+    };
     let status = if explicit_status {
         let status = optional_id(args, "status_id")?;
-        status
-            .as_str()
-            .map(|id| scoped("task_statuses", id, &list))
-            .transpose()?
+        if let Some(category) = builtin_category {
+            default_status(&list, category, None)?
+        } else {
+            status
+                .as_str()
+                .map(|id| scoped("task_statuses", id, &list))
+                .transpose()?
+        }
     } else if moved {
         let old = current
             .get("status_id")
@@ -235,7 +245,7 @@ pub fn organize(args: &Args) -> Result<Value> {
         .as_ref()
         .and_then(|s| s.get("category"))
         .and_then(Value::as_str)
-        .unwrap_or(category(&current));
+        .unwrap_or(builtin_category.unwrap_or(category(&current)));
     let finishing = target_category == "completed";
     let changes_completion = finishing != (category(&current) == "completed");
     let mut values = Row::new();
