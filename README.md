@@ -34,6 +34,7 @@ syncs their data between devices.
 | [Habits](packages/habits) | Scheduled habits with check-ins, streaks, reminders and sleep logs |
 | [Bookmarks](packages/bookmarks) | Links with projects, tags and notes; pin the ones you use most |
 | [Voice](packages/voice) | Record or type quick captures, transcribed locally, then send them to To-do or Notes |
+| [Feeds](packages/feeds) | HTTPS RSS/Atom reader with text summaries, read/unread controls, hourly desktop refresh and an unread widget; asks to reach any website |
 | [Reports](packages/reports) | AI-written reviews of your tasks, habits and notes, on demand or on a schedule |
 
 ## Getting started
@@ -95,7 +96,7 @@ python3 scripts/build-release.py \
   --output releases/dev-001
 ```
 
-The script verifies the SDK snapshot, builds and runtime-checks all six
+The script verifies the SDK snapshot, builds and runtime-checks all seven
 plugins, and exports only manifests, referenced UI templates and
 `dist/plugin.wasm`. `bundle.json` pins versions, digests, SDK provenance and
 the plugins commit; builds from a dirty checkout are marked

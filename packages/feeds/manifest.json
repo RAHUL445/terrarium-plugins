@@ -1,0 +1,228 @@
+{
+  "id": "feeds",
+  "name": "Feeds",
+  "version": "0.1.0",
+  "api": "terrarium:plugin@0.1.0",
+  "description": "Read RSS and Atom feeds. Can send data it can read to any public website, including sites you have not added.",
+  "permissions": [
+    "http"
+  ],
+  "hosts": [
+    "*"
+  ],
+  "storage": {
+    "version": 1,
+    "tables": [
+      {
+        "name": "feeds",
+        "columns": [
+          {
+            "name": "url",
+            "type": "text"
+          },
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "etag",
+            "type": "text"
+          },
+          {
+            "name": "last_modified",
+            "type": "text"
+          },
+          {
+            "name": "last_error",
+            "type": "text"
+          },
+          {
+            "name": "fetched_ms",
+            "type": "integer"
+          },
+          {
+            "name": "paused",
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      },
+      {
+        "name": "items",
+        "columns": [
+          {
+            "name": "feed_id",
+            "type": "text"
+          },
+          {
+            "name": "guid",
+            "type": "text"
+          },
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "link",
+            "type": "text"
+          },
+          {
+            "name": "summary",
+            "type": "text"
+          },
+          {
+            "name": "published_ms",
+            "type": "integer"
+          },
+          {
+            "name": "read",
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      }
+    ]
+  },
+  "operations": {
+    "add": {
+      "description": "Add an HTTPS feed and fetch it once.",
+      "effect": "write",
+      "params": {
+        "url": {
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    "remove": {
+      "description": "Remove a feed and its items.",
+      "effect": "destructive",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true
+        }
+      },
+      "confirm": "Remove this feed and its items?"
+    },
+    "refresh": {
+      "description": "Refresh up to 20 active feeds, or one feed.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id"
+        }
+      },
+      "cli": true
+    },
+    "on_fetched": {
+      "description": "Store a feed reply.",
+      "effect": "write",
+      "params": {},
+      "cli": false
+    },
+    "mark_read": {
+      "description": "Set an item as read or unread.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true
+        },
+        "read": {
+          "type": "boolean",
+          "required": true
+        }
+      }
+    },
+    "mark_all_read": {
+      "description": "Mark all items read, optionally in one feed.",
+      "effect": "write",
+      "params": {
+        "feed_id": {
+          "type": "id"
+        }
+      }
+    },
+    "scheduled_refresh": {
+      "description": "Refresh up to 20 active feeds.",
+      "effect": "write",
+      "params": {},
+      "cli": false
+    }
+  },
+  "queries": {
+    "feeds": {
+      "sql": "SELECT * FROM feeds WHERE _deleted IS NULL ORDER BY title, id",
+      "params": []
+    },
+    "items": {
+      "sql": "SELECT i.*, f.title AS feed_title, CASE WHEN i.read = 1 THEN 'Mark unread' ELSE 'Mark read' END AS read_label FROM items i JOIN feeds f ON f.id = i.feed_id WHERE i._deleted IS NULL AND f._deleted IS NULL AND (?1 IS NULL OR ?1 = '' OR i.feed_id = ?1) AND (COALESCE(?2, 0) = 0 OR i.read = 0) ORDER BY f.title, f.id, i.published_ms DESC, i.id DESC LIMIT 500",
+      "params": [
+        "feed_id",
+        "unread"
+      ],
+      "types": {
+        "feed_id": {
+          "type": "id"
+        },
+        "unread": {
+          "type": "boolean"
+        }
+      }
+    },
+    "unread": {
+      "sql": "SELECT i.*, f.title AS feed_title, CASE WHEN i.read = 1 THEN 'Mark unread' ELSE 'Mark read' END AS read_label FROM items i JOIN feeds f ON f.id = i.feed_id WHERE i._deleted IS NULL AND f._deleted IS NULL AND i.read = 0 ORDER BY i.published_ms DESC, i.id DESC LIMIT 10",
+      "params": [],
+      "cli": false
+    },
+    "unread_count": {
+      "sql": "SELECT COUNT(*) AS count FROM items i JOIN feeds f ON f.id = i.feed_id WHERE i._deleted IS NULL AND f._deleted IS NULL AND i.read = 0",
+      "params": []
+    },
+    "search": {
+      "sql": "SELECT i.id, i.title, i.summary AS subtitle, i.link AS url FROM items i JOIN feeds f ON f.id = i.feed_id WHERE i._deleted IS NULL AND f._deleted IS NULL AND (i.title LIKE '%' || ?1 || '%' OR i.summary LIKE '%' || ?1 || '%') ORDER BY i.published_ms DESC LIMIT 20",
+      "params": [
+        "q"
+      ],
+      "types": {
+        "q": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "cli": false
+    }
+  },
+  "jobs": {
+    "refresh": {
+      "operation": "scheduled_refresh",
+      "schedule": {
+        "every_minutes": 60
+      },
+      "run_on": "desktop"
+    }
+  },
+  "pages": [
+    {
+      "id": "main",
+      "title": "Feeds",
+      "template": "ui/page-main.json"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "unread",
+      "title": "Unread feeds",
+      "template": "ui/widget-unread.json"
+    }
+  ],
+  "icon": "inbox",
+  "badge": "unread_count",
+  "search": "search",
+  "limits": {
+    "fuel": 200000000,
+    "memory_mb": 64,
+    "timeout_ms": 5000
+  }
+}

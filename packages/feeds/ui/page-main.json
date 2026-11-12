@@ -1,0 +1,149 @@
+{
+  "state": {
+    "feed_id": "",
+    "unread": false
+  },
+  "body": {
+    "type": "stack",
+    "gap": 12,
+    "children": [
+      {
+        "type": "heading",
+        "text": "Feeds"
+      },
+      {
+        "type": "form",
+        "inline": true,
+        "submit_label": "Add feed",
+        "submit": {
+          "op": "add",
+          "args": {
+            "url": "{{form.url}}"
+          },
+          "reset": true
+        },
+        "children": [
+          {
+            "type": "text-field",
+            "name": "url",
+            "label": "Feed URL",
+            "placeholder": "https://\u2026",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "tone": "muted",
+        "text": "Feeds can reach any public website, including sites you have not added. Only HTTPS feed addresses are supported."
+      },
+      {
+        "type": "stack",
+        "direction": "row",
+        "children": [
+          {
+            "type": "button",
+            "label": "Refresh",
+            "action": {
+              "op": "refresh"
+            }
+          },
+          {
+            "type": "button",
+            "label": "Mark all read",
+            "action": {
+              "op": "mark_all_read",
+              "args": {
+                "feed_id": "{{state.feed_id}}"
+              }
+            }
+          },
+          {
+            "type": "button",
+            "label": "All feeds",
+            "action": {
+              "set": {
+                "state.feed_id": ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "query": "feeds",
+        "empty": "Add an RSS or Atom feed above.",
+        "item": {
+          "type": "item",
+          "title": "{{row.title}}",
+          "subtitle": "{{row.last_error}}",
+          "action": {
+            "set": {
+              "state.feed_id": "{{row.id}}"
+            }
+          },
+          "trailing": [
+            {
+              "type": "button",
+              "label": "Refresh",
+              "action": {
+                "op": "refresh",
+                "args": {
+                  "id": "{{row.id}}"
+                }
+              }
+            },
+            {
+              "type": "button",
+              "label": "Remove",
+              "action": {
+                "op": "remove",
+                "args": {
+                  "id": "{{row.id}}"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "checkbox",
+        "label": "Unread only",
+        "checked": "{{state.unread}}",
+        "action": {
+          "set": {
+            "state.unread": "{{value}}"
+          }
+        }
+      },
+      {
+        "type": "list",
+        "query": "items",
+        "group": "feed_title",
+        "params": {
+          "feed_id": "{{state.feed_id}}",
+          "unread": "{{state.unread}}"
+        },
+        "empty": "No items yet.",
+        "item": {
+          "type": "item",
+          "title": "{{row.title}}",
+          "subtitle": "{{row.summary}}",
+          "action": {
+            "open": "{{row.link}}"
+          },
+          "check": {
+            "checked": "{{row.read}}",
+            "action": {
+              "op": "mark_read",
+              "args": {
+                "id": "{{row.id}}",
+                "read": "{{value}}"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -13,6 +13,14 @@ All notable changes to this project are documented here. The format follows
   day/status check-in is harmless. Upgrade Terrarium on every device before
   installing or syncing these event-enabled packages, then review automations
   on the chosen execution device.
+- Feeds (`feeds` 0.1.0): public HTTPS RSS/Atom subscriptions, conditional
+  refresh, text summaries, read/unread controls and an unread widget. Keeps
+  the newest 200 items per feed plus older unread items, and refreshes up to
+  20 feeds per run; hourly schedules default to desktop. Requires an HTTP-capable host on every paired device
+  and explicit “Reach any website” approval on each device. This permission
+  allows sending readable data to public websites, including sites not added
+  as feeds. Requests run only while the app is open (foreground on Android);
+  feed content never automatically loads remote images.
 
 - First public source preview of the six first-party plugins: To-do, Notes,
   Habits, Bookmarks, Voice and Reports.

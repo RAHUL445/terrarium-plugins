@@ -28,7 +28,8 @@ pub mod bindings {
 }
 
 use bindings::terrarium::plugin::{
-    ai as host_ai, clock as host_clock, events as host_events, interop as host_interop, log as host_log,
+    ai as host_ai, clock as host_clock, events as host_events, http as host_http,
+    interop as host_interop, log as host_log,
     schedule as host_schedule, speech as host_speech, storage as host,
 };
 
@@ -213,6 +214,16 @@ pub mod events {
 
     pub fn emit(name: &str, payload: &Value) -> Result<()> {
         Ok(host_events::emit(name, &payload.to_string())?)
+    }
+}
+
+/// Web requests to hosts listed in the manifest (needs the `http`
+/// permission). Replies arrive later, at the operation named `on_done`.
+pub mod http {
+    use super::*;
+    pub fn available() -> bool { host_http::available() }
+    pub fn fetch(request: &Value, on_done: &str) -> Result<String> {
+        Ok(host_http::fetch(&request.to_string(), on_done)?)
     }
 }
 

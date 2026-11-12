@@ -1,15 +1,19 @@
 {
   "source": {
     "host_commit": "0e51387709feb28fa92641d54cf032f66f989d7d",
+    "host_commits": [
+      "0e51387709feb28fa92641d54cf032f66f989d7d",
+      "e97cc8a9e733b55b5d2865390bdddb4783637af0"
+    ],
     "api": "terrarium:plugin@0.1.0",
     "source_dirty": true
   },
   "files": {
-    "SOURCE.json": "0ec73fde99e1a6e15aadd3fe3d1379e5b522c0759cc79b7235f6557f7fc89411",
+    "SOURCE.json": "86348ec8698306512d9a3f133feb9f9268c8729e8864b26ecbb7e4d8e404a64c",
     "crates/guest/Cargo.toml": "9daeeb9e4da77d36df7c522635e407c70cff488dd9d3fd517b4e59f75982c4e4",
     "crates/guest/LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
     "crates/guest/NOTICE": "edbf2f2a48ccb9191c13d4d90b04f13fb9d76c2d603b90277275818098f7e25f",
-    "crates/guest/src/lib.rs": "5ac5a1b8dd147ffa3ab7b6a16f6dd2087398d5259a873fc1edc8d626862dafa9",
-    "wit/plugin.wit": "f605502299911f7f1ff59e80f1bcb022e703e410c911cdfeea5d291c2340f41a"
+    "crates/guest/src/lib.rs": "e20c6de87565da0aa79eb38f64d2f8c2be8da0a1007363451601782487e085cd",
+    "wit/plugin.wit": "e63dcc261c2d549a9e812f2f9e80702f24095303bedf44a5a41678b9815f3a85"
   }
 }

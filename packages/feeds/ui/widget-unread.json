@@ -1,0 +1,42 @@
+{
+  "state": {},
+  "body": {
+    "type": "list",
+    "query": "unread",
+    "empty": "No unread items.",
+    "item": {
+      "type": "item",
+      "title": "{{row.title}}",
+      "subtitle": "{{row.summary}}",
+      "action": {
+        "open": "{{row.link}}"
+      },
+      "check": {
+        "checked": "{{row.read}}",
+        "action": {
+          "op": "mark_read",
+          "args": {
+            "id": "{{row.id}}",
+            "read": "{{value}}"
+          }
+        }
+      }
+    }
+  },
+  "page": {
+    "size": {
+      "default": [
+        6,
+        4
+      ],
+      "min": [
+        3,
+        2
+      ],
+      "max": [
+        12,
+        8
+      ]
+    }
+  }
+}
