@@ -417,6 +417,14 @@
       "arg": "text"
     }
   ],
+  "share_target": {
+    "types": [
+      "text/plain",
+      "text/uri-list"
+    ],
+    "op": "create",
+    "arg": "text"
+  },
   "open": {
     "page": "main"
   },

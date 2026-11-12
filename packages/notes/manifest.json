@@ -399,6 +399,13 @@
       "arg": "body"
     }
   ],
+  "share_target": {
+    "types": [
+      "text/plain"
+    ],
+    "op": "create",
+    "arg": "body"
+  },
   "open": {
     "page": "main"
   },
