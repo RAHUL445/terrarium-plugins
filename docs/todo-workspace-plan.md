@@ -114,8 +114,12 @@ roll back; repeat completion produces one successor on retry; reopen restores
 the previous custom status and clears the consumed previous-status reference.
 An unrelated group edit retains archived status assignments.
 
-Completed commits cover the storage and command layers. M2-M4 remain pending;
-no new organization controls or saved-view UI have been installed or shipped.
+M2 adds the host-themed capture/focus workspace, My Day with earlier unfinished
+plans, explicit capture destination, Plan today and bulk planning, organization
+forms, and list/group/status management. The workspace query filters organization
+and tags before its result limit. Query behavior tests, renderer contract tests,
+and all ten focused runtime tests pass. Browser/mobile visual verification is
+still pending. Shared named views and final polish remain the next milestones.
 
 Implementation and test outcomes are recorded with each milestone commit.
 Native UI, mobile, multi-device sync, and user-data migration require separate

@@ -136,32 +136,87 @@
       {
         "name": "task_lists",
         "columns": [
-          { "name": "name", "type": "text" },
-          { "name": "color", "type": "text" },
-          { "name": "position", "type": "integer", "default": 0 },
-          { "name": "archived", "type": "boolean", "default": false }
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "color",
+            "type": "text"
+          },
+          {
+            "name": "position",
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "archived",
+            "type": "boolean",
+            "default": false
+          }
         ]
       },
       {
         "name": "task_groups",
         "columns": [
-          { "name": "list_id", "type": "text" },
-          { "name": "name", "type": "text" },
-          { "name": "color", "type": "text" },
-          { "name": "position", "type": "integer", "default": 0 },
-          { "name": "archived", "type": "boolean", "default": false }
+          {
+            "name": "list_id",
+            "type": "text"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "color",
+            "type": "text"
+          },
+          {
+            "name": "position",
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "archived",
+            "type": "boolean",
+            "default": false
+          }
         ]
       },
       {
         "name": "task_statuses",
         "columns": [
-          { "name": "list_id", "type": "text" },
-          { "name": "name", "type": "text" },
-          { "name": "color", "type": "text" },
-          { "name": "category", "type": "text" },
-          { "name": "ready", "type": "boolean", "default": true },
-          { "name": "position", "type": "integer", "default": 0 },
-          { "name": "archived", "type": "boolean", "default": false }
+          {
+            "name": "list_id",
+            "type": "text"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "color",
+            "type": "text"
+          },
+          {
+            "name": "category",
+            "type": "text"
+          },
+          {
+            "name": "ready",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "position",
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "archived",
+            "type": "boolean",
+            "default": false
+          }
         ]
       },
       {
@@ -184,66 +239,150 @@
       "description": "Create a task list with To pick, In progress, Waiting and Done statuses.",
       "effect": "write",
       "params": {
-        "name": { "type": "string", "required": true },
-        "color": { "type": "string", "description": "Optional #RRGGBB color." },
-        "position": { "type": "integer", "min": 0 }
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "color": {
+          "type": "string",
+          "description": "Optional #RRGGBB color."
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        }
       }
     },
     "update_list": {
       "description": "Rename, recolor, reorder or archive a list; keeps its tasks and references.",
       "effect": "write",
       "params": {
-        "id": { "type": "id", "required": true },
-        "name": { "type": "string" },
-        "color": { "type": "string" },
-        "position": { "type": "integer", "min": 0 },
-        "archived": { "type": "boolean" }
+        "id": {
+          "type": "id",
+          "required": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        },
+        "archived": {
+          "type": "boolean"
+        }
       }
     },
     "create_group": {
       "description": "Create an organizational group in a list. Empty list_id means Inbox.",
       "effect": "write",
       "params": {
-        "name": { "type": "string", "required": true },
-        "list_id": { "type": "string" },
-        "color": { "type": "string" },
-        "position": { "type": "integer", "min": 0 }
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "list_id": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        }
       }
     },
     "update_group": {
       "description": "Rename, recolor, reorder or archive a group without moving its tasks.",
       "effect": "write",
       "params": {
-        "id": { "type": "id", "required": true },
-        "name": { "type": "string" },
-        "color": { "type": "string" },
-        "position": { "type": "integer", "min": 0 },
-        "archived": { "type": "boolean" }
+        "id": {
+          "type": "id",
+          "required": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        },
+        "archived": {
+          "type": "boolean"
+        }
       }
     },
     "create_status": {
       "description": "Create a custom status in one list (empty list_id means Inbox). ready=false excludes Waiting/Blocked from future ready-work suggestions.",
       "effect": "write",
       "params": {
-        "name": { "type": "string", "required": true },
-        "list_id": { "type": "string" },
-        "category": { "type": "enum", "values": ["not_started", "active", "completed"], "required": true },
-        "ready": { "type": "boolean" },
-        "color": { "type": "string" },
-        "position": { "type": "integer", "min": 0 }
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "list_id": {
+          "type": "string"
+        },
+        "category": {
+          "type": "enum",
+          "values": [
+            "not_started",
+            "active",
+            "completed"
+          ],
+          "required": true
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "color": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        }
       }
     },
     "update_status": {
       "description": "Customize a status. Changing category requires no current or previous task references; archiving preserves existing assignments.",
       "effect": "write",
       "params": {
-        "id": { "type": "id", "required": true },
-        "name": { "type": "string" },
-        "category": { "type": "enum", "values": ["not_started", "active", "completed"] },
-        "ready": { "type": "boolean" },
-        "color": { "type": "string" },
-        "position": { "type": "integer", "min": 0 },
-        "archived": { "type": "boolean" }
+        "id": {
+          "type": "id",
+          "required": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "category": {
+          "type": "enum",
+          "values": [
+            "not_started",
+            "active",
+            "completed"
+          ]
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "color": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        },
+        "archived": {
+          "type": "boolean"
+        }
       }
     },
     "organize": {
@@ -251,19 +390,34 @@
       "effect": "write",
       "bulk": true,
       "params": {
-        "id": { "type": "id", "required": true },
-        "list_id": { "type": "string" },
-        "group_id": { "type": "string" },
-        "status_id": { "type": "string" }
+        "id": {
+          "type": "id",
+          "required": true
+        },
+        "list_id": {
+          "type": "string"
+        },
+        "group_id": {
+          "type": "string"
+        },
+        "status_id": {
+          "type": "string"
+        }
       }
     },
     "create": {
       "description": "Create a task. Dates, times, #tags, !priority and \"every week\" in the title are understood. Optional list_id/group_id/status_id organize the task atomically; omission captures into Inbox. Existing due, reminder, repeat and attention fields are supported.",
       "effect": "write",
       "params": {
-        "list_id": { "type": "string" },
-        "group_id": { "type": "string" },
-        "status_id": { "type": "string" },
+        "list_id": {
+          "type": "string"
+        },
+        "group_id": {
+          "type": "string"
+        },
+        "status_id": {
+          "type": "string"
+        },
         "title": {
           "type": "string",
           "required": true,
@@ -326,8 +480,15 @@
       "effect": "write",
       "bulk": true,
       "params": {
-        "planned_for": { "type": "date", "description": "Intended work date, independent of due date/reminder. Empty clears." },
-        "sort_order": { "type": "integer", "min": 0, "description": "Manual task position; applies only to views using manual order." },
+        "planned_for": {
+          "type": "date",
+          "description": "Intended work date, independent of due date/reminder. Empty clears."
+        },
+        "sort_order": {
+          "type": "integer",
+          "min": 0,
+          "description": "Manual task position; applies only to views using manual order."
+        },
         "id": {
           "type": "id",
           "required": true,
@@ -674,9 +835,16 @@
   "queries": {
     "organization_tasks": {
       "sql": "SELECT t.id, t.list_id, t.group_id, t.status_id, t.previous_status_id, t.planned_for, COALESCE(t.sort_order, 0) AS sort_order, COALESCE(l.name, 'Inbox') AS list_name, COALESCE(g.name, 'Ungrouped') AS group_name, COALESCE(s.name, CASE WHEN t.done = 1 THEN 'Done' WHEN t.in_progress = 1 THEN 'In progress' ELSE 'To pick' END) AS status_name, CASE WHEN t.done = 1 THEN 'completed' WHEN t.in_progress = 1 THEN 'active' ELSE 'not_started' END AS status_category, t.list_id IS NOT NULL AND l.id IS NULL AS invalid_list, t.group_id IS NOT NULL AND g.id IS NULL AS invalid_group, t.status_id IS NOT NULL AND s.id IS NULL AS invalid_status FROM tasks t LEFT JOIN task_lists l ON l.id = t.list_id AND l._deleted IS NULL LEFT JOIN task_groups g ON g.id = t.group_id AND g._deleted IS NULL AND g.list_id IS t.list_id LEFT JOIN task_statuses s ON s.id = t.status_id AND s._deleted IS NULL AND s.list_id IS t.list_id AND s.category = CASE WHEN t.done = 1 THEN 'completed' WHEN t.in_progress = 1 THEN 'active' ELSE 'not_started' END WHERE t._deleted IS NULL AND t.cleared_at IS NULL AND (?1 IS NULL OR ?1 = '' OR t.id = ?1) ORDER BY COALESCE(t.sort_order, 0), t.id LIMIT 500",
-      "params": ["id"],
+      "params": [
+        "id"
+      ],
       "description": "Organization metadata with legacy defaults and invalid-reference flags; optional task id. Does not change task data.",
-      "types": { "id": { "type": "string", "description": "Optional task id; empty returns up to 500 current tasks." } },
+      "types": {
+        "id": {
+          "type": "string",
+          "description": "Optional task id; empty returns up to 500 current tasks."
+        }
+      },
       "cli": false
     },
     "task_lists": {
@@ -687,13 +855,17 @@
     },
     "task_groups": {
       "sql": "SELECT id, list_id, name, color, position, archived FROM task_groups WHERE _deleted IS NULL AND list_id IS NULLIF(?1, '') ORDER BY position, name, id",
-      "params": ["list_id"],
+      "params": [
+        "list_id"
+      ],
       "description": "Groups belonging to one list; empty list id means Inbox.",
       "cli": false
     },
     "task_statuses": {
       "sql": "SELECT id, list_id, name, color, category, ready, position, archived FROM task_statuses WHERE _deleted IS NULL AND list_id IS NULLIF(?1, '') ORDER BY position, name, id",
-      "params": ["list_id"],
+      "params": [
+        "list_id"
+      ],
       "description": "Custom statuses belonging to one list; empty list id means Inbox. Tasks without an assignment derive status from their completion flags.",
       "cli": false
     },
@@ -825,7 +997,7 @@
       "cli": false
     },
     "search": {
-      "sql": "SELECT id, title, CASE WHEN done = 1 THEN 'Done' ELSE COALESCE(due, 'No date') END || CASE WHEN COALESCE(tags, '') <> '' THEN ' · ' || tags ELSE '' END || CASE WHEN COALESCE(notes, '') <> '' THEN ' · ' || substr(notes, 1, 100) ELSE '' END AS subtitle FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND (title LIKE '%' || ?1 || '%' OR notes LIKE '%' || ?1 || '%' OR tags LIKE '%' || ?1 || '%') ORDER BY done, due IS NULL, due LIMIT 8",
+      "sql": "SELECT id, title, CASE WHEN done = 1 THEN 'Done' ELSE COALESCE(due, 'No date') END || CASE WHEN COALESCE(tags, '') <> '' THEN ' \u00b7 ' || tags ELSE '' END || CASE WHEN COALESCE(notes, '') <> '' THEN ' \u00b7 ' || substr(notes, 1, 100) ELSE '' END AS subtitle FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND (title LIKE '%' || ?1 || '%' OR notes LIKE '%' || ?1 || '%' OR tags LIKE '%' || ?1 || '%') ORDER BY done, due IS NULL, due LIMIT 8",
       "params": [
         "q"
       ],
@@ -840,7 +1012,7 @@
       "cli": false
     },
     "task": {
-      "sql": "SELECT COALESCE(t.in_progress, 0) AS in_progress, COALESCE(t.urgent, 0) AS urgent, COALESCE(t.important, 0) AS important, t.id, t.title, t.note_id, COALESCE(t.notes, '') AS notes, t.due, COALESCE(t.tags, '') AS tags, COALESCE(t.priority, 0) AS priority, COALESCE(t.repeat, '') AS repeat, t.remind_time, t.done, CASE WHEN t.done = 1 THEN 'Mark not done' ELSE 'Mark done' END AS done_label, COALESCE(t.done_note, '') AS done_note, t.done = 1 AS can_note, (SELECT p.done_note FROM tasks p WHERE p._deleted IS NULL AND p.id <> t.id AND p.done = 1 AND p.done_note IS NOT NULL AND COALESCE(p.series, p.id) = COALESCE(t.series, t.id) ORDER BY p.completed_at DESC LIMIT 1) AS last_note, (SELECT 'Last time (' || date(p.completed_at / 1000, 'unixepoch') || ')' FROM tasks p WHERE p._deleted IS NULL AND p.id <> t.id AND p.done = 1 AND p.done_note IS NOT NULL AND COALESCE(p.series, p.id) = COALESCE(t.series, t.id) ORDER BY p.completed_at DESC LIMIT 1) AS last_note_title FROM tasks t WHERE t.id = ?1 AND t._deleted IS NULL",
+      "sql": "SELECT t.list_id, t.group_id, t.status_id, t.planned_for, t.sort_order, COALESCE(t.in_progress, 0) AS in_progress, COALESCE(t.urgent, 0) AS urgent, COALESCE(t.important, 0) AS important, t.id, t.title, t.note_id, COALESCE(t.notes, '') AS notes, t.due, COALESCE(t.tags, '') AS tags, COALESCE(t.priority, 0) AS priority, COALESCE(t.repeat, '') AS repeat, t.remind_time, t.done, CASE WHEN t.done = 1 THEN 'Mark not done' ELSE 'Mark done' END AS done_label, COALESCE(t.done_note, '') AS done_note, t.done = 1 AS can_note, (SELECT p.done_note FROM tasks p WHERE p._deleted IS NULL AND p.id <> t.id AND p.done = 1 AND p.done_note IS NOT NULL AND COALESCE(p.series, p.id) = COALESCE(t.series, t.id) ORDER BY p.completed_at DESC LIMIT 1) AS last_note, (SELECT 'Last time (' || date(p.completed_at / 1000, 'unixepoch') || ')' FROM tasks p WHERE p._deleted IS NULL AND p.id <> t.id AND p.done = 1 AND p.done_note IS NOT NULL AND COALESCE(p.series, p.id) = COALESCE(t.series, t.id) ORDER BY p.completed_at DESC LIMIT 1) AS last_note_title FROM tasks t WHERE t.id = ?1 AND t._deleted IS NULL",
       "params": [
         "id"
       ],
@@ -888,7 +1060,7 @@
       "description": "Current settings for offering a note on finishing a task."
     },
     "index_tasks": {
-      "sql": "SELECT id, title, substr(COALESCE(notes, ''), 1, 20000) AS body, tags AS keywords, CASE WHEN done = 1 THEN 'Done' ELSE COALESCE(due, 'No date') END || CASE WHEN COALESCE(tags, '') <> '' THEN ' · ' || tags ELSE '' END || CASE WHEN COALESCE(notes, '') <> '' THEN ' · ' || substr(notes, 1, 100) ELSE '' END AS subtitle FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "sql": "SELECT id, title, substr(COALESCE(notes, ''), 1, 20000) AS body, tags AS keywords, CASE WHEN done = 1 THEN 'Done' ELSE COALESCE(due, 'No date') END || CASE WHEN COALESCE(tags, '') <> '' THEN ' \u00b7 ' || tags ELSE '' END || CASE WHEN COALESCE(notes, '') <> '' THEN ' \u00b7 ' || substr(notes, 1, 100) ELSE '' END AS subtitle FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND id IN (SELECT value FROM json_each(?1))",
       "params": [
         "ids"
       ],
@@ -907,6 +1079,88 @@
       "sql": "SELECT title, notes, due, remind_time, COALESCE(priority, 0) AS priority, repeat, tags, CASE WHEN done = 1 THEN 'true' ELSE 'false' END AS done, CASE WHEN in_progress = 1 THEN 'true' ELSE 'false' END AS in_progress, CASE WHEN urgent = 1 THEN 'true' ELSE 'false' END AS urgent, CASE WHEN important = 1 THEN 'true' ELSE 'false' END AS important FROM tasks WHERE _deleted IS NULL ORDER BY COALESCE(due, '9999'), title",
       "params": [],
       "description": "Every task, for exports.",
+      "cli": false
+    },
+    "workspace_tasks": {
+      "sql": "SELECT id, list_id, group_id, status_id, planned_for, sort_order, list_name, group_name, status_name, status_category, workflow_id, CASE ?11 WHEN 'list' THEN list_name WHEN 'group' THEN group_name WHEN 'status' THEN status_name WHEN 'none' THEN '' ELSE CASE WHEN planned_for IS NOT NULL AND planned_for < ?1 THEN 'Earlier plans' WHEN planned_for = ?1 THEN 'Planned today' ELSE list_name END END AS workspace_group, title, notes, due, tags, COALESCE(in_progress, 0) AS in_progress, COALESCE(urgent, 0) AS urgent, COALESCE(important, 0) AS important, CASE WHEN done = 1 THEN 'done' WHEN in_progress = 1 THEN 'doing' ELSE 'todo' END AS board_lane, CASE WHEN in_progress = 1 THEN 'Move to To do' ELSE 'Start task' END AS move_label, CASE WHEN urgent = 1 AND important = 1 THEN 'do' WHEN important = 1 THEN 'schedule' WHEN urgent = 1 THEN 'delegate' ELSE 'eliminate' END AS matrix_lane, COALESCE(priority, 0) AS priority, repeat, remind_time, done, CASE WHEN due IS NULL THEN 'No date' WHEN d = 0 THEN 'Today' WHEN d = 1 THEN 'Tomorrow' WHEN d = -1 THEN 'Yesterday' WHEN d BETWEEN 2 AND 6 THEN CASE strftime('%w', due) WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END ELSE CAST(strftime('%d', due) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', due) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(due, 1, 4) <> substr(?1, 1, 4) THEN ' ' || substr(due, 1, 4) ELSE '' END END || CASE WHEN remind_time IS NOT NULL THEN ' ' || remind_time ELSE '' END AS due_label, CASE WHEN done = 0 AND d < 0 THEN 'danger' WHEN done = 0 AND d = 0 THEN 'accent' END AS due_tone, CASE WHEN done = 1 THEN 'Completed' WHEN due IS NULL THEN 'No date' WHEN d < 0 THEN 'Overdue' WHEN d = 0 THEN 'Today' WHEN d = 1 THEN 'Tomorrow' WHEN d <= 6 THEN CASE strftime('%w', due) WHEN '0' THEN 'Sunday' WHEN '1' THEN 'Monday' WHEN '2' THEN 'Tuesday' WHEN '3' THEN 'Wednesday' WHEN '4' THEN 'Thursday' WHEN '5' THEN 'Friday' ELSE 'Saturday' END ELSE 'Later' END AS section, CASE WHEN done = 0 AND d < 0 THEN 'danger' END AS section_tone, CASE repeat WHEN 'daily' THEN 'Daily' WHEN 'weekdays' THEN 'Weekdays' WHEN 'weekly' THEN 'Weekly' WHEN 'monthly' THEN 'Monthly' END AS repeat_label, CASE WHEN steps_total > 0 THEN steps_done || '/' || steps_total END AS steps_label, CASE WHEN done_note IS NOT NULL THEN 'Note' END AS note_chip FROM (SELECT t.*, COALESCE((SELECT name FROM task_lists l WHERE l.id=t.list_id AND l._deleted IS NULL), 'Inbox') AS list_name, COALESCE((SELECT name FROM task_groups g WHERE g.id=t.group_id AND g.list_id IS t.list_id AND g._deleted IS NULL), 'Ungrouped') AS group_name, COALESCE((SELECT name FROM task_statuses s WHERE s.id=t.status_id AND s.list_id IS t.list_id AND s._deleted IS NULL AND s.category=CASE WHEN t.done=1 THEN 'completed' WHEN t.in_progress=1 THEN 'active' ELSE 'not_started' END), CASE WHEN t.done=1 THEN 'Done' WHEN t.in_progress=1 THEN 'In progress' ELSE 'To pick' END) AS status_name, CASE WHEN t.done=1 THEN 'completed' WHEN t.in_progress=1 THEN 'active' ELSE 'not_started' END AS status_category, COALESCE(t.status_id, CASE WHEN t.done=1 THEN '@completed' WHEN t.in_progress=1 THEN '@active' ELSE '@not_started' END) AS workflow_id, COALESCE((SELECT ready FROM task_statuses s WHERE s.id=t.status_id AND s.list_id IS t.list_id AND s._deleted IS NULL), 1) AS ready,  CAST(julianday(t.due) - julianday(?1) AS INTEGER) AS d, (SELECT COUNT(*) FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS steps_total, (SELECT COUNT(*) FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL AND s.done = 1) AS steps_done FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL) WHERE (?3 IS NULL OR ?3 = '' OR title LIKE '%' || ?3 || '%' OR tags LIKE '%' || ?3 || '%' OR notes LIKE '%' || ?3 || '%') AND (?4 IS NULL OR ?4 = '' OR EXISTS (WITH RECURSIVE f(tag, rest) AS (SELECT '', ?4 || ',' UNION ALL SELECT lower(ltrim(trim(substr(rest, 1, instr(rest, ',') - 1)), '#')), substr(rest, instr(rest, ',') + 1) FROM f WHERE rest <> '') SELECT 1 FROM f WHERE tag <> '' AND instr(', ' || lower(COALESCE(tags, '')) || ', ', ', ' || tag || ', ') > 0))  AND (?5 IS NULL OR ?5 = '' OR instr(',' || ?5 || ',', ',' || COALESCE(list_id, '@inbox') || ',') > 0) AND (?6 IS NULL OR ?6 = '' OR instr(',' || ?6 || ',', ',' || COALESCE(group_id, '@ungrouped') || ',') > 0) AND (?7 IS NULL OR ?7 = '' OR instr(',' || ?7 || ',', ',' || COALESCE(workflow_id, '') || ',') > 0) AND (?9 IS NULL OR ?9 = '' OR status_category = ?9) AND (?8 IS NULL OR ?8 <> 'all' OR NOT EXISTS (WITH RECURSIVE f(tag, rest) AS (SELECT '', COALESCE(?4, '') || ',' UNION ALL SELECT lower(ltrim(trim(substr(rest, 1, instr(rest, ',') - 1)), '#')), substr(rest, instr(rest, ',') + 1) FROM f WHERE rest <> '') SELECT 1 FROM f WHERE tag <> '' AND instr(', ' || lower(COALESCE(tags, '')) || ', ', ', ' || tag || ', ') = 0)) AND CASE ?2 WHEN 'my_day' THEN done = 0 AND planned_for IS NOT NULL AND planned_for <= ?1 WHEN 'inbox' THEN done = 0 AND list_id IS NULL WHEN 'ready' THEN done = 0 AND ready = 1 AND (planned_for IS NULL OR planned_for <= ?1) WHEN 'today' THEN done = 0 AND d <= 0 WHEN 'upcoming' THEN done = 0 AND d > 0 WHEN 'done' THEN done = 1 WHEN 'everything' THEN 1 ELSE done = 0 END ORDER BY CASE WHEN ?10 = 'manual' THEN sort_order END, CASE WHEN ?10 = 'title' THEN title END COLLATE NOCASE, CASE WHEN ?10 = 'priority' THEN -COALESCE(priority,0) END, CASE WHEN done = 1 THEN 6 WHEN due IS NULL THEN 5 WHEN d < 0 THEN 0 WHEN d = 0 THEN 1 WHEN d <= 6 THEN 2 ELSE 4 END, due, COALESCE(priority, 0) DESC, CASE WHEN done = 1 THEN -completed_at END, id DESC LIMIT 500",
+      "params": [
+        "today",
+        "filter",
+        "q",
+        "tags",
+        "lists",
+        "groups",
+        "statuses",
+        "tags_mode",
+        "category",
+        "sort",
+        "grouping"
+      ],
+      "description": "Tasks for capture and focus. My Day includes unfinished earlier plans; dates, organization and tag filters run before the result limit.",
+      "cli": false
+    },
+    "list_choices": {
+      "sql": "SELECT id AS value, name AS label FROM task_lists WHERE _deleted IS NULL AND archived = 0 ORDER BY position,name,id",
+      "params": [],
+      "cli": false
+    },
+    "group_choices": {
+      "sql": "SELECT id AS value, name AS label FROM task_groups WHERE _deleted IS NULL AND archived = 0 AND list_id IS NULLIF(?1, '') ORDER BY position,name,id",
+      "params": [
+        "list_id"
+      ],
+      "cli": false
+    },
+    "all_group_choices": {
+      "sql": "SELECT d.id AS value, d.name || ' (' || COALESCE(l.name, 'Inbox') || ')' AS label FROM task_groups d LEFT JOIN task_lists l ON l.id=d.list_id AND l._deleted IS NULL WHERE d._deleted IS NULL AND d.archived=0 ORDER BY l.name,d.position,d.name,d.id",
+      "params": [],
+      "cli": false
+    },
+    "status_choices": {
+      "sql": "SELECT id AS value, name AS label FROM task_statuses WHERE _deleted IS NULL AND archived = 0 AND list_id IS NULLIF(?1, '') ORDER BY position,name,id",
+      "params": [
+        "list_id"
+      ],
+      "cli": false
+    },
+    "all_status_choices": {
+      "sql": "SELECT d.id AS value, d.name || ' (' || COALESCE(l.name, 'Inbox') || ')' AS label FROM task_statuses d LEFT JOIN task_lists l ON l.id=d.list_id AND l._deleted IS NULL WHERE d._deleted IS NULL AND d.archived=0 ORDER BY l.name,d.position,d.name,d.id",
+      "params": [],
+      "cli": false
+    },
+    "list_detail": {
+      "sql": "SELECT id,name,color,archived FROM task_lists WHERE id=?1 AND _deleted IS NULL UNION ALL SELECT '', 'Inbox', '', 0 WHERE ?1='@inbox'",
+      "params": [
+        "id"
+      ],
+      "cli": false
+    },
+    "group_detail": {
+      "sql": "SELECT * FROM task_groups WHERE id=?1 AND _deleted IS NULL",
+      "params": [
+        "id"
+      ],
+      "cli": false
+    },
+    "group_scope": {
+      "sql": "SELECT CASE WHEN ?1='@inbox' THEN '' ELSE ?1 END AS list_id",
+      "params": [
+        "id"
+      ],
+      "cli": false
+    },
+    "status_detail": {
+      "sql": "SELECT * FROM task_statuses WHERE id=?1 AND _deleted IS NULL",
+      "params": [
+        "id"
+      ],
+      "cli": false
+    },
+    "status_scope": {
+      "sql": "SELECT CASE WHEN ?1='@inbox' THEN '' ELSE ?1 END AS list_id",
+      "params": [
+        "id"
+      ],
       "cli": false
     }
   },
