@@ -29,7 +29,8 @@
     "new_group": "",
     "new_status": "",
     "new_list": "",
-    "workspace_mode": "tasks"
+    "workspace_mode": "tasks",
+    "inline_steps": ""
   },
   "body": {
     "type": "stack",
@@ -524,18 +525,119 @@
                         ]
                       },
                       {
-                        "type": "button",
-                        "label": "Plan today",
-                        "variant": "ghost",
-                        "action": {
-                          "op": "update",
-                          "args": {
-                            "id": "{{row.id}}",
-                            "planned_for": "{{$today}}"
+                        "type": "stack",
+                        "direction": "row",
+                        "wrap": true,
+                        "gap": 4,
+                        "align": "start",
+                        "justify": "start",
+                        "children": [
+                          {
+                            "type": "button",
+                            "label": "Plan today",
+                            "variant": "ghost",
+                            "action": {
+                              "op": "update",
+                              "args": {
+                                "id": "{{row.id}}",
+                                "planned_for": "{{$today}}"
+                              },
+                              "success": "Planned for today",
+                              "undo": {
+                                "op": "update",
+                                "args": {
+                                  "id": "{{row.id}}",
+                                  "planned_for": "{{row.planned_for}}"
+                                },
+                                "success": "Restored previous plan"
+                              }
+                            },
+                            "if": "{{!row.done}}"
                           },
-                          "success": "Planned for today"
-                        },
-                        "if": "{{!row.done}}"
+                          {
+                            "type": "button",
+                            "label": "Show steps",
+                            "variant": "ghost",
+                            "action": {
+                              "set": {
+                                "state.inline_steps": "{{row.id}}"
+                              }
+                            },
+                            "if": "{{state.inline_steps != @row.id}}",
+                            "focus_key": "steps-{{row.id}}"
+                          },
+                          {
+                            "type": "button",
+                            "label": "Hide steps",
+                            "variant": "ghost",
+                            "action": {
+                              "set": {
+                                "state.inline_steps": ""
+                              }
+                            },
+                            "if": "{{state.inline_steps == @row.id}}",
+                            "focus_key": "steps-{{row.id}}"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "stack",
+                        "gap": 1,
+                        "if": "{{state.inline_steps == @row.id}}",
+                        "children": [
+                          {
+                            "type": "section",
+                            "title": "Steps",
+                            "children": [
+                              {
+                                "type": "list",
+                                "query": "steps",
+                                "params": {
+                                  "task_id": "{{row.id}}"
+                                },
+                                "empty": "No steps yet. Add your first step below.",
+                                "item": {
+                                  "type": "item",
+                                  "title": "{{row.title}}",
+                                  "done": "{{row.done}}",
+                                  "check": {
+                                    "checked": "{{row.done}}",
+                                    "action": {
+                                      "op": "toggle_step",
+                                      "args": {
+                                        "id": "{{row.id}}",
+                                        "done": "{{value}}"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "type": "form",
+                                "inline": true,
+                                "submit_label": "Add step",
+                                "submit_icon": "plus",
+                                "submit": {
+                                  "op": "add_step",
+                                  "args": {
+                                    "task_id": "{{row.id}}",
+                                    "title": "{{form.title}}"
+                                  },
+                                  "reset": true,
+                                  "success": "Step added"
+                                },
+                                "children": [
+                                  {
+                                    "type": "text-field",
+                                    "name": "title",
+                                    "label": "Step",
+                                    "placeholder": "Add a step"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
                       }
                     ]
                   }
@@ -715,7 +817,15 @@
                             "id": "{{row.id}}",
                             "planned_for": "{{$today}}"
                           },
-                          "success": "Planned for today"
+                          "success": "Planned for today",
+                          "undo": {
+                            "op": "update",
+                            "args": {
+                              "id": "{{row.id}}",
+                              "planned_for": "{{row.planned_for}}"
+                            },
+                            "success": "Restored previous plan"
+                          }
                         },
                         "if": "{{!row.done}}"
                       }
@@ -912,7 +1022,15 @@
                             "id": "{{row.id}}",
                             "planned_for": "{{$today}}"
                           },
-                          "success": "Planned for today"
+                          "success": "Planned for today",
+                          "undo": {
+                            "op": "update",
+                            "args": {
+                              "id": "{{row.id}}",
+                              "planned_for": "{{row.planned_for}}"
+                            },
+                            "success": "Restored previous plan"
+                          }
                         },
                         "if": "{{!row.done}}"
                       }

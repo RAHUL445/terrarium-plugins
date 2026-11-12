@@ -140,13 +140,36 @@ have automated coverage. The full host JavaScript run passed all 299 tests
 after fixture paths were made compatible with `TERRA_PLUGIN_SOURCE`; all 28
 query tests and 17 host page-storage tests passed. No owner data was used.
 
-M4 remains: compact/collapsible view controls, density/visible-field choices,
-friendlier multi-selects on touch, inline steps, undo, and complete keyboard/
-native mobile workflow verification. Details currently use the existing task
-sheet, not a persistent side pane. Views still have a 500-row result cap;
+M4 implements collapsible saved-view controls, saved compact/comfortable density
+and visible-field choices, searchable checkbox multi-selects with explicit clear
+and Escape dismissal, and Reset changes. In-session drafts survive tab changes
+and navigation; unapplied edits remain separate from the preview and shared
+definition. Reloading the app still ends the draft session. Saved display
+preferences apply to page references too. The task title stays visible even
+when every optional field is hidden.
+
+The capture/focus list now expands checklist steps inline, querying only the
+expanded task. Steps can be added and toggled without opening task details.
+Show/Hide retains keyboard focus through row refresh; action buttons share a
+compact row. Individual Plan today actions offer Undo restoring the exact prior
+plan, including no plan. Completion Undo is not introduced because repeating
+tasks can create a successor; existing trash restoration remains available.
+
+Browser verification confirmed inline add/toggle, planning Undo, compact table
+field choices shared with Home, draft navigation, keyboard expansion focus and
+mobile filter search/selection/Escape at 390px with no document overflow.
+Automated tests cover lazy row conditions, draft snapshots, checkbox selection,
+display-field visibility and storage validation. Native mobile/device and full
+assistive-technology verification remain separate work.
+Final M4 checks passed: 306 host UI tests, 18 host page-storage tests, and all
+10 To-do runtime integration tests. The preview CLI build also passed.
+
+Remaining limits: details use the existing task sheet, not a persistent side
+pane. Views still have a 500-row result cap;
 display sorting operates on that result set, not a paginated full collection.
 Mixed-version sync, full organization export and live migration are not yet
-verified. Draft view edits survive refresh but are not durable across navigation.
+verified. Display preferences are currently configured in the saved-view builder;
+the capture/focus workspace keeps its existing presentation.
 
 Implementation and test outcomes are recorded with each milestone commit.
 Native UI, mobile, multi-device sync, and user-data migration require separate
