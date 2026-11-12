@@ -8,25 +8,45 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
-- To-do 0.5.0 emits `task_done` on real task completion; Habits 0.3.0 emits
-  `checked_in` on effective check-in changes, without notes. Repeating the same
-  day/status check-in is harmless. Upgrade Terrarium on every device before
-  installing or syncing these event-enabled packages, then review automations
-  on the chosen execution device.
-- Feeds (`feeds` 0.1.0): public HTTPS RSS/Atom subscriptions, conditional
-  refresh, text summaries, read/unread controls and an unread widget. Keeps
-  the newest 200 items per feed plus older unread items, and refreshes up to
-  20 feeds per run; hourly schedules default to desktop. Requires an HTTP-capable host on every paired device
-  and explicit “Reach any website” approval on each device. This permission
-  allows sending readable data to public websites, including sites not added
-  as feeds. Requests run only while the app is open (foreground on Android);
-  feed content never automatically loads remote images.
+- **To-do 0.5.0:** indexed task search, item references and linked note
+  context; viewable task data with board and matrix moves; bulk completion,
+  updates, tags, trash and restore; CSV export and task import; item History.
+  Real completions emit `task_done` for approved automations.
+- **Notes 0.3.3:** indexed search, item chips, @mentions and Linked from;
+  viewable note data; bulk project changes, trash and restore; Android text
+  sharing; Markdown export and folder import; item History.
+- **Bookmarks 0.2.3:** indexed search and item references, viewable bookmark
+  data, bulk pin/unpin, trash and restore, and Android text/link sharing.
+- **Voice 0.2.3:** indexed capture search and item references.
+- **Habits 0.3.0:** search and item references. Effective check-in changes
+  emit `checked_in` without notes; repeating the same day/status is harmless.
+- **Reports 0.3.4:** search and item references for saved reports.
+- **Feeds 0.1.0:** public HTTPS RSS/Atom subscriptions, conditional refresh,
+  text summaries, read/unread controls and an unread widget. Keeps the newest
+  200 items per feed plus older unread items, and refreshes up to 20 feeds
+  per run. Hourly schedules default to desktop. Requires an HTTP-capable host
+  and explicit **Reach any website** approval on each device, including for
+  sites not added as feeds. Runs only while the app is open (foreground on
+  Android); feed content never automatically loads remote images.
+- Deterministic unsigned catalog generation for reviewed plugin artifacts;
+  registry signing is a separate host CLI step.
+- First public source preview of the original six plugins, release bundle
+  builder with SDK verification and digest pinning, and a vendored SDK for
+  `terrarium:plugin@0.1.0`.
+- Command descriptions in every plugin manifest for command-line clients
+  and agents: typed arguments, effects, confirmation questions, examples,
+  item destinations and hidden internal commands.
 
-- First public source preview of the six first-party plugins: To-do, Notes,
-  Habits, Bookmarks, Voice and Reports.
-- Release bundle builder with SDK verification and digest pinning.
-- Vendored guest SDK snapshot for `terrarium:plugin@0.1.0`.
-- Command descriptions in every plugin manifest for the `terrarium` command
-  line and agents: typed arguments, effects, confirmation questions,
-  examples, the page items open on, and internal commands hidden with
-  `"cli": false`. These manifests need a host with the command registry.
+### Changed
+
+- **Voice 0.2.3 and Habits 0.3.0:** desktop instructions follow the input
+  device. **Habits 0.3.0:** new reminders default to the device in use.
+
+### Fixed
+
+- **To-do 0.5.0:** completion says **Task done** and offers the optional note
+  action in a toast; saving does not interrupt you with a note prompt.
+
+Upgrade Terrarium on every paired device before installing these packages.
+New manifest declarations need matching host support; event-enabled packages
+also require reviewing automations on the chosen execution device.

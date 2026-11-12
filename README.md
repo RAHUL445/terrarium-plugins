@@ -18,7 +18,7 @@ Terrarium is a host; these plugins give it its features. They use only the
 public SDK and WIT contract, so they are also working examples for writing your
 own.
 
-Each plugin is a Rust crate compiled to a WebAssembly component, plus a
+These plugins are Rust crates compiled to WebAssembly components, each with a
 manifest (storage schema, queries, permissions, schedules) and declarative UI
 templates. The Terrarium host runs them in a sandbox on macOS and Android and
 syncs their data between devices.
@@ -29,13 +29,26 @@ syncs their data between devices.
 
 | Plugin | What it does |
 | --- | --- |
-| [To-do](packages/todo) | Tasks with due dates, reminders, priorities, repeats and steps; list, board and matrix layouts |
-| [Notes](packages/notes) | Markdown notes in projects with checklists and autosave; edits on different devices merge |
-| [Habits](packages/habits) | Scheduled habits with check-ins, streaks, reminders and sleep logs |
-| [Bookmarks](packages/bookmarks) | Links with projects, tags and notes; pin the ones you use most |
-| [Voice](packages/voice) | Record or type quick captures, transcribed locally, then send them to To-do or Notes |
+| [To-do](packages/todo) | Tasks, repeats, reminders and steps; board/matrix moves, bulk tags, CSV import/export, links and History |
+| [Notes](packages/notes) | Markdown notes with merging, mentions, backlinks and attachments; custom views, bulk changes, Android sharing, import/export and History |
+| [Habits](packages/habits) | Scheduled habits, check-ins, streaks, reminders and sleep logs; search, references and check-in events |
+| [Bookmarks](packages/bookmarks) | Links with projects, tags and notes; indexed search, references, views, bulk pin/trash and Android sharing |
+| [Voice](packages/voice) | Record or type quick captures, transcribe locally, search and link them, then send them to To-do or Notes |
 | [Feeds](packages/feeds) | HTTPS RSS/Atom reader with text summaries, read/unread controls, hourly desktop refresh and an unread widget; asks to reach any website |
-| [Reports](packages/reports) | AI-written reviews of your tasks, habits and notes, on demand or on a schedule |
+| [Reports](packages/reports) | AI-written reviews on demand or on a schedule; search and link saved reports |
+
+Search and item links use host-owned indexes and reference resolution; plugins
+keep their own data. To-do completions and Habits check-ins can trigger approved
+[automations](https://github.com/RAHUL445/terrarium/blob/main/docs/guide/automations.md).
+Upgrade all paired hosts before installing the new packages, then review their
+permissions on each device. Feeds needs explicit website access; accounts and
+browser sign-in are host features, not built-in Feeds requirements.
+
+To publish catalog metadata, `scripts/build-index.py` builds deterministic
+unsigned indexes from reviewed package artifacts. Sign them separately with
+`terra sign-index`; see the host's
+[registry design](https://github.com/RAHUL445/terrarium/blob/main/docs/design/registry.md).
+Production catalog activation is still gated.
 
 ## Getting started
 
