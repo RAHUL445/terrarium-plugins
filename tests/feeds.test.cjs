@@ -32,21 +32,20 @@ for (const [name, template] of [['page', page], ['widget', widget]]) {
     });
     await view.ready;
     let row = ui.root.children[0].children[0].children[0];
-    const main = row.children[1];
+    const main = row.children[0];
     assert.equal(main.children[0].textContent, '<script>alert(1)</script>');
     assert.equal(main.children[1].textContent, '<img src=x onerror=alert(1)>');
     assert.equal(main.children[0].innerHTML, undefined);
     await main.fire('click');
     assert.deepEqual(opened, []);
-    row.children[0].checked = true;
-    await row.children[0].fire('change');
+    await row.children[1].fire('click');
     assert.equal(actions[0].op, 'mark_read');
     assert.equal(actions[0].args.id, 'synthetic');
     assert.equal(actions[0].args.read, true);
     link = 'https://example.com/story';
     await view.refresh();
     row = ui.root.children[0].children[0].children[0];
-    await row.children[1].fire('click');
+    await row.children[0].fire('click');
     assert.deepEqual(opened, ['https://example.com/story']);
     view.dispose();
   });
@@ -59,9 +58,9 @@ test('feeds page unread filter changes the item query', async () => {
     today: () => '2026-11-11', query: async (name, args) => { queries.push({name,args}); return []; },
   });
   await view.ready;
-  const checkbox = ui.root.children[0].children.find(n => n.className === 'pp-checkbox').children[0];
-  checkbox.checked = true;
-  await checkbox.fire('change');
+  const filter = ui.root.querySelectorAll('select').find(n => n.children.some(option => option.textContent === 'Unread'));
+  filter.value = 'true';
+  await filter.fire('change');
   await view.refresh();
   assert.equal(queries.filter(q => q.name === 'items').at(-1).args.unread, true);
   view.dispose();

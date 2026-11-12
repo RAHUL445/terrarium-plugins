@@ -1,7 +1,7 @@
 {
   "id": "feeds",
   "name": "Feeds",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "api": "terrarium:plugin@0.1.0",
   "description": "Read RSS and Atom feeds. Can send data it can read to any public website, including sites you have not added.",
   "permissions": [
@@ -177,7 +177,7 @@
       "cli": false
     },
     "unread_count": {
-      "sql": "SELECT COUNT(*) AS count FROM items i JOIN feeds f ON f.id = i.feed_id WHERE i._deleted IS NULL AND f._deleted IS NULL AND i.read = 0",
+      "sql": "SELECT 'unread' AS noun, COUNT(*) AS count FROM items i JOIN feeds f ON f.id = i.feed_id WHERE i._deleted IS NULL AND f._deleted IS NULL AND i.read = 0",
       "params": []
     },
     "search": {

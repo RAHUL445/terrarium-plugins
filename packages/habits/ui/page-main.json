@@ -23,7 +23,7 @@
           "args": {
             "title": "{{form.title}}"
           },
-          "success": "Added \u2014 set its days and target",
+          "success": "Added — set its days and target",
           "reset": true,
           "then": {
             "state.open": "{{result.id}}"
@@ -36,7 +36,7 @@
             "label": "New habit",
             "label_hidden": true,
             "required": true,
-            "placeholder": "Add a habit, e.g. \u201cRead 20 minutes\u201d"
+            "placeholder": "Add a habit, e.g. “Read 20 minutes”"
           }
         ]
       },
@@ -110,7 +110,7 @@
             "params": {
               "today": "{{$today}}"
             },
-            "empty": "No habits yet. Add one above \u2014 e.g. \u201cMorning walk\u201d or \u201cDrink water\u201d.",
+            "empty": "No habits yet. Add one above — e.g. “Morning walk” or “Drink water”.",
             "item": {
               "type": "stack",
               "gap": 4,
@@ -185,7 +185,8 @@
                         }
                       }
                     }
-                  ]
+                  ],
+                  "strike_done": false
                 },
                 {
                   "type": "week-strip",
@@ -243,7 +244,8 @@
                 },
                 "label": "label",
                 "value": "pct",
-                "max": 100
+                "max": 100,
+                "suffix": "%"
               }
             ]
           },
@@ -394,7 +396,8 @@
                 },
                 "label": "label",
                 "value": "hours",
-                "max": 10
+                "max": 10,
+                "empty": "No sleep logged yet."
               }
             ]
           },
@@ -416,7 +419,8 @@
                       "text": "{{row.label}}",
                       "icon": "calendar"
                     }
-                  ]
+                  ],
+                  "strike_done": false
                 }
               }
             ]
@@ -452,7 +456,7 @@
               },
               {
                 "type": "stat",
-                "value": "{{row.rate30}}",
+                "value": "{{row.rate30}}%",
                 "label": "Last 30 days"
               },
               {
@@ -502,7 +506,7 @@
                     "id": "{{row.id}}",
                     "status": "skipped"
                   },
-                  "success": "Skipped for today \u2014 your streak is safe"
+                  "success": "Skipped for today — your streak is safe"
                 }
               },
               {

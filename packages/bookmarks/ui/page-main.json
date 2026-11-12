@@ -1,116 +1,288 @@
 {
-  "creation": {"operation": "create", "bind": "state.creating", "prefill": "state.newText"},
+  "creation": {
+    "operation": "create",
+    "bind": "state.creating",
+    "prefill": "state.newText"
+  },
   "state": {
     "creating": "",
-    "newText": "", "q": "", "project": "", "tag": "", "sort": "new", "open": "" },
+    "newText": "",
+    "q": "",
+    "project": "",
+    "tag": "",
+    "sort": "new",
+    "open": ""
+  },
   "body": {
-    "type": "stack", "gap": 16,
+    "type": "stack",
+    "gap": 16,
     "children": [
       {
-        "type": "stack", "gap": 2,
+        "type": "stack",
+        "gap": 2,
         "children": [
-          { "type": "heading", "text": "Bookmarks" },
-          { "type": "list", "query": "summary", "item": { "type": "text", "text": "{{row.label}}", "tone": "muted" } }
+          {
+            "type": "heading",
+            "text": "Bookmarks"
+          }
         ]
       },
       {
         "type": "card",
         "children": [
           {
-            "type": "form", "inline": true, "submit_icon": "plus",
+            "type": "form",
+            "inline": true,
+            "submit_icon": "plus",
             "submit": {
               "op": "create",
-              "args": { "text": "{{form.text}}", "project": "{{state.project}}", "tags": "{{state.tag}}" },
-              "success": "{{result.message}}", "reset": true
+              "args": {
+                "text": "{{form.text}}",
+                "project": "{{state.project}}",
+                "tags": "{{state.tag}}"
+              },
+              "success": "{{result.message}}",
+              "reset": true
             },
             "submit_label": "Save",
             "children": [
               {
-                "type": "text-field", "name": "text", "label": "Save a link", "label_hidden": true, "required": true,
+                "type": "text-field",
+                "name": "text",
+                "label": "Save a link",
+                "label_hidden": true,
+                "required": true,
                 "placeholder": "Paste a link · add #tags"
               }
             ]
           },
-          { "type": "text", "tone": "muted", "text": "Words before the link become its title. New links join the project and tag you’ve picked." }
+          {
+            "type": "text",
+            "tone": "muted",
+            "text": "Words before the link become its title."
+          },
+          {
+            "type": "text",
+            "tone": "muted",
+            "if": "{{state.project}}",
+            "text": "New links join the selected project."
+          },
+          {
+            "type": "text",
+            "tone": "muted",
+            "if": "{{state.tag}}",
+            "text": "New links use the selected tag."
+          }
         ]
       },
       {
-        "type": "stack", "direction": "row", "gap": 12, "wrap": true, "align": "center",
+        "type": "stack",
+        "direction": "row",
+        "gap": 12,
+        "wrap": true,
+        "align": "center",
         "children": [
-          { "type": "search-field", "bind": "state.q", "label": "Search bookmarks", "label_hidden": true, "placeholder": "Search bookmarks", "grow": 1, "basis": 220 },
           {
-            "type": "tabs", "bind": "state.sort", "label": "Sort",
+            "type": "search-field",
+            "bind": "state.q",
+            "label": "Search bookmarks",
+            "label_hidden": true,
+            "placeholder": "Search bookmarks",
+            "grow": 1,
+            "basis": 220
+          },
+          {
+            "type": "tabs",
+            "bind": "state.sort",
+            "label": "Sort",
             "options": [
-              { "value": "new", "label": "Newest" },
-              { "value": "visits", "label": "Popular" },
-              { "value": "opened", "label": "Last used" },
-              { "value": "title", "label": "A–Z" }
+              {
+                "value": "new",
+                "label": "Newest"
+              },
+              {
+                "value": "visits",
+                "label": "Popular"
+              },
+              {
+                "value": "opened",
+                "label": "Last used"
+              },
+              {
+                "value": "title",
+                "label": "A–Z"
+              }
             ]
           }
         ]
       },
       {
-        "type": "list", "query": "projects", "layout": "chips", "params": { "project": "{{state.project}}" },
-        "item": {
-          "type": "button", "variant": "chip", "label": "{{row.label}} · {{row.count}}", "pressed": "{{row.selected}}",
-          "action": { "set": { "state.project": "{{row.project}}", "state.tag": "" } }
-        }
-      },
-      {
-        "type": "list", "query": "tags", "layout": "chips", "params": { "project": "{{state.project}}", "tag": "{{state.tag}}" },
-        "item": {
-          "type": "button", "variant": "chip", "label": "{{row.label}} · {{row.count}}", "pressed": "{{row.selected}}",
-          "aria_label": "Filter by {{row.label}}",
-          "action": { "set": { "state.tag": "{{row.next}}" } }
-        }
-      },
-      {
-        "type": "list", "query": "list", "group": "section",
+        "type": "list",
+        "query": "projects",
+        "layout": "chips",
         "params": {
-          "q": "{{state.q}}", "project": "{{state.project}}", "tag": "{{state.tag}}", "sort": "{{state.sort}}",
-          "utc_offset_ms": "{{$utc_offset_ms}}", "today": "{{$today}}"
+          "project": "{{state.project}}"
+        },
+        "item": {
+          "type": "button",
+          "variant": "chip",
+          "label": "{{row.label}} · {{row.count}}",
+          "pressed": "{{row.selected}}",
+          "action": {
+            "set": {
+              "state.project": "{{row.project}}",
+              "state.tag": ""
+            }
+          }
+        }
+      },
+      {
+        "type": "list",
+        "query": "tags",
+        "layout": "chips",
+        "params": {
+          "project": "{{state.project}}",
+          "tag": "{{state.tag}}"
+        },
+        "item": {
+          "type": "button",
+          "variant": "chip",
+          "label": "{{row.label}} · {{row.count}}",
+          "pressed": "{{row.selected}}",
+          "aria_label": "Filter by {{row.label}}",
+          "action": {
+            "set": {
+              "state.tag": "{{row.next}}"
+            }
+          }
+        }
+      },
+      {
+        "type": "list",
+        "query": "list",
+        "group": "section",
+        "params": {
+          "q": "{{state.q}}",
+          "project": "{{state.project}}",
+          "tag": "{{state.tag}}",
+          "sort": "{{state.sort}}",
+          "utc_offset_ms": "{{$utc_offset_ms}}",
+          "today": "{{$today}}"
         },
         "select": {
           "label": "Select bookmarks",
           "actions": [
-            { "label": "Pin", "icon": "pin", "op": "pin", "args": { "pinned": true }, "success": "Pinned {{count}} bookmarks" },
-            { "label": "Delete", "icon": "trash", "variant": "danger", "op": "delete", "confirm": "Move {{count}} bookmarks to the trash?", "success": "Moved {{count}} bookmarks to the trash", "undo": { "op": "restore", "success": "Restored {{count}} bookmarks" } }
+            {
+              "label": "Pin",
+              "icon": "pin",
+              "op": "pin",
+              "args": {
+                "pinned": true
+              },
+              "success": "Pinned {{count}} bookmarks"
+            },
+            {
+              "label": "Delete",
+              "icon": "trash",
+              "variant": "danger",
+              "op": "delete",
+              "confirm": "Move {{count}} bookmarks to the trash?",
+              "success": "Moved {{count}} bookmarks to the trash",
+              "undo": {
+                "op": "restore",
+                "success": "Restored {{count}} bookmarks"
+              }
+            }
           ]
         },
         "empty": "Nothing here yet. Paste a link above to save it.",
         "item": {
-          "type": "item", "title": "{{row.title}}", "subtitle": "{{row.subtitle}}", "avatar": "{{row.host}}",
-          "action": { "open": "{{row.url}}", "op": "visit", "args": { "id": "{{row.id}}" } },
+          "type": "item",
+          "title": "{{row.title}}",
+          "subtitle": "{{row.subtitle}}",
+          "avatar": "{{row.host}}",
+          "action": {
+            "open": "{{row.url}}",
+            "op": "visit",
+            "args": {
+              "id": "{{row.id}}"
+            }
+          },
           "chips": [
-            { "text": "{{row.project}}", "icon": "folder" },
-            { "text": "{{row.tags_label}}", "tone": "accent" },
-            { "text": "{{row.visits_label}}", "icon": "eye" },
-            { "text": "{{row.added}}", "icon": "clock" }
+            {
+              "text": "{{row.project}}",
+              "icon": "folder"
+            },
+            {
+              "text": "{{row.tags_label}}",
+              "tone": "accent"
+            },
+            {
+              "text": "{{row.visits_label}}",
+              "icon": "eye"
+            },
+            {
+              "text": "{{row.added}}",
+              "icon": "clock",
+              "format": "local-time"
+            }
           ],
           "trailing": [
             {
-              "type": "button", "icon": "pin", "variant": "ghost", "pressed": "{{row.pinned}}",
+              "type": "button",
+              "icon": "pin",
+              "variant": "ghost",
+              "pressed": "{{row.pinned}}",
               "aria_label": "Pin {{row.title}}",
-              "action": { "op": "pin", "args": { "id": "{{row.id}}" }, "success": "{{result.message}}" }
+              "action": {
+                "op": "pin",
+                "args": {
+                  "id": "{{row.id}}"
+                },
+                "success": "{{result.message}}"
+              }
             },
             {
-              "type": "button", "icon": "edit", "variant": "ghost", "aria_label": "Edit {{row.title}}",
-              "action": { "set": { "state.open": "{{row.id}}" } }
+              "type": "button",
+              "icon": "edit",
+              "variant": "ghost",
+              "aria_label": "Edit {{row.title}}",
+              "action": {
+                "set": {
+                  "state.open": "{{row.id}}"
+                }
+              }
             }
           ]
         }
       },
       {
-        "type": "section", "title": "Trash", "collapsible": true,
+        "type": "section",
+        "title": "Trash",
+        "collapsible": true,
         "children": [
           {
-            "type": "list", "query": "trash", "empty": "Trash is empty.",
+            "type": "list",
+            "query": "trash",
+            "empty": "Trash is empty.",
             "item": {
-              "type": "item", "title": "{{row.title}}", "subtitle": "{{row.host}}",
+              "type": "item",
+              "title": "{{row.title}}",
+              "subtitle": "{{row.host}}",
               "trailing": [
                 {
-                  "type": "button", "label": "Restore", "icon": "undo", "variant": "ghost", "aria_label": "Restore {{row.title}}",
-                  "action": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored" }
+                  "type": "button",
+                  "label": "Restore",
+                  "icon": "undo",
+                  "variant": "ghost",
+                  "aria_label": "Restore {{row.title}}",
+                  "action": {
+                    "op": "restore",
+                    "args": {
+                      "id": "{{row.id}}"
+                    },
+                    "success": "Restored"
+                  }
                 }
               ]
             }
@@ -118,46 +290,139 @@
         ]
       },
       {
-        "type": "sheet", "bind": "state.open", "title": "Bookmark", "query": "bookmark",
-        "params": { "id": "{{state.open}}", "utc_offset_ms": "{{$utc_offset_ms}}", "today": "{{$today}}" },
+        "type": "sheet",
+        "bind": "state.open",
+        "title": "Bookmark",
+        "query": "bookmark",
+        "params": {
+          "id": "{{state.open}}",
+          "utc_offset_ms": "{{$utc_offset_ms}}",
+          "today": "{{$today}}"
+        },
         "children": [
-          { "type": "text", "if": "{{row.info}}", "text": "{{row.info}}", "tone": "muted" },
           {
-            "type": "form", "autosave": true,
+            "type": "text",
+            "if": "{{row.info}}",
+            "text": "{{row.info}}",
+            "tone": "muted",
+            "format": "local-time"
+          },
+          {
+            "type": "form",
+            "autosave": true,
             "submit": {
               "op": "update",
               "args": {
-                "id": "{{row.id}}", "url": "{{form.url}}", "title": "{{form.title}}", "project": "{{form.project}}",
-                "tags": "{{form.tags}}", "note": "{{form.note}}", "pinned": "{{form.pinned}}"
+                "id": "{{row.id}}",
+                "url": "{{form.url}}",
+                "title": "{{form.title}}",
+                "project": "{{form.project}}",
+                "tags": "{{form.tags}}",
+                "note": "{{form.note}}",
+                "pinned": "{{form.pinned}}"
               }
             },
             "children": [
-              { "type": "text-field", "name": "title", "label": "Title", "placeholder": "{{row.host}}", "value": "{{row.title}}" },
-              { "type": "text-field", "name": "url", "label": "Address", "value": "{{row.url}}", "required": true },
               {
-                "type": "stack", "direction": "row", "gap": 12, "wrap": true, "align": "end",
+                "type": "text-field",
+                "name": "title",
+                "label": "Title",
+                "placeholder": "{{row.host}}",
+                "value": "{{row.title}}"
+              },
+              {
+                "type": "text-field",
+                "name": "url",
+                "label": "Address",
+                "value": "{{row.url}}",
+                "required": true
+              },
+              {
+                "type": "stack",
+                "direction": "row",
+                "gap": 12,
+                "wrap": true,
+                "align": "end",
                 "children": [
                   {
-                    "type": "text-field", "name": "project", "label": "Project", "placeholder": "None", "value": "{{row.project}}",
-                    "grow": 1, "basis": 160, "suggestions": { "query": "project_names", "column": "project" }
+                    "type": "text-field",
+                    "name": "project",
+                    "label": "Project",
+                    "placeholder": "None",
+                    "value": "{{row.project}}",
+                    "grow": 1,
+                    "basis": 160,
+                    "suggestions": {
+                      "query": "project_names",
+                      "column": "project"
+                    }
                   },
-                  { "type": "toggle", "name": "pinned", "label": "Pinned", "value": "{{row.pinned}}" }
+                  {
+                    "type": "toggle",
+                    "name": "pinned",
+                    "label": "Pinned",
+                    "value": "{{row.pinned}}"
+                  }
                 ]
               },
-              { "type": "text-field", "name": "tags", "label": "Tags", "placeholder": "rust, docs", "value": "{{row.tags}}" },
-              { "type": "text-area", "name": "note", "label": "Note", "rows": 4, "value": "{{row.note}}", "placeholder": "Why you saved it, what to read first…" }
+              {
+                "type": "text-field",
+                "name": "tags",
+                "label": "Tags",
+                "placeholder": "rust, docs",
+                "value": "{{row.tags}}"
+              },
+              {
+                "type": "text-area",
+                "name": "note",
+                "label": "Note",
+                "rows": 4,
+                "value": "{{row.note}}",
+                "placeholder": "Why you saved it, what to read first…"
+              }
             ]
           },
           {
-            "type": "stack", "direction": "row", "gap": 8, "wrap": true,
+            "type": "stack",
+            "direction": "row",
+            "gap": 8,
+            "wrap": true,
             "children": [
               {
-                "type": "button", "label": "Open link", "icon": "external", "variant": "primary",
-                "action": { "open": "{{row.url}}", "op": "visit", "args": { "id": "{{row.id}}" } }
+                "type": "button",
+                "label": "Open link",
+                "icon": "external",
+                "variant": "primary",
+                "action": {
+                  "open": "{{row.url}}",
+                  "op": "visit",
+                  "args": {
+                    "id": "{{row.id}}"
+                  }
+                }
               },
               {
-                "type": "button", "label": "Delete", "icon": "trash", "variant": "danger",
-                "action": { "op": "delete", "args": { "id": "{{row.id}}" }, "success": "Moved to trash", "undo": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored from trash" }, "then": { "state.open": "" } }
+                "type": "button",
+                "label": "Delete",
+                "icon": "trash",
+                "variant": "danger",
+                "action": {
+                  "op": "delete",
+                  "args": {
+                    "id": "{{row.id}}"
+                  },
+                  "success": "Moved to trash",
+                  "undo": {
+                    "op": "restore",
+                    "args": {
+                      "id": "{{row.id}}"
+                    },
+                    "success": "Restored from trash"
+                  },
+                  "then": {
+                    "state.open": ""
+                  }
+                }
               }
             ]
           }
@@ -178,7 +443,7 @@
                 "label": "Link",
                 "required": true,
                 "value": "{{state.newText}}",
-                "placeholder": "https://example.com \u00b7 #tags"
+                "placeholder": "https://example.com · #tags"
               },
               {
                 "type": "text-field",
@@ -235,5 +500,7 @@
       }
     ]
   },
-  "entry": {"bind": "state.open"}
+  "entry": {
+    "bind": "state.open"
+  }
 }

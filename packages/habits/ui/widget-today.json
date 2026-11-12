@@ -90,13 +90,29 @@
                 }
               }
             }
-          ]
+          ],
+          "strike_done": false
         }
       }
     ]
   },
-  "home": {"order": 20},
+  "home": {
+    "order": 20
+  },
   "page": {
-    "size": { "default": [6, 3], "min": [3, 2], "max": [12, 6] }
+    "size": {
+      "default": [
+        6,
+        3
+      ],
+      "min": [
+        3,
+        2
+      ],
+      "max": [
+        12,
+        6
+      ]
+    }
   }
 }

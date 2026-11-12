@@ -1,10 +1,12 @@
 {
   "id": "todo",
   "name": "To-do",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "api": "terrarium:plugin@0.1.0",
   "description": "Tasks with due dates, reminders, priorities, repeats and steps.",
-  "history": ["tasks"],
+  "history": [
+    "tasks"
+  ],
   "storage": {
     "version": 4,
     "tables": [
@@ -660,7 +662,7 @@
       "cli": false
     },
     "search": {
-      "sql": "SELECT id, title, CASE WHEN done = 1 THEN 'Done' ELSE COALESCE(due, tags) END AS subtitle FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND (title LIKE '%' || ?1 || '%' OR notes LIKE '%' || ?1 || '%' OR tags LIKE '%' || ?1 || '%') ORDER BY done, due IS NULL, due LIMIT 8",
+      "sql": "SELECT id, title, CASE WHEN done = 1 THEN 'Done' ELSE COALESCE(due, 'No date') END || CASE WHEN COALESCE(tags, '') <> '' THEN ' · ' || tags ELSE '' END || CASE WHEN COALESCE(notes, '') <> '' THEN ' · ' || substr(notes, 1, 100) ELSE '' END AS subtitle FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND (title LIKE '%' || ?1 || '%' OR notes LIKE '%' || ?1 || '%' OR tags LIKE '%' || ?1 || '%') ORDER BY done, due IS NULL, due LIMIT 8",
       "params": [
         "q"
       ],
@@ -723,7 +725,7 @@
       "description": "Current settings for offering a note on finishing a task."
     },
     "index_tasks": {
-      "sql": "SELECT id, title, substr(COALESCE(notes, ''), 1, 20000) AS body, tags AS keywords, CASE WHEN done = 1 THEN 'Done' ELSE COALESCE(due, tags) END AS subtitle FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "sql": "SELECT id, title, substr(COALESCE(notes, ''), 1, 20000) AS body, tags AS keywords, CASE WHEN done = 1 THEN 'Done' ELSE COALESCE(due, 'No date') END || CASE WHEN COALESCE(tags, '') <> '' THEN ' · ' || tags ELSE '' END || CASE WHEN COALESCE(notes, '') <> '' THEN ' · ' || substr(notes, 1, 100) ELSE '' END AS subtitle FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND id IN (SELECT value FROM json_each(?1))",
       "params": [
         "ids"
       ],

@@ -11,7 +11,8 @@
     "filter": "today",
     "q": "",
     "open": "",
-    "note_for": ""
+    "note_for": "",
+    "undatedExpanded": false
   },
   "body": {
     "type": "stack",
@@ -114,7 +115,7 @@
         "type": "text",
         "tone": "muted",
         "if": "{{state.view != list}}",
-        "text": "These views use the Show and Search filters above. Change the filters to see more tasks."
+        "text": "These views use the Today, Upcoming, All open, All tasks and Done tabs and Search tasks above."
       },
       {
         "type": "list",
@@ -229,6 +230,11 @@
               "icon": "note"
             }
           ]
+        },
+        "collapse_group": {
+          "value": "No date",
+          "when": "{{state.filter == today}}",
+          "bind": "state.undatedExpanded"
         }
       },
       {
@@ -349,9 +355,8 @@
             {
               "type": "button",
               "if": "{{!row.done}}",
-              "label": "{{row.move_label}}",
               "variant": "ghost",
-              "aria_label": "{{row.move_label}}: {{row.title}}",
+              "aria_label": "{{row.move_label}}",
               "action": {
                 "op": "update",
                 "args": {
@@ -359,7 +364,8 @@
                   "in_progress": "{{!row.in_progress}}"
                 },
                 "success": "Task moved"
-              }
+              },
+              "icon": "play"
             }
           ]
         },
@@ -387,13 +393,18 @@
             "label": "Done"
           }
         ],
-        "label": "Task Kanban"
+        "label": "Task Kanban",
+        "collapse_group": {
+          "value": "No date",
+          "when": "{{state.filter == today}}",
+          "bind": "state.undatedExpanded"
+        }
       },
       {
         "type": "text",
         "tone": "muted",
         "if": "{{state.view == matrix}}",
-        "text": "Open a task to set Urgent and Important. Tasks without either flag start in Eliminate; nothing is deleted."
+        "text": "Open a task to set Urgent and Important. Tasks without either flag stay in Unsorted."
       },
       {
         "type": "list",
@@ -534,11 +545,16 @@
           },
           {
             "value": "eliminate",
-            "label": "Eliminate",
-            "description": "Neither urgent nor important"
+            "label": "Unsorted",
+            "description": "Tasks waiting to be sorted"
           }
         ],
-        "label": "Eisenhower matrix"
+        "label": "Eisenhower matrix",
+        "collapse_group": {
+          "value": "No date",
+          "when": "{{state.filter == today}}",
+          "bind": "state.undatedExpanded"
+        }
       },
       {
         "type": "button",
@@ -773,7 +789,8 @@
                     "label": "Remind at",
                     "value": "{{row.remind_time}}",
                     "grow": 1,
-                    "basis": 120
+                    "basis": 120,
+                    "enabled_when": "{{form.due}}"
                   }
                 ]
               },
@@ -1117,7 +1134,8 @@
                     "label": "Remind at",
                     "value": "",
                     "grow": 1,
-                    "basis": 120
+                    "basis": 120,
+                    "enabled_when": "{{form.due}}"
                   }
                 ]
               },

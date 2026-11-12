@@ -96,7 +96,8 @@
                 "success": "Transcribed {{result.transcribed}}"
               }
             }
-          ]
+          ],
+          "if": "{{row.total}}"
         }
       },
       {
@@ -548,7 +549,7 @@
       {
         "type": "sheet",
         "bind": "state.creating",
-        "title": "Capture text",
+        "title": "New capture",
         "presentation": "modal",
         "children": [
           {

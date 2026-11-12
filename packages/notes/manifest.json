@@ -1,10 +1,12 @@
 {
   "id": "notes",
   "name": "Notes",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "api": "terrarium:plugin@0.1.0",
   "description": "Markdown notes in projects, with checklists and autosave; edits on different devices merge. Notes saved from finished tasks live in the Tasks project.",
-  "history": ["notes"],
+  "history": [
+    "notes"
+  ],
   "storage": {
     "version": 2,
     "tables": [
@@ -404,7 +406,7 @@
   "search": "search",
   "quick_actions": [
     {
-      "label": "Quick note",
+      "label": "New note",
       "op": "create",
       "arg": "body"
     }

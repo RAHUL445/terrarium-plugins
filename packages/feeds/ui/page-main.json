@@ -27,7 +27,7 @@
             "type": "text-field",
             "name": "url",
             "label": "Feed URL",
-            "placeholder": "https://\u2026",
+            "placeholder": "https://…",
             "required": true
           }
         ]
@@ -57,64 +57,76 @@
                 "feed_id": "{{state.feed_id}}"
               }
             }
-          },
-          {
-            "type": "button",
-            "label": "All feeds",
-            "action": {
-              "set": {
-                "state.feed_id": ""
-              }
-            }
           }
         ]
       },
       {
-        "type": "list",
-        "query": "feeds",
-        "empty": "Add an RSS or Atom feed above.",
-        "item": {
-          "type": "item",
-          "title": "{{row.title}}",
-          "subtitle": "{{row.last_error}}",
-          "action": {
-            "set": {
-              "state.feed_id": "{{row.id}}"
+        "type": "stack",
+        "direction": "row",
+        "gap": 12,
+        "wrap": true,
+        "children": [
+          {
+            "type": "select",
+            "bind": "state.feed_id",
+            "label": "Feed",
+            "options": [
+              {
+                "value": "",
+                "label": "All feeds"
+              }
+            ],
+            "options_query": {
+              "query": "feeds",
+              "value": "id",
+              "label": "title"
             }
           },
-          "trailing": [
-            {
-              "type": "button",
-              "label": "Refresh",
-              "action": {
-                "op": "refresh",
-                "args": {
-                  "id": "{{row.id}}"
-                }
+          {
+            "type": "select",
+            "bind": "state.unread",
+            "label": "Read status",
+            "options": [
+              {
+                "value": false,
+                "label": "All articles"
+              },
+              {
+                "value": true,
+                "label": "Unread"
               }
-            },
-            {
-              "type": "button",
-              "label": "Remove",
-              "action": {
-                "op": "remove",
-                "args": {
-                  "id": "{{row.id}}"
-                }
-              }
-            }
-          ]
-        }
+            ]
+          }
+        ]
       },
       {
-        "type": "checkbox",
-        "label": "Unread only",
-        "checked": "{{state.unread}}",
-        "action": {
-          "set": {
-            "state.unread": "{{value}}"
+        "type": "section",
+        "title": "Manage feeds",
+        "collapsible": true,
+        "children": [
+          {
+            "type": "list",
+            "query": "feeds",
+            "item": {
+              "type": "item",
+              "title": "{{row.title}}",
+              "subtitle": "{{row.last_error}}",
+              "trailing": [
+                {
+                  "type": "button",
+                  "label": "Remove",
+                  "variant": "ghost",
+                  "action": {
+                    "op": "remove",
+                    "args": {
+                      "id": "{{row.id}}"
+                    }
+                  }
+                }
+              ]
+            }
           }
-        }
+        ]
       },
       {
         "type": "list",
@@ -132,16 +144,30 @@
           "action": {
             "open": "{{row.link}}"
           },
-          "check": {
-            "checked": "{{row.read}}",
-            "action": {
-              "op": "mark_read",
-              "args": {
-                "id": "{{row.id}}",
-                "read": "{{value}}"
+          "chips": [
+            {
+              "text": "{{row.feed_title}}"
+            },
+            {
+              "text": "{{row.published_ms}}",
+              "format": "datetime",
+              "icon": "clock"
+            }
+          ],
+          "trailing": [
+            {
+              "type": "button",
+              "label": "{{row.read_label}}",
+              "variant": "ghost",
+              "action": {
+                "op": "mark_read",
+                "args": {
+                  "id": "{{row.id}}",
+                  "read": "{{!row.read}}"
+                }
               }
             }
-          }
+          ]
         }
       }
     ]

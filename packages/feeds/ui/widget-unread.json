@@ -11,16 +11,30 @@
       "action": {
         "open": "{{row.link}}"
       },
-      "check": {
-        "checked": "{{row.read}}",
-        "action": {
-          "op": "mark_read",
-          "args": {
-            "id": "{{row.id}}",
-            "read": "{{value}}"
+      "chips": [
+        {
+          "text": "{{row.feed_title}}"
+        },
+        {
+          "text": "{{row.published_ms}}",
+          "format": "datetime",
+          "icon": "clock"
+        }
+      ],
+      "trailing": [
+        {
+          "type": "button",
+          "label": "{{row.read_label}}",
+          "variant": "ghost",
+          "action": {
+            "op": "mark_read",
+            "args": {
+              "id": "{{row.id}}",
+              "read": "{{!row.read}}"
+            }
           }
         }
-      }
+      ]
     }
   },
   "page": {
