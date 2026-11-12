@@ -371,6 +371,12 @@
       ],
       "cli": false,
       "description": "Notes by id, for links."
+    },
+    "export_notes": {
+      "sql": "SELECT title, body, project FROM notes WHERE _deleted IS NULL ORDER BY project, title",
+      "params": [],
+      "description": "Every note, for exports.",
+      "cli": false
     }
   },
   "pages": [
@@ -425,6 +431,27 @@
       "resolve": "ref_notes",
       "kind": "Note",
       "icon": "note"
+    }
+  ],
+  "export": [
+    {
+      "query": "export_notes",
+      "format": "markdown",
+      "path": "{{project}}/{{title}}.md",
+      "body": "body"
+    }
+  ],
+  "import": [
+    {
+      "id": "markdown",
+      "label": "Notes from a folder of Markdown files",
+      "format": "markdown",
+      "op": "create",
+      "fields": {
+        "title": "$name",
+        "body": "$text",
+        "project": "$folder"
+      }
     }
   ]
 }

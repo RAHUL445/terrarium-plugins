@@ -479,6 +479,55 @@
         }
       },
       "cli": false
+    },
+    "import": {
+      "description": "Add a task from an import: the title is kept as written. Takes the same fields as create, plus done.",
+      "effect": "write",
+      "params": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "notes": {
+          "type": "text"
+        },
+        "due": {
+          "type": "date"
+        },
+        "remind_time": {
+          "type": "time"
+        },
+        "priority": {
+          "type": "integer",
+          "min": 0,
+          "max": 3
+        },
+        "repeat": {
+          "type": "enum",
+          "values": [
+            "daily",
+            "weekdays",
+            "weekly",
+            "monthly",
+            "never"
+          ]
+        },
+        "tags": {
+          "type": "string"
+        },
+        "in_progress": {
+          "type": "boolean"
+        },
+        "urgent": {
+          "type": "boolean"
+        },
+        "important": {
+          "type": "boolean"
+        },
+        "done": {
+          "type": "boolean"
+        }
+      }
     }
   },
   "queries": {
@@ -687,6 +736,12 @@
       ],
       "cli": false,
       "description": "Tasks by id, for links."
+    },
+    "export_tasks": {
+      "sql": "SELECT title, notes, due, remind_time, COALESCE(priority, 0) AS priority, repeat, tags, CASE WHEN done = 1 THEN 'true' ELSE 'false' END AS done, CASE WHEN in_progress = 1 THEN 'true' ELSE 'false' END AS in_progress, CASE WHEN urgent = 1 THEN 'true' ELSE 'false' END AS urgent, CASE WHEN important = 1 THEN 'true' ELSE 'false' END AS important FROM tasks WHERE _deleted IS NULL ORDER BY COALESCE(due, '9999'), title",
+      "params": [],
+      "description": "Every task, for exports.",
+      "cli": false
     }
   },
   "reminders": {
@@ -750,6 +805,56 @@
       "resolve": "ref_tasks",
       "kind": "Task",
       "icon": "check"
+    }
+  ],
+  "export": [
+    {
+      "query": "export_tasks",
+      "format": "csv",
+      "path": "tasks.csv",
+      "columns": [
+        "title",
+        "notes",
+        "due",
+        "remind_time",
+        "priority",
+        "repeat",
+        "tags",
+        "done",
+        "in_progress",
+        "urgent",
+        "important"
+      ]
+    }
+  ],
+  "import": [
+    {
+      "id": "tasks_csv",
+      "label": "Tasks from a CSV file",
+      "format": "csv",
+      "op": "import",
+      "fields": {
+        "title": "title",
+        "notes": "notes",
+        "due": "due",
+        "remind_time": "remind_time",
+        "priority": "priority",
+        "repeat": "repeat",
+        "tags": "tags",
+        "done": "done",
+        "in_progress": "in_progress",
+        "urgent": "urgent",
+        "important": "important"
+      }
+    },
+    {
+      "id": "titles_csv",
+      "label": "Task titles from a CSV file",
+      "format": "csv",
+      "op": "import",
+      "fields": {
+        "title": "title"
+      }
     }
   ]
 }

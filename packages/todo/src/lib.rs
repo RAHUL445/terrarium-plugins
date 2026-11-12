@@ -20,6 +20,7 @@ impl Plugin for Todo {
     fn handle(operation: &str, args: Args) -> Result<Value> {
         match operation {
             "create" => create(&args),
+            "import" => import(&args),
             "update" => update(&args),
             "move" => move_task(&args),
             "add_tag" => add_tag(&args),
@@ -56,8 +57,32 @@ impl Plugin for Todo {
 /// Creates a task. Dates, times, `#tags`, `!priority` and "every …" in the
 /// title are read out of it; explicit `due`, `tags` and `notes` win.
 fn create(args: &Args) -> Result<Value> {
+    create_task(args, true)
+}
+
+/// Imports a literal title and preserves whether the task is finished.
+fn import(args: &Args) -> Result<Value> {
+    let out = create_task(args, false)?;
+    if args.get("done").and_then(Value::as_bool) == Some(true) {
+        let mut values = Map::new();
+        values.insert("done".into(), json!(true));
+        values.insert("completed_at".into(), json!(clock::now_ms() as i64));
+        storage::update(TABLE, out["id"].as_str().unwrap_or_default(), &values)?;
+    }
+    Ok(out)
+}
+
+/// Creates a task, optionally reading quick-add fields out of its title.
+fn create_task(args: &Args, parse: bool) -> Result<Value> {
     let today = clock::today("")?;
-    let parsed = quick::parse(args.str("title")?, &today);
+    let parsed = if parse {
+        quick::parse(args.str("title")?, &today)
+    } else {
+        quick::Parsed {
+            title: args.str("title")?.to_string(),
+            ..Default::default()
+        }
+    };
     let title = clean_title(&parsed.title)?;
     let mut values = Map::new();
     values.insert("title".into(), json!(title));
