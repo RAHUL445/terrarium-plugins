@@ -1,14 +1,14 @@
 {
   "id": "todo",
   "name": "To-do",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "api": "terrarium:plugin@0.1.0",
   "description": "Tasks with due dates, reminders, priorities, repeats and steps.",
   "history": [
     "tasks"
   ],
   "storage": {
-    "version": 4,
+    "version": 5,
     "tables": [
       {
         "name": "tasks",
@@ -86,6 +86,31 @@
             "name": "important",
             "type": "boolean",
             "default": false
+          },
+          {
+            "name": "list_id",
+            "type": "text"
+          },
+          {
+            "name": "group_id",
+            "type": "text"
+          },
+          {
+            "name": "status_id",
+            "type": "text"
+          },
+          {
+            "name": "previous_status_id",
+            "type": "text"
+          },
+          {
+            "name": "planned_for",
+            "type": "text"
+          },
+          {
+            "name": "sort_order",
+            "type": "integer",
+            "default": 0
           }
         ]
       },
@@ -106,6 +131,37 @@
             "type": "boolean",
             "default": false
           }
+        ]
+      },
+      {
+        "name": "task_lists",
+        "columns": [
+          { "name": "name", "type": "text" },
+          { "name": "color", "type": "text" },
+          { "name": "position", "type": "integer", "default": 0 },
+          { "name": "archived", "type": "boolean", "default": false }
+        ]
+      },
+      {
+        "name": "task_groups",
+        "columns": [
+          { "name": "list_id", "type": "text" },
+          { "name": "name", "type": "text" },
+          { "name": "color", "type": "text" },
+          { "name": "position", "type": "integer", "default": 0 },
+          { "name": "archived", "type": "boolean", "default": false }
+        ]
+      },
+      {
+        "name": "task_statuses",
+        "columns": [
+          { "name": "list_id", "type": "text" },
+          { "name": "name", "type": "text" },
+          { "name": "color", "type": "text" },
+          { "name": "category", "type": "text" },
+          { "name": "ready", "type": "boolean", "default": true },
+          { "name": "position", "type": "integer", "default": 0 },
+          { "name": "archived", "type": "boolean", "default": false }
         ]
       },
       {
@@ -534,6 +590,31 @@
     }
   },
   "queries": {
+    "organization_tasks": {
+      "sql": "SELECT t.id, t.list_id, t.group_id, t.status_id, t.previous_status_id, t.planned_for, COALESCE(t.sort_order, 0) AS sort_order, COALESCE(l.name, 'Inbox') AS list_name, COALESCE(g.name, 'Ungrouped') AS group_name, COALESCE(s.name, CASE WHEN t.done = 1 THEN 'Done' WHEN t.in_progress = 1 THEN 'In progress' ELSE 'To pick' END) AS status_name, CASE WHEN t.done = 1 THEN 'completed' WHEN t.in_progress = 1 THEN 'active' ELSE 'not_started' END AS status_category, t.list_id IS NOT NULL AND l.id IS NULL AS invalid_list, t.group_id IS NOT NULL AND g.id IS NULL AS invalid_group, t.status_id IS NOT NULL AND s.id IS NULL AS invalid_status FROM tasks t LEFT JOIN task_lists l ON l.id = t.list_id AND l._deleted IS NULL LEFT JOIN task_groups g ON g.id = t.group_id AND g._deleted IS NULL AND g.list_id IS t.list_id LEFT JOIN task_statuses s ON s.id = t.status_id AND s._deleted IS NULL AND s.list_id IS t.list_id AND s.category = CASE WHEN t.done = 1 THEN 'completed' WHEN t.in_progress = 1 THEN 'active' ELSE 'not_started' END WHERE t._deleted IS NULL AND t.cleared_at IS NULL AND (?1 IS NULL OR ?1 = '' OR t.id = ?1) ORDER BY COALESCE(t.sort_order, 0), t.id LIMIT 500",
+      "params": ["id"],
+      "description": "Organization metadata with legacy defaults and invalid-reference flags; optional task id. Does not change task data.",
+      "types": { "id": { "type": "string", "description": "Optional task id; empty returns up to 500 current tasks." } },
+      "cli": false
+    },
+    "task_lists": {
+      "sql": "SELECT id, name, color, position, archived FROM task_lists WHERE _deleted IS NULL ORDER BY position, name, id",
+      "params": [],
+      "description": "User-created lists, including archived lists. Inbox is the implicit null-list destination.",
+      "cli": false
+    },
+    "task_groups": {
+      "sql": "SELECT id, list_id, name, color, position, archived FROM task_groups WHERE _deleted IS NULL AND list_id IS NULLIF(?1, '') ORDER BY position, name, id",
+      "params": ["list_id"],
+      "description": "Groups belonging to one list; empty list id means Inbox.",
+      "cli": false
+    },
+    "task_statuses": {
+      "sql": "SELECT id, list_id, name, color, category, ready, position, archived FROM task_statuses WHERE _deleted IS NULL AND list_id IS NULLIF(?1, '') ORDER BY position, name, id",
+      "params": ["list_id"],
+      "description": "Custom statuses belonging to one list; empty list id means Inbox. Tasks without an assignment derive status from their completion flags.",
+      "cli": false
+    },
     "focus_suggestions": {
       "sql": "WITH RECURSIVE s(tag, rest) AS (SELECT '', tags || ', ' FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND tags IS NOT NULL AND tags <> '' UNION ALL SELECT trim(substr(rest, 1, instr(rest, ', ') - 1)), substr(rest, instr(rest, ', ') + 2) FROM s WHERE rest <> '') SELECT tag AS value, COUNT(*) AS count FROM s WHERE tag <> '' GROUP BY tag ORDER BY count DESC, tag LIMIT 30",
       "params": [],
