@@ -4,6 +4,7 @@
   "version": "0.5.0",
   "api": "terrarium:plugin@0.1.0",
   "description": "Tasks with due dates, reminders, priorities, repeats and steps.",
+  "history": ["tasks"],
   "storage": {
     "version": 4,
     "tables": [

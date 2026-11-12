@@ -484,6 +484,10 @@
                 "action": { "op": "toggle", "args": { "id": "{{row.id}}", "done": "{{!row.done}}" }, "then": { "state.open": "", "state.note_for": "{{result.ask_note}}" } }
               },
               {
+                "type": "button", "label": "History", "variant": "ghost",
+                "action": { "history": { "table": "tasks", "id": "{{row.id}}", "title": "{{row.title}}" } }
+              },
+              {
                 "type": "button", "label": "Delete", "icon": "trash", "variant": "danger",
                 "action": { "op": "delete", "args": { "id": "{{row.id}}" }, "success": "Moved to trash", "undo": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored from trash" }, "then": { "state.open": "" } }
               }

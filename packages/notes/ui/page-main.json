@@ -97,6 +97,10 @@
             "type": "stack", "direction": "row", "gap": 8,
             "children": [
               {
+                "type": "button", "label": "History", "variant": "ghost",
+                "action": { "history": { "table": "notes", "id": "{{row.id}}", "title": "{{row.title}}" } }
+              },
+              {
                 "type": "button", "label": "Delete note", "icon": "trash", "variant": "danger",
                 "action": { "op": "delete", "args": { "id": "{{row.id}}" }, "success": "Moved to trash", "undo": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored from trash" }, "then": { "state.open": "" } }
               }
