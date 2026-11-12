@@ -6,7 +6,7 @@
     "children": [
       {
         "type": "audio-recorder",
-        "label": "Tap to record",
+        "label": "{{$gesture}} to record",
         "hint": "Up to 3 minutes · transcribed on your computer",
         "max_seconds": 180,
         "action": {

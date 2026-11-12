@@ -305,6 +305,7 @@ fn move_task(args: &Args) -> Result<Value> {
 fn toggle(args: &Args) -> Result<Value> {
     let id = args.str("id")?;
     let done = args.bool("done")?;
+    let message = if done { "Task done" } else { "Task reopened" };
     let current = storage::query(
         "SELECT done, title, tags FROM tasks WHERE id = ?1 AND _deleted IS NULL",
         &[json!(id)],
@@ -318,7 +319,7 @@ fn toggle(args: &Args) -> Result<Value> {
         .unwrap_or_else(|| current["done"].as_i64() == Some(1))
         == done
     {
-        return Ok(Value::Null);
+        return Ok(json!({ "message": message }));
     }
     let mut values = Map::new();
     values.insert("done".into(), json!(done));
@@ -336,7 +337,7 @@ fn toggle(args: &Args) -> Result<Value> {
     }
     storage::update(TABLE, id, &values)?;
     if !done {
-        return Ok(Value::Null);
+        return Ok(json!({ "message": message }));
     }
     events::emit(
         "task_done",
@@ -354,12 +355,12 @@ fn toggle(args: &Args) -> Result<Value> {
         &[json!(id)],
     )?;
     let Some(task) = rows.first() else {
-        return Ok(json!({ "ask_note": ask_note }));
+        return Ok(json!({ "message": message, "ask_note": ask_note }));
     };
     let today = clock::today("")?;
     let repeat = task["repeat"].as_str().unwrap_or_default();
     let Some(next) = quick::next_due(repeat, task["due"].as_str().unwrap_or(&today), &today) else {
-        return Ok(json!({ "ask_note": ask_note }));
+        return Ok(json!({ "message": message, "ask_note": ask_note }));
     };
     let mut copy = Map::new();
     for key in [
@@ -401,7 +402,7 @@ fn toggle(args: &Args) -> Result<Value> {
         values.insert("title".into(), step["title"].clone());
         storage::insert(STEPS, &values)?;
     }
-    Ok(json!({ "next": { "id": new_id, "due": next }, "ask_note": ask_note }))
+    Ok(json!({ "next": { "id": new_id, "due": next }, "message": message, "ask_note": ask_note }))
 }
 
 /// Whether finishing task `id` should offer to save a note, per the

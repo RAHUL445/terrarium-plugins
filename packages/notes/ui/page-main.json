@@ -42,7 +42,7 @@
           "chips": [
             { "text": "{{row.edited}}" },
             { "text": "{{row.checklist}}", "icon": "steps" },
-            { "text": "{{row.project}}", "icon": "tag" }
+            { "text": "{{row.project}}", "icon": "folder" }
           ]
         }
       },
@@ -113,7 +113,7 @@
       {
         "type": "sheet",
         "bind": "state.creating",
-        "title": "Quick note",
+        "title": "New note",
         "presentation": "modal",
         "children": [
           {

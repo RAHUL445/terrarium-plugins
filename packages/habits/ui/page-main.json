@@ -428,6 +428,7 @@
         "bind": "state.open",
         "title": "{{row.title}}",
         "query": "habit",
+        "refresh": true,
         "params": {
           "id": "{{state.open}}",
           "today": "{{$today}}"
@@ -468,7 +469,7 @@
               {
                 "type": "text",
                 "tone": "muted",
-                "text": "Tap a day to mark it done or undo it."
+                "text": "{{$gesture}} a day to mark it done or undo it."
               },
               {
                 "type": "week-strip",
@@ -857,7 +858,7 @@
                     "type": "select",
                     "name": "notify_on",
                     "label": "Remind on",
-                    "value": "both",
+                    "value": "{{$remind_on}}",
                     "grow": 1,
                     "basis": 140,
                     "options": [

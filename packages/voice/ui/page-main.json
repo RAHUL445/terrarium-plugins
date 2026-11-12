@@ -1,5 +1,9 @@
 {
-  "creation": {"operation": "capture_text", "bind": "state.creating", "prefill": "state.newText"},
+  "creation": {
+    "operation": "capture_text",
+    "bind": "state.creating",
+    "prefill": "state.newText"
+  },
   "state": {
     "creating": "",
     "newText": "",
@@ -24,7 +28,7 @@
             "children": [
               {
                 "type": "audio-recorder",
-                "label": "Tap to record",
+                "label": "{{$gesture}} to record",
                 "hint": "Up to 3 minutes · transcribed on your computer",
                 "max_seconds": 180,
                 "action": {
@@ -164,8 +168,18 @@
                       "id": "{{row.id}}",
                       "to": "todo"
                     },
-                    "success": "{{result.message}}"
-                  }
+                    "success": "{{result.message}}",
+                    "followup": {
+                      "label": "Open",
+                      "action": {
+                        "navigate": {
+                          "plugin": "todo",
+                          "item": "{{result.id}}"
+                        }
+                      }
+                    }
+                  },
+                  "label": "To-do"
                 },
                 {
                   "type": "button",
@@ -179,8 +193,18 @@
                       "id": "{{row.id}}",
                       "to": "notes"
                     },
-                    "success": "{{result.message}}"
-                  }
+                    "success": "{{result.message}}",
+                    "followup": {
+                      "label": "Open",
+                      "action": {
+                        "navigate": {
+                          "plugin": "notes",
+                          "item": "{{result.id}}"
+                        }
+                      }
+                    }
+                  },
+                  "label": "Notes"
                 }
               ]
             }
@@ -376,7 +400,7 @@
                   {
                     "type": "button",
                     "variant": "primary",
-                    "label": "Send to To-do",
+                    "label": "To-do",
                     "icon": "check",
                     "action": {
                       "op": "send",
@@ -387,13 +411,22 @@
                       "success": "{{result.message}}",
                       "then": {
                         "state.open": ""
+                      },
+                      "followup": {
+                        "label": "Open",
+                        "action": {
+                          "navigate": {
+                            "plugin": "todo",
+                            "item": "{{result.id}}"
+                          }
+                        }
                       }
                     }
                   },
                   {
                     "type": "button",
                     "if": "{{row.multi}}",
-                    "label": "One task per line",
+                    "label": "To-do",
                     "icon": "steps",
                     "action": {
                       "op": "send",
@@ -405,12 +438,21 @@
                       "success": "{{result.message}}",
                       "then": {
                         "state.open": ""
+                      },
+                      "followup": {
+                        "label": "Open",
+                        "action": {
+                          "navigate": {
+                            "plugin": "todo",
+                            "item": "{{result.id}}"
+                          }
+                        }
                       }
                     }
                   },
                   {
                     "type": "button",
-                    "label": "Send to Notes",
+                    "label": "Notes",
                     "icon": "note",
                     "action": {
                       "op": "send",
@@ -421,6 +463,15 @@
                       "success": "{{result.message}}",
                       "then": {
                         "state.open": ""
+                      },
+                      "followup": {
+                        "label": "Open",
+                        "action": {
+                          "navigate": {
+                            "plugin": "notes",
+                            "item": "{{result.id}}"
+                          }
+                        }
                       }
                     }
                   },
@@ -510,7 +561,7 @@
                 "rows": 8,
                 "required": true,
                 "value": "{{state.newText}}",
-                "placeholder": "Capture a thought\u2026"
+                "placeholder": "Capture a thought…"
               }
             ],
             "submit": {
