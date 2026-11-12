@@ -2,13 +2,17 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 
 const plugins = [
-  { id: "todo", query: "tasks" },
+  { id: "todo", query: "workspace_tasks", count: 3 },
   { id: "notes", query: "list" },
   { id: "bookmarks", query: "list" },
 ];
 
 function listByQuery(template, query) {
-  return template.body.children.filter((node) => node.type === "list" && node.query === query);
+  const visit = node => {
+    if (!node || typeof node !== "object") return [];
+    return [node, ...Object.values(node).flatMap(visit)];
+  };
+  return visit(template.body).filter((node) => node.type === "list" && node.query === query);
 }
 
 for (const plugin of plugins) {
@@ -17,6 +21,7 @@ for (const plugin of plugins) {
     const template = require(`../packages/${plugin.id}/ui/page-main.json`);
     const lists = listByQuery(template, plugin.query);
     assert.ok(lists.length > 0, `expected at least one ${plugin.query} list`);
+    if (plugin.count) assert.equal(lists.length, plugin.count, "list, board and matrix must all retain bulk actions");
 
     for (const list of lists) {
       assert.ok(list.select, "list should declare select actions");

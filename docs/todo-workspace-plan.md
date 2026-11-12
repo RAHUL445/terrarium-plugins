@@ -164,6 +164,15 @@ assistive-technology verification remain separate work.
 Final M4 checks passed: 306 host UI tests, 18 host page-storage tests, and all
 10 To-do runtime integration tests. The preview CLI build also passed.
 
+Pre-merge verification on 2026-11-12 passed all 188 runtime unit tests, all 54
+cross-plugin runtime integration tests, 306 host UI tests, 27 host script tests,
+six To-do Rust tests and 28 query tests. The 27-test plugin UI suite exposed an
+outdated flat-list lookup in the bulk-action contract test; it now traverses the
+workspace and checks all three task layouts. Its three cases passed on rerun;
+the other 24 plugin tests passed in the full run. A fresh browser smoke test
+confirmed temporary filters do not modify shared page references and Reset
+changes restores the saved view. Verification used disposable preview data.
+
 Remaining limits: details use the existing task sheet, not a persistent side
 pane. Views still have a 500-row result cap;
 display sorting operates on that result set, not a paginated full collection.
