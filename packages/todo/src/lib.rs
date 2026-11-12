@@ -22,6 +22,7 @@ impl Plugin for Todo {
             "create" => create(&args),
             "update" => update(&args),
             "move" => move_task(&args),
+            "add_tag" => add_tag(&args),
             "toggle" => toggle(&args),
             "delete" => {
                 storage::delete(TABLE, args.str("id")?)?;
@@ -195,6 +196,28 @@ fn update(args: &Args) -> Result<Value> {
     }
     storage::update(TABLE, id, &values)?;
     Ok(Value::Null)
+}
+
+/// Adds one tag to a task's tags (normalized, no duplicates).
+fn add_tag(args: &Args) -> Result<Value> {
+    let id = args.str("id")?;
+    let tag = normalize_tags(args.str("tag")?);
+    if tag.is_empty() || tag.contains(',') {
+        return Err(Error::invalid("Give one tag"));
+    }
+    let rows = storage::query(
+        "SELECT tags FROM tasks WHERE id = ?1 AND _deleted IS NULL",
+        &[json!(id)],
+    )?;
+    let row = rows
+        .first()
+        .ok_or_else(|| Error::new("not-found", "That task no longer exists"))?;
+    let current = row["tags"].as_str().unwrap_or("");
+    let tags = normalize_tags(&format!("{current}, {tag}"));
+    let mut values = Map::new();
+    values.insert("tags".into(), json!(tags));
+    storage::update(TABLE, id, &values)?;
+    Ok(json!({ "tags": tags }))
 }
 
 /// Explicit classification: independent of deadline and priority.

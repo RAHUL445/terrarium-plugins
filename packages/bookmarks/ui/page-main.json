@@ -70,6 +70,13 @@
           "q": "{{state.q}}", "project": "{{state.project}}", "tag": "{{state.tag}}", "sort": "{{state.sort}}",
           "utc_offset_ms": "{{$utc_offset_ms}}", "today": "{{$today}}"
         },
+        "select": {
+          "label": "Select bookmarks",
+          "actions": [
+            { "label": "Pin", "icon": "pin", "op": "pin", "args": { "pinned": true }, "success": "Pinned {{count}} bookmarks" },
+            { "label": "Delete", "icon": "trash", "variant": "danger", "op": "delete", "confirm": "Move {{count}} bookmarks to the trash?", "success": "Moved {{count}} bookmarks to the trash", "undo": { "op": "restore", "success": "Restored {{count}} bookmarks" } }
+          ]
+        },
         "empty": "Nothing here yet. Paste a link above to save it.",
         "item": {
           "type": "item", "title": "{{row.title}}", "subtitle": "{{row.subtitle}}", "avatar": "{{row.host}}",

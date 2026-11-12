@@ -27,6 +27,14 @@
       {
         "type": "list", "query": "list", "group": "section",
         "params": { "q": "{{state.q}}", "project": "{{state.project}}", "utc_offset_ms": "{{$utc_offset_ms}}", "today": "{{$today}}" },
+        "select": {
+          "label": "Select notes",
+          "actions": [
+            { "label": "Move", "icon": "folder", "op": "update", "ask": { "name": "project", "label": "Project", "title": "Move {{count}} notes to a project" }, "success": "Moved {{count}} notes" },
+            { "label": "Pin", "icon": "pin", "op": "update", "args": { "pinned": true }, "success": "Pinned {{count}} notes" },
+            { "label": "Delete", "icon": "trash", "variant": "danger", "op": "delete", "confirm": "Move {{count}} notes to the trash?", "success": "Moved {{count}} notes to the trash", "undo": { "op": "restore", "success": "Restored {{count}} notes" } }
+          ]
+        },
         "empty": "No notes here yet. Start one with New note.",
         "item": {
           "type": "item", "title": "{{row.title}}", "subtitle": "{{row.snippet}}",

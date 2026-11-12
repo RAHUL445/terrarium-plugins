@@ -77,6 +77,7 @@
     "update": {
       "description": "Change a note's title (blank follows the first line), body, project or pinned flag.",
       "effect": "write",
+      "bulk": true,
       "params": {
         "id": {
           "type": "id",
@@ -110,6 +111,7 @@
     "delete": {
       "description": "Move a note to trash.",
       "effect": "destructive",
+      "bulk": true,
       "confirm": "Move this note to the trash?",
       "params": {
         "id": {
@@ -122,6 +124,7 @@
     "restore": {
       "description": "Bring a note back from trash.",
       "effect": "write",
+      "bulk": true,
       "params": {
         "id": {
           "type": "id",

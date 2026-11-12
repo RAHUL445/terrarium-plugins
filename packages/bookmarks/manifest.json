@@ -140,6 +140,7 @@
     "pin": {
       "description": "Pin or unpin a bookmark (pinned: true/false); without pinned it flips.",
       "effect": "write",
+      "bulk": true,
       "params": {
         "id": {
           "type": "id",
@@ -172,6 +173,7 @@
     "delete": {
       "description": "Move a bookmark to trash.",
       "effect": "destructive",
+      "bulk": true,
       "confirm": "Move this bookmark to the trash?",
       "params": {
         "id": {
@@ -184,6 +186,7 @@
     "restore": {
       "description": "Bring a bookmark back from trash.",
       "effect": "write",
+      "bulk": true,
       "params": {
         "id": {
           "type": "id",

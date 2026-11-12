@@ -185,6 +185,7 @@
     "update": {
       "description": "Change a task's title, notes, due, remind_time, priority (0-3), repeat (daily, weekdays, weekly, monthly) or tags; empty clears. Also accepts in_progress, urgent and important (booleans).",
       "effect": "write",
+      "bulk": true,
       "params": {
         "id": {
           "type": "id",
@@ -277,6 +278,7 @@
     "toggle": {
       "description": "Mark a task done or not done. Finishing a repeating task creates the next one. Returns ask_note (the task id) when a note should be offered.",
       "effect": "write",
+      "bulk": true,
       "params": {
         "id": {
           "type": "id",
@@ -299,6 +301,7 @@
     "delete": {
       "description": "Move a task to trash.",
       "effect": "destructive",
+      "bulk": true,
       "confirm": "Move this task to the trash?",
       "params": {
         "id": {
@@ -311,6 +314,7 @@
     "restore": {
       "description": "Bring a task back from trash.",
       "effect": "write",
+      "bulk": true,
       "params": {
         "id": {
           "type": "id",
@@ -318,6 +322,29 @@
           "description": "A task in the trash."
         }
       }
+    },
+    "add_tag": {
+      "description": "Add a tag to a task, keeping its other tags.",
+      "effect": "write",
+      "bulk": true,
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The task."
+        },
+        "tag": {
+          "type": "string",
+          "required": true,
+          "description": "Tag to add, with or without #."
+        }
+      },
+      "examples": [
+        {
+          "id": "<task id>",
+          "tag": "work"
+        }
+      ]
     },
     "completed_between": {
       "description": "Tasks completed between local dates start and end (inclusive), with their notes.",

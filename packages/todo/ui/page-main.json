@@ -64,6 +64,15 @@
       {
         "type": "list", "query": "tasks", "if": "{{state.view == list}}", "group": "section", "group_tone": "section_tone",
         "params": { "today": "{{$today}}", "filter": "{{state.filter}}", "q": "{{state.q}}" },
+        "select": {
+          "label": "Select tasks",
+          "actions": [
+            { "label": "Complete", "icon": "check", "op": "toggle", "args": { "done": true }, "success": "{{count}} tasks completed" },
+            { "label": "Start", "icon": "play", "op": "update", "args": { "in_progress": true }, "success": "{{count}} tasks started" },
+            { "label": "Add tag", "icon": "tag", "op": "add_tag", "ask": { "name": "tag", "label": "Tag", "title": "Add a tag to {{count}} tasks" }, "success": "Tagged {{count}} tasks" },
+            { "label": "Delete", "icon": "trash", "variant": "danger", "op": "delete", "confirm": "Move {{count}} tasks to the trash?", "success": "Moved {{count}} tasks to the trash", "undo": { "op": "restore", "success": "Restored {{count}} tasks" } }
+          ]
+        },
         "empty": "Nothing here. Add a task above.",
         "item": {
           "type": "item", "title": "{{row.title}}", "subtitle": "{{row.notes}}", "done": "{{row.done}}", "flag": "{{row.priority}}",
@@ -85,6 +94,15 @@
           "today": "{{$today}}",
           "filter": "{{state.filter}}",
           "q": "{{state.q}}"
+        },
+        "select": {
+          "label": "Select tasks",
+          "actions": [
+            { "label": "Complete", "icon": "check", "op": "toggle", "args": { "done": true }, "success": "{{count}} tasks completed" },
+            { "label": "Start", "icon": "play", "op": "update", "args": { "in_progress": true }, "success": "{{count}} tasks started" },
+            { "label": "Add tag", "icon": "tag", "op": "add_tag", "ask": { "name": "tag", "label": "Tag", "title": "Add a tag to {{count}} tasks" }, "success": "Tagged {{count}} tasks" },
+            { "label": "Delete", "icon": "trash", "variant": "danger", "op": "delete", "confirm": "Move {{count}} tasks to the trash?", "success": "Moved {{count}} tasks to the trash", "undo": { "op": "restore", "success": "Restored {{count}} tasks" } }
+          ]
         },
         "empty": "No tasks match these filters.",
         "item": {
@@ -195,6 +213,15 @@
           "today": "{{$today}}",
           "filter": "{{state.filter}}",
           "q": "{{state.q}}"
+        },
+        "select": {
+          "label": "Select tasks",
+          "actions": [
+            { "label": "Complete", "icon": "check", "op": "toggle", "args": { "done": true }, "success": "{{count}} tasks completed" },
+            { "label": "Start", "icon": "play", "op": "update", "args": { "in_progress": true }, "success": "{{count}} tasks started" },
+            { "label": "Add tag", "icon": "tag", "op": "add_tag", "ask": { "name": "tag", "label": "Tag", "title": "Add a tag to {{count}} tasks" }, "success": "Tagged {{count}} tasks" },
+            { "label": "Delete", "icon": "trash", "variant": "danger", "op": "delete", "confirm": "Move {{count}} tasks to the trash?", "success": "Moved {{count}} tasks to the trash", "undo": { "op": "restore", "success": "Restored {{count}} tasks" } }
+          ]
         },
         "empty": "No tasks match these filters.",
         "item": {
