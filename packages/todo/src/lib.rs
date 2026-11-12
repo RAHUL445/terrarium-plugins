@@ -9,6 +9,7 @@
 use serde_json::{json, Map, Value};
 use terrarium_guest::{clock, events, interop, storage, Args, Error, Plugin, Result};
 
+mod organization;
 mod quick;
 
 struct Todo;
@@ -23,6 +24,13 @@ impl Plugin for Todo {
             "import" => import(&args),
             "update" => update(&args),
             "move" => move_task(&args),
+            "organize" => organization::organize(&args),
+            "create_list" => organization::save_definition(&args, "list", true),
+            "update_list" => organization::save_definition(&args, "list", false),
+            "create_group" => organization::save_definition(&args, "group", true),
+            "update_group" => organization::save_definition(&args, "group", false),
+            "create_status" => organization::save_definition(&args, "status", true),
+            "update_status" => organization::save_definition(&args, "status", false),
             "add_tag" => add_tag(&args),
             "toggle" => toggle(&args),
             "delete" => {
@@ -66,6 +74,9 @@ fn import(args: &Args) -> Result<Value> {
     if args.get("done").and_then(Value::as_bool) == Some(true) {
         let mut values = Map::new();
         values.insert("done".into(), json!(true));
+        values.insert("in_progress".into(), json!(false));
+        let current = storage::query("SELECT * FROM tasks WHERE id = ?1", &[out["id"].clone()])?;
+        organization::completion_fields(&current[0], true, &mut values)?;
         values.insert("completed_at".into(), json!(clock::now_ms() as i64));
         storage::update(TABLE, out["id"].as_str().unwrap_or_default(), &values)?;
     }
@@ -139,7 +150,21 @@ fn create_task(args: &Args, parse: bool) -> Result<Value> {
     }
     attention_fields(args, &mut values)?;
     let id = storage::insert(TABLE, &values)?;
-    Ok(json!({ "id": id, "title": title, "due": due }))
+    let mut result = json!({ "id": id, "title": title, "due": due });
+    if ["list_id", "group_id", "status_id"]
+        .iter()
+        .any(|key| args.get(key).is_some())
+    {
+        let mut fields = Map::new();
+        fields.insert("id".into(), json!(id));
+        for key in ["list_id", "group_id", "status_id"] {
+            if let Some(value) = args.get(key) {
+                fields.insert(key.into(), value.clone());
+            }
+        }
+        result["organization"] = organization::organize(&Args(fields))?;
+    }
+    Ok(result)
 }
 
 /// Changes any of title, notes, due, remind_time, priority, repeat, tags.
@@ -147,13 +172,26 @@ fn create_task(args: &Args, parse: bool) -> Result<Value> {
 fn update(args: &Args) -> Result<Value> {
     let id = args.str("id")?;
     let current = storage::query(
-        "SELECT due, remind_time FROM tasks WHERE id = ?1",
+        "SELECT * FROM tasks WHERE id = ?1 AND _deleted IS NULL",
         &[json!(id)],
     )?;
     let current = current
         .first()
         .ok_or_else(|| Error::invalid("That task no longer exists"))?;
     let mut values = Map::new();
+    if args.get("planned_for").is_some() {
+        values.insert(
+            "planned_for".into(),
+            optional_date(args, "planned_for")?.map_or(Value::Null, |d| json!(d)),
+        );
+    }
+    if let Some(order) = args.get("sort_order") {
+        let order = order
+            .as_i64()
+            .filter(|n| *n >= 0)
+            .ok_or_else(|| Error::invalid("Order must be a nonnegative integer"))?;
+        values.insert("sort_order".into(), json!(order));
+    }
     if let Some(title) = args.opt_str("title") {
         values.insert("title".into(), json!(clean_title(title)?));
     }
@@ -216,6 +254,9 @@ fn update(args: &Args) -> Result<Value> {
         );
     }
     attention_fields(args, &mut values)?;
+    if args.get("in_progress").is_some() {
+        organization::progress_fields(current, args.bool("in_progress")?, &mut values)?;
+    }
     if values.is_empty() {
         return Err(Error::invalid("nothing to update"));
     }
@@ -260,7 +301,10 @@ fn attention_fields(args: &Args, values: &mut Map<String, Value>) -> Result<()> 
 fn move_task(args: &Args) -> Result<Value> {
     let id = args.str("id")?;
     let lane = args.str("lane")?;
-    let rows = storage::query("SELECT done FROM tasks WHERE id = ?1 AND _deleted IS NULL", &[json!(id)])?;
+    let rows = storage::query(
+        "SELECT done FROM tasks WHERE id = ?1 AND _deleted IS NULL",
+        &[json!(id)],
+    )?;
     let task = rows
         .first()
         .ok_or_else(|| Error::invalid("That task no longer exists"))?;
@@ -270,10 +314,17 @@ fn move_task(args: &Args) -> Result<Value> {
     match lane {
         "todo" | "doing" => {
             if is_done {
-                toggle(&Args(json!({"id": id, "done": false}).as_object().cloned().unwrap_or_default()))?;
+                toggle(&Args(
+                    json!({"id": id, "done": false})
+                        .as_object()
+                        .cloned()
+                        .unwrap_or_default(),
+                ))?;
             }
             let mut values = Map::new();
             values.insert("in_progress".into(), json!(lane == "doing"));
+            let current = storage::query("SELECT * FROM tasks WHERE id = ?1", &[json!(id)])?;
+            organization::progress_fields(&current[0], lane == "doing", &mut values)?;
             storage::update(TABLE, id, &values)?;
             Ok(Value::Null)
         }
@@ -307,7 +358,7 @@ fn toggle(args: &Args) -> Result<Value> {
     let done = args.bool("done")?;
     let message = if done { "Task done" } else { "Task reopened" };
     let current = storage::query(
-        "SELECT done, title, tags FROM tasks WHERE id = ?1 AND _deleted IS NULL",
+        "SELECT * FROM tasks WHERE id = ?1 AND _deleted IS NULL",
         &[json!(id)],
     )?;
     let current = current
@@ -324,6 +375,7 @@ fn toggle(args: &Args) -> Result<Value> {
     let mut values = Map::new();
     values.insert("done".into(), json!(done));
     values.insert("in_progress".into(), json!(false));
+    organization::completion_fields(current, done, &mut values)?;
     values.insert(
         "completed_at".into(),
         if done {
@@ -350,7 +402,7 @@ fn toggle(args: &Args) -> Result<Value> {
     )?;
     let ask_note = asks_note(id)?.then(|| id.to_string());
     let rows = storage::query(
-        "SELECT title, notes, due, tags, priority, repeat, remind_time, urgent, important, COALESCE(series, id) AS series FROM tasks \
+        "SELECT *, COALESCE(series, id) AS repeat_series FROM tasks \
          WHERE id = ?1 AND repeat IS NOT NULL",
         &[json!(id)],
     )?;
@@ -370,12 +422,13 @@ fn toggle(args: &Args) -> Result<Value> {
         "priority",
         "repeat",
         "remind_time",
-        "series",
     ] {
         if !task[key].is_null() {
             copy.insert(key.into(), task[key].clone());
         }
     }
+    copy.insert("series".into(), task["repeat_series"].clone());
+    organization::repeat_fields(task, &mut copy)?;
     for field in ["urgent", "important"] {
         copy.insert(
             field.into(),

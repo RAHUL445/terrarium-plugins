@@ -180,10 +180,90 @@
     ]
   },
   "operations": {
-    "create": {
-      "description": "Create a task. Dates, times, #tags, !priority and \"every week\" in the title are understood (\"Call Sam tomorrow 6pm #work !high\"); due (YYYY-MM-DD), remind_time (HH:MM), priority (0-3), repeat, tags and notes may also be given. Optional in_progress, urgent and important booleans.",
+    "create_list": {
+      "description": "Create a task list with To pick, In progress, Waiting and Done statuses.",
       "effect": "write",
       "params": {
+        "name": { "type": "string", "required": true },
+        "color": { "type": "string", "description": "Optional #RRGGBB color." },
+        "position": { "type": "integer", "min": 0 }
+      }
+    },
+    "update_list": {
+      "description": "Rename, recolor, reorder or archive a list; keeps its tasks and references.",
+      "effect": "write",
+      "params": {
+        "id": { "type": "id", "required": true },
+        "name": { "type": "string" },
+        "color": { "type": "string" },
+        "position": { "type": "integer", "min": 0 },
+        "archived": { "type": "boolean" }
+      }
+    },
+    "create_group": {
+      "description": "Create an organizational group in a list. Empty list_id means Inbox.",
+      "effect": "write",
+      "params": {
+        "name": { "type": "string", "required": true },
+        "list_id": { "type": "string" },
+        "color": { "type": "string" },
+        "position": { "type": "integer", "min": 0 }
+      }
+    },
+    "update_group": {
+      "description": "Rename, recolor, reorder or archive a group without moving its tasks.",
+      "effect": "write",
+      "params": {
+        "id": { "type": "id", "required": true },
+        "name": { "type": "string" },
+        "color": { "type": "string" },
+        "position": { "type": "integer", "min": 0 },
+        "archived": { "type": "boolean" }
+      }
+    },
+    "create_status": {
+      "description": "Create a custom status in one list (empty list_id means Inbox). ready=false excludes Waiting/Blocked from future ready-work suggestions.",
+      "effect": "write",
+      "params": {
+        "name": { "type": "string", "required": true },
+        "list_id": { "type": "string" },
+        "category": { "type": "enum", "values": ["not_started", "active", "completed"], "required": true },
+        "ready": { "type": "boolean" },
+        "color": { "type": "string" },
+        "position": { "type": "integer", "min": 0 }
+      }
+    },
+    "update_status": {
+      "description": "Customize a status. Changing category requires no current or previous task references; archiving preserves existing assignments.",
+      "effect": "write",
+      "params": {
+        "id": { "type": "id", "required": true },
+        "name": { "type": "string" },
+        "category": { "type": "enum", "values": ["not_started", "active", "completed"] },
+        "ready": { "type": "boolean" },
+        "color": { "type": "string" },
+        "position": { "type": "integer", "min": 0 },
+        "archived": { "type": "boolean" }
+      }
+    },
+    "organize": {
+      "description": "Move a task between lists/groups or assign a custom status. Empty ids clear assignments; moving lists clears an unspecified group and maps status by category/name. Completing through status preserves repeat and note behavior. Returns chosen destination and any completion result.",
+      "effect": "write",
+      "bulk": true,
+      "params": {
+        "id": { "type": "id", "required": true },
+        "list_id": { "type": "string" },
+        "group_id": { "type": "string" },
+        "status_id": { "type": "string" }
+      }
+    },
+    "create": {
+      "description": "Create a task. Dates, times, #tags, !priority and \"every week\" in the title are understood. Optional list_id/group_id/status_id organize the task atomically; omission captures into Inbox. Existing due, reminder, repeat and attention fields are supported.",
+      "effect": "write",
+      "params": {
+        "list_id": { "type": "string" },
+        "group_id": { "type": "string" },
+        "status_id": { "type": "string" },
         "title": {
           "type": "string",
           "required": true,
@@ -246,6 +326,8 @@
       "effect": "write",
       "bulk": true,
       "params": {
+        "planned_for": { "type": "date", "description": "Intended work date, independent of due date/reminder. Empty clears." },
+        "sort_order": { "type": "integer", "min": 0, "description": "Manual task position; applies only to views using manual order." },
         "id": {
           "type": "id",
           "required": true,

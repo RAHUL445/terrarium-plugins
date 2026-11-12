@@ -42,6 +42,34 @@ development commits.
 - Groups/statuses can be archived. Commands must validate reassignment before
   destructive removal. Cross-list moves must validate both group and status.
 
+## Organization commands (M1b)
+
+`create_list` creates the list and four statuses in one operation: To pick,
+In progress, Waiting, and Done. `create_group` and `create_status` accept a
+list ID; omitting it creates an Inbox definition. `update_list`, `update_group`,
+and `update_status` edit names, colors, positions, or archive state. A used
+status cannot change category until its current/previous task references are
+reassigned. Destructive deletion is deliberately not exposed at this stage.
+
+`organize` accepts a task ID and optional `list_id`, `group_id`, `status_id`.
+An empty ID clears that assignment. A cross-list move clears an unspecified
+group and prefers a same-name/same-category status in the destination, then
+its default compatible category. It returns the chosen IDs so callers can
+explain the result. Selecting a completed status follows the normal completion
+path, including events, completion-note follow-up, and next recurrence.
+
+`create` accepts the same organization IDs atomically with capture. `update`
+accepts `planned_for` and `sort_order`. Planning never changes the deadline or
+reminder. Existing progress controls select compatible statuses; reopening
+restores the previous open custom status when available. A recurring successor
+inherits list/group and a not-started status, without carrying the previous
+occurrence's plan, progress, order, or completion state.
+
+These are plugin operations and query contracts, not a finished user interface.
+The current CSV format remains the legacy portable task format and does not
+export organization definitions/IDs or planning fields; full workspace export
+must be designed before presenting that format as a complete workspace backup.
+
 ## Migration and rollback
 
 M1a is expansion only: schema 4 to 5 adds nullable task references, a nullable
@@ -77,6 +105,17 @@ eleven import/export and bulk-action contract tests, and seven real host To-do
 integration tests. The new v4-to-v5 migration test compares every original
 task/step field after upgrade and verifies that a second load is unchanged.
 The host test is on the matching `feature/todo-organization` branch.
+
+M1b passed: all ten focused To-do host integration tests (including three new
+organization scenarios), six Rust unit tests, six query behavior tests, eleven
+import/export and bulk-action contract tests, Clippy with warnings denied,
+and formatting of the modified plugin Rust files. Invalid capture/move targets
+roll back; repeat completion produces one successor on retry; reopen restores
+the previous custom status and clears the consumed previous-status reference.
+An unrelated group edit retains archived status assignments.
+
+Completed commits cover the storage and command layers. M2-M4 remain pending;
+no new organization controls or saved-view UI have been installed or shipped.
 
 Implementation and test outcomes are recorded with each milestone commit.
 Native UI, mobile, multi-device sync, and user-data migration require separate
