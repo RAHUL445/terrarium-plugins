@@ -18,8 +18,8 @@ for (const entry of fs.readdirSync(path.join(__dirname, "../packages"), {withFil
   });
 }
 
-test("To-do's full CSV importer accepts every exported column", () => {
-  const manifest = require("../packages/todo/manifest.json");
+test("Task manager's full CSV importer accepts every exported column", () => {
+  const manifest = require("../packages/tasks/manifest.json");
   const columns = manifest.export.find(item => item.format === "csv").columns;
   const importer = manifest.import.find(item => item.id === "tasks_csv");
   for (const column of Object.values(importer.fields)) {

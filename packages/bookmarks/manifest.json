@@ -1,8 +1,12 @@
 {
   "id": "bookmarks",
   "name": "Bookmarks",
-  "version": "0.2.4",
+  "version": "0.3.1",
   "api": "terrarium:plugin@0.1.0",
+  "requires": [
+    "data-views-v1",
+    "today-v1"
+  ],
   "description": "Save links with projects, tags and notes. Pin the ones you use most; filter by project or tag.",
   "storage": {
     "version": 2,
@@ -389,6 +393,136 @@
       ],
       "cli": false,
       "description": "Bookmarks by id, for links."
+    },
+    "host_bookmarks": {
+      "sql": "SELECT id, title, url, lower(substr(substr(url, instr(url, '://') + 3), 1, CASE WHEN instr(substr(url, instr(url, '://') + 3), '/') = 0 THEN length(substr(url, instr(url, '://') + 3)) ELSE instr(substr(url, instr(url, '://') + 3), '/') - 1 END)) AS host, project, CASE WHEN tags IS NOT NULL AND tags <> '' THEN '#' || replace(tags, ', ', ' #') END AS tags_label, COALESCE(visits, 0) AS visits, pinned, created_at FROM bookmarks WHERE _deleted IS NULL AND (?1 IS NULL OR ?1 = '' OR title LIKE '%' || ?1 || '%' OR url LIKE '%' || ?1 || '%' OR tags LIKE '%' || ?1 || '%' OR note LIKE '%' || ?1 || '%' OR project LIKE '%' || ?1 || '%') AND (?2 IS NULL OR ?2 = '' OR project = ?2) AND (?3 IS NULL OR ?3 = '' OR instr(', ' || COALESCE(tags, '') || ', ', ', ' || ?3 || ', ') > 0) ORDER BY pinned DESC, CASE ?4 WHEN 'visits' THEN -COALESCE(visits, 0) WHEN 'opened' THEN -COALESCE(visited_at, 0) ELSE 0 END, CASE WHEN ?4 = 'title' THEN lower(title) END, COALESCE(created_at, 0) DESC, id DESC LIMIT ?5 OFFSET ?6",
+      "params": [
+        "q",
+        "project",
+        "tag",
+        "sort",
+        "page_size",
+        "offset"
+      ],
+      "types": {
+        "q": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "string"
+        },
+        "page_size": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        }
+      },
+      "description": "All active bookmarks matching search, project and tag, pinned first with query-side pagination.",
+      "cli": false,
+      "view": {
+        "version": 1,
+        "title": "Bookmarks",
+        "params": {
+          "q": "",
+          "project": "",
+          "tag": "",
+          "sort": "new"
+        },
+        "columns": [
+          {
+            "key": "title",
+            "label": "Title",
+            "type": "string"
+          },
+          {
+            "key": "host",
+            "label": "Site",
+            "type": "string"
+          },
+          {
+            "key": "project",
+            "label": "Project",
+            "type": "string"
+          },
+          {
+            "key": "tags_label",
+            "label": "Tags",
+            "type": "string"
+          },
+          {
+            "key": "visits",
+            "label": "Visits",
+            "type": "integer"
+          },
+          {
+            "key": "created_at",
+            "label": "Added",
+            "type": "date"
+          },
+          {
+            "key": "pinned",
+            "label": "Pinned",
+            "type": "boolean"
+          }
+        ],
+        "filters": [
+          {
+            "param": "q",
+            "label": "Search",
+            "type": "string"
+          },
+          {
+            "param": "project",
+            "label": "Project",
+            "type": "string"
+          },
+          {
+            "param": "tag",
+            "label": "Tag",
+            "type": "string"
+          }
+        ],
+        "pagination": {
+          "page_size_param": "page_size",
+          "offset_param": "offset",
+          "default_page_size": 100,
+          "max_page_size": 1000
+        },
+        "sorts": [
+          {
+            "param": "sort",
+            "values": [
+              "new",
+              "visits",
+              "opened",
+              "title"
+            ]
+          }
+        ]
+      }
+    },
+    "today_untagged": {
+      "description": "Today view: links saved in the last 7 days that have no tags.",
+      "params": [
+        "now_ms"
+      ],
+      "cli": false,
+      "sql": "SELECT id, COALESCE(NULLIF(trim(title), ''), url) AS title, url, CASE WHEN instr(substr(url, instr(url, '://') + 3), '/') > 0 THEN substr(substr(url, instr(url, '://') + 3), 1, instr(substr(url, instr(url, '://') + 3), '/') - 1) ELSE substr(url, instr(url, '://') + 3) END AS host FROM bookmarks WHERE _deleted IS NULL AND (tags IS NULL OR trim(tags) = '') AND created_at >= ?1 - 7 * 86400000 ORDER BY created_at DESC, id DESC LIMIT 21"
+    },
+    "today_untagged_count": {
+      "description": "Today view: how many links today_untagged would list.",
+      "params": [
+        "now_ms"
+      ],
+      "cli": false,
+      "sql": "SELECT COUNT(*) AS count FROM bookmarks WHERE _deleted IS NULL AND (tags IS NULL OR trim(tags) = '') AND created_at >= ?1 - 7 * 86400000"
     }
   },
   "pages": [
@@ -403,6 +537,11 @@
       "id": "recent",
       "title": "Bookmarks",
       "template": "ui/widget-recent.json"
+    },
+    {
+      "id": "host-view",
+      "title": "Bookmarks list",
+      "template": "ui/widget-host-view.json"
     }
   ],
   "limits": {
@@ -444,6 +583,41 @@
       "resolve": "ref_bookmarks",
       "kind": "Bookmark",
       "icon": "bookmark"
+    }
+  ],
+  "today": [
+    {
+      "id": "untagged",
+      "section": "sort",
+      "query": "today_untagged",
+      "limit": 3,
+      "count_query": "today_untagged_count",
+      "row": {
+        "key": "{{row.id}}",
+        "kind": "link",
+        "title": "{{row.title}}",
+        "note": "untagged",
+        "chips": [
+          {
+            "text": "{{row.host}}"
+          }
+        ],
+        "actions": [
+          {
+            "label": "Tag",
+            "action": {
+              "navigate": {
+                "item": "{{row.id}}"
+              }
+            }
+          }
+        ],
+        "open": {
+          "navigate": {
+            "item": "{{row.id}}"
+          }
+        }
+      }
     }
   ]
 }

@@ -1,9 +1,12 @@
 {
   "id": "voice",
   "name": "Voice",
-  "version": "0.2.4",
+  "version": "0.2.7",
   "api": "terrarium:plugin@0.1.0",
-  "description": "Record or type quick captures, transcribed locally on your computer. Review them, then send to To-do (one task or one per line) or Notes.",
+  "requires": [
+    "today-v1"
+  ],
+  "description": "Record or type quick captures, transcribed locally on your computer. Review them, then send to Task manager (one task or one per line) or Notes.",
   "storage": {
     "version": 2,
     "tables": [
@@ -152,7 +155,7 @@
       }
     },
     "send": {
-      "description": "Send a capture to `todo` or `notes`; `split: true` makes one task per line.",
+      "description": "Send a capture to Task manager (`to: todo`) or Notes (`to: notes`); `split: true` makes one task per line.",
       "effect": "write",
       "params": {
         "id": {
@@ -167,7 +170,7 @@
             "todo",
             "notes"
           ],
-          "description": "Where to send it: To-do or Notes."
+          "description": "Where to send it: todo (Task manager) or notes (Notes)."
         },
         "split": {
           "type": "boolean",
@@ -252,7 +255,7 @@
       "description": "The three most recent captures still in the inbox."
     },
     "capture": {
-      "sql": "SELECT id, text, status, error, CASE WHEN source = 'audio' THEN 'mic' END AS length_icon, status = 'queued' AS is_queued, status = 'failed' AS is_failed, status = 'ready' AS is_ready, source = 'audio' AS is_audio, audio IS NOT NULL AS has_audio, CASE WHEN created_at IS NULL THEN NULL WHEN date((created_at + ?2) / 1000, 'unixepoch') = ?3 THEN strftime('%H:%M', (created_at + ?2) / 1000, 'unixepoch') WHEN date((created_at + ?2) / 1000, 'unixepoch') = date(?3, '-1 day') THEN 'Yesterday ' || strftime('%H:%M', (created_at + ?2) / 1000, 'unixepoch') WHEN date((created_at + ?2) / 1000, 'unixepoch') > date(?3, '-7 day') THEN CASE strftime('%w', (created_at + ?2) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END || ' ' || strftime('%H:%M', (created_at + ?2) / 1000, 'unixepoch') ELSE CAST(strftime('%d', (created_at + ?2) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (created_at + ?2) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((created_at + ?2) / 1000, 'unixepoch'), 1, 4) <> substr(?3, 1, 4) THEN ' ' || substr(date((created_at + ?2) / 1000, 'unixepoch'), 1, 4) ELSE '' END END AS at, CASE WHEN duration_ms > 0 THEN (duration_ms / 60000) || ':' || substr('0' || ((duration_ms / 1000) % 60), -2) WHEN text IS NOT NULL AND trim(text) <> '' THEN (length(replace(replace(replace(trim(replace(replace(text, char(13), ' '), char(10), ' ')), '  ', ' '), '  ', ' '), '  ', ' ')) - length(replace(replace(replace(replace(trim(replace(replace(text, char(13), ' '), char(10), ' ')), '  ', ' '), '  ', ' '), '  ', ' '), ' ', '')) + 1) || CASE WHEN instr(replace(replace(replace(trim(replace(replace(text, char(13), ' '), char(10), ' ')), '  ', ' '), '  ', ' '), '  ', ' '), ' ') = 0 THEN ' word' ELSE ' words' END END AS length, COALESCE(instr(trim(text, ' ' || char(10)), char(10)) > 0, 0) AS multi, status IN ('sent', 'archived') AS is_done, CASE status WHEN 'sent' THEN 'Sent to ' || CASE sent_to WHEN 'todo' THEN 'To-do' WHEN 'notes' THEN 'Notes' WHEN 'todo-lines' THEN 'To-do' ELSE 'Kept' END || ' ' || COALESCE(CASE WHEN sent_at IS NULL THEN NULL WHEN date((sent_at + ?2) / 1000, 'unixepoch') = ?3 THEN strftime('%H:%M', (sent_at + ?2) / 1000, 'unixepoch') WHEN date((sent_at + ?2) / 1000, 'unixepoch') = date(?3, '-1 day') THEN 'Yesterday ' || strftime('%H:%M', (sent_at + ?2) / 1000, 'unixepoch') WHEN date((sent_at + ?2) / 1000, 'unixepoch') > date(?3, '-7 day') THEN CASE strftime('%w', (sent_at + ?2) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END || ' ' || strftime('%H:%M', (sent_at + ?2) / 1000, 'unixepoch') ELSE CAST(strftime('%d', (sent_at + ?2) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (sent_at + ?2) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((sent_at + ?2) / 1000, 'unixepoch'), 1, 4) <> substr(?3, 1, 4) THEN ' ' || substr(date((sent_at + ?2) / 1000, 'unixepoch'), 1, 4) ELSE '' END END, '') WHEN 'archived' THEN 'Kept ' || COALESCE(CASE WHEN sent_at IS NULL THEN NULL WHEN date((sent_at + ?2) / 1000, 'unixepoch') = ?3 THEN strftime('%H:%M', (sent_at + ?2) / 1000, 'unixepoch') WHEN date((sent_at + ?2) / 1000, 'unixepoch') = date(?3, '-1 day') THEN 'Yesterday ' || strftime('%H:%M', (sent_at + ?2) / 1000, 'unixepoch') WHEN date((sent_at + ?2) / 1000, 'unixepoch') > date(?3, '-7 day') THEN CASE strftime('%w', (sent_at + ?2) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END || ' ' || strftime('%H:%M', (sent_at + ?2) / 1000, 'unixepoch') ELSE CAST(strftime('%d', (sent_at + ?2) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (sent_at + ?2) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((sent_at + ?2) / 1000, 'unixepoch'), 1, 4) <> substr(?3, 1, 4) THEN ' ' || substr(date((sent_at + ?2) / 1000, 'unixepoch'), 1, 4) ELSE '' END END, '') END AS done_label, CASE WHEN source = 'audio' THEN 'Recorded' ELSE 'Typed' END AS source_label FROM captures WHERE id = ?1 AND _deleted IS NULL",
+      "sql": "SELECT id, text, status, error, CASE WHEN source = 'audio' THEN 'mic' END AS length_icon, status = 'queued' AS is_queued, status = 'failed' AS is_failed, status = 'ready' AS is_ready, source = 'audio' AS is_audio, audio IS NOT NULL AS has_audio, CASE WHEN created_at IS NULL THEN NULL WHEN date((created_at + ?2) / 1000, 'unixepoch') = ?3 THEN strftime('%H:%M', (created_at + ?2) / 1000, 'unixepoch') WHEN date((created_at + ?2) / 1000, 'unixepoch') = date(?3, '-1 day') THEN 'Yesterday ' || strftime('%H:%M', (created_at + ?2) / 1000, 'unixepoch') WHEN date((created_at + ?2) / 1000, 'unixepoch') > date(?3, '-7 day') THEN CASE strftime('%w', (created_at + ?2) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END || ' ' || strftime('%H:%M', (created_at + ?2) / 1000, 'unixepoch') ELSE CAST(strftime('%d', (created_at + ?2) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (created_at + ?2) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((created_at + ?2) / 1000, 'unixepoch'), 1, 4) <> substr(?3, 1, 4) THEN ' ' || substr(date((created_at + ?2) / 1000, 'unixepoch'), 1, 4) ELSE '' END END AS at, CASE WHEN duration_ms > 0 THEN (duration_ms / 60000) || ':' || substr('0' || ((duration_ms / 1000) % 60), -2) WHEN text IS NOT NULL AND trim(text) <> '' THEN (length(replace(replace(replace(trim(replace(replace(text, char(13), ' '), char(10), ' ')), '  ', ' '), '  ', ' '), '  ', ' ')) - length(replace(replace(replace(replace(trim(replace(replace(text, char(13), ' '), char(10), ' ')), '  ', ' '), '  ', ' '), '  ', ' '), ' ', '')) + 1) || CASE WHEN instr(replace(replace(replace(trim(replace(replace(text, char(13), ' '), char(10), ' ')), '  ', ' '), '  ', ' '), '  ', ' '), ' ') = 0 THEN ' word' ELSE ' words' END END AS length, COALESCE(instr(trim(text, ' ' || char(10)), char(10)) > 0, 0) AS multi, status IN ('sent', 'archived') AS is_done, CASE status WHEN 'sent' THEN 'Sent to ' || CASE sent_to WHEN 'todo' THEN 'Tasks' WHEN 'notes' THEN 'Notes' WHEN 'todo-lines' THEN 'Tasks' ELSE 'Kept' END || ' ' || COALESCE(CASE WHEN sent_at IS NULL THEN NULL WHEN date((sent_at + ?2) / 1000, 'unixepoch') = ?3 THEN strftime('%H:%M', (sent_at + ?2) / 1000, 'unixepoch') WHEN date((sent_at + ?2) / 1000, 'unixepoch') = date(?3, '-1 day') THEN 'Yesterday ' || strftime('%H:%M', (sent_at + ?2) / 1000, 'unixepoch') WHEN date((sent_at + ?2) / 1000, 'unixepoch') > date(?3, '-7 day') THEN CASE strftime('%w', (sent_at + ?2) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END || ' ' || strftime('%H:%M', (sent_at + ?2) / 1000, 'unixepoch') ELSE CAST(strftime('%d', (sent_at + ?2) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (sent_at + ?2) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((sent_at + ?2) / 1000, 'unixepoch'), 1, 4) <> substr(?3, 1, 4) THEN ' ' || substr(date((sent_at + ?2) / 1000, 'unixepoch'), 1, 4) ELSE '' END END, '') WHEN 'archived' THEN 'Kept ' || COALESCE(CASE WHEN sent_at IS NULL THEN NULL WHEN date((sent_at + ?2) / 1000, 'unixepoch') = ?3 THEN strftime('%H:%M', (sent_at + ?2) / 1000, 'unixepoch') WHEN date((sent_at + ?2) / 1000, 'unixepoch') = date(?3, '-1 day') THEN 'Yesterday ' || strftime('%H:%M', (sent_at + ?2) / 1000, 'unixepoch') WHEN date((sent_at + ?2) / 1000, 'unixepoch') > date(?3, '-7 day') THEN CASE strftime('%w', (sent_at + ?2) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END || ' ' || strftime('%H:%M', (sent_at + ?2) / 1000, 'unixepoch') ELSE CAST(strftime('%d', (sent_at + ?2) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (sent_at + ?2) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((sent_at + ?2) / 1000, 'unixepoch'), 1, 4) <> substr(?3, 1, 4) THEN ' ' || substr(date((sent_at + ?2) / 1000, 'unixepoch'), 1, 4) ELSE '' END END, '') END AS done_label, CASE WHEN source = 'audio' THEN 'Recorded' ELSE 'Typed' END AS source_label FROM captures WHERE id = ?1 AND _deleted IS NULL",
       "params": [
         "id",
         "utc_offset_ms",
@@ -268,7 +271,7 @@
       }
     },
     "history": {
-      "sql": "SELECT id, CASE WHEN text IS NULL OR trim(text) = '' THEN CASE status WHEN 'queued' THEN 'Recording' ELSE 'Recording (no text)' END WHEN length(trim(substr(text, 1, instr(text || char(10), char(10)) - 1))) > 90 THEN substr(trim(substr(text, 1, instr(text || char(10), char(10)) - 1)), 1, 88) || '…' ELSE trim(substr(text, 1, instr(text || char(10), char(10)) - 1)) END AS title, NULLIF(substr(trim(replace(substr(replace(replace(replace(char(10) || substr(text, instr(text || char(10), char(10)) + 1), char(10) || '- ', char(10)), char(10) || '* ', char(10)), char(10) || '• ', char(10)), 2), char(10), ' · ')), 1, 140), '') AS snippet, CASE WHEN COALESCE(sent_at, created_at) IS NULL THEN NULL WHEN date((COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') = ?3 THEN strftime('%H:%M', (COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') WHEN date((COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') = date(?3, '-1 day') THEN 'Yesterday ' || strftime('%H:%M', (COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') WHEN date((COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') > date(?3, '-7 day') THEN CASE strftime('%w', (COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END || ' ' || strftime('%H:%M', (COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') ELSE CAST(strftime('%d', (COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch'), 1, 4) <> substr(?3, 1, 4) THEN ' ' || substr(date((COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch'), 1, 4) ELSE '' END END AS at, CASE sent_to WHEN 'todo' THEN 'To-do' WHEN 'notes' THEN 'Notes' WHEN 'todo-lines' THEN 'To-do' ELSE 'Kept' END AS dest, CASE WHEN sent_to IS NULL THEN 'archive' ELSE 'send' END AS dest_icon, CASE WHEN sent_to IS NOT NULL THEN 'accent' END AS dest_tone FROM captures WHERE _deleted IS NULL AND status IN ('sent', 'archived') AND (?1 IS NULL OR ?1 = '' OR text LIKE '%' || ?1 || '%') ORDER BY COALESCE(sent_at, created_at) DESC LIMIT 200",
+      "sql": "SELECT id, CASE WHEN text IS NULL OR trim(text) = '' THEN CASE status WHEN 'queued' THEN 'Recording' ELSE 'Recording (no text)' END WHEN length(trim(substr(text, 1, instr(text || char(10), char(10)) - 1))) > 90 THEN substr(trim(substr(text, 1, instr(text || char(10), char(10)) - 1)), 1, 88) || '…' ELSE trim(substr(text, 1, instr(text || char(10), char(10)) - 1)) END AS title, NULLIF(substr(trim(replace(substr(replace(replace(replace(char(10) || substr(text, instr(text || char(10), char(10)) + 1), char(10) || '- ', char(10)), char(10) || '* ', char(10)), char(10) || '• ', char(10)), 2), char(10), ' · ')), 1, 140), '') AS snippet, CASE WHEN COALESCE(sent_at, created_at) IS NULL THEN NULL WHEN date((COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') = ?3 THEN strftime('%H:%M', (COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') WHEN date((COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') = date(?3, '-1 day') THEN 'Yesterday ' || strftime('%H:%M', (COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') WHEN date((COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') > date(?3, '-7 day') THEN CASE strftime('%w', (COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END || ' ' || strftime('%H:%M', (COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') ELSE CAST(strftime('%d', (COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch'), 1, 4) <> substr(?3, 1, 4) THEN ' ' || substr(date((COALESCE(sent_at, created_at) + ?2) / 1000, 'unixepoch'), 1, 4) ELSE '' END END AS at, CASE sent_to WHEN 'todo' THEN 'Tasks' WHEN 'notes' THEN 'Notes' WHEN 'todo-lines' THEN 'Tasks' ELSE 'Kept' END AS dest, CASE WHEN sent_to IS NULL THEN 'archive' ELSE 'send' END AS dest_icon, CASE WHEN sent_to IS NOT NULL THEN 'accent' END AS dest_tone FROM captures WHERE _deleted IS NULL AND status IN ('sent', 'archived') AND (?1 IS NULL OR ?1 = '' OR text LIKE '%' || ?1 || '%') ORDER BY COALESCE(sent_at, created_at) DESC LIMIT 200",
       "params": [
         "q",
         "utc_offset_ms",
@@ -293,7 +296,7 @@
       "description": "Counts of captures to review, waiting and failed, with a short label."
     },
     "search": {
-      "sql": "SELECT id, CASE WHEN text IS NULL OR trim(text) = '' THEN CASE status WHEN 'queued' THEN 'Recording' ELSE 'Recording (no text)' END WHEN length(trim(substr(text, 1, instr(text || char(10), char(10)) - 1))) > 90 THEN substr(trim(substr(text, 1, instr(text || char(10), char(10)) - 1)), 1, 88) || '…' ELSE trim(substr(text, 1, instr(text || char(10), char(10)) - 1)) END AS title, CASE status WHEN 'sent' THEN 'Sent to ' || CASE sent_to WHEN 'todo' THEN 'To-do' WHEN 'notes' THEN 'Notes' WHEN 'todo-lines' THEN 'To-do' ELSE 'Kept' END WHEN 'archived' THEN 'Kept' ELSE 'In Voice inbox' END AS subtitle FROM captures WHERE _deleted IS NULL AND text LIKE '%' || ?1 || '%' ORDER BY created_at DESC LIMIT 8",
+      "sql": "SELECT id, CASE WHEN text IS NULL OR trim(text) = '' THEN CASE status WHEN 'queued' THEN 'Recording' ELSE 'Recording (no text)' END WHEN length(trim(substr(text, 1, instr(text || char(10), char(10)) - 1))) > 90 THEN substr(trim(substr(text, 1, instr(text || char(10), char(10)) - 1)), 1, 88) || '…' ELSE trim(substr(text, 1, instr(text || char(10), char(10)) - 1)) END AS title, CASE status WHEN 'sent' THEN 'Sent to ' || CASE sent_to WHEN 'todo' THEN 'Tasks' WHEN 'notes' THEN 'Notes' WHEN 'todo-lines' THEN 'Tasks' ELSE 'Kept' END WHEN 'archived' THEN 'Kept' ELSE 'In Voice inbox' END AS subtitle FROM captures WHERE _deleted IS NULL AND text LIKE '%' || ?1 || '%' ORDER BY created_at DESC LIMIT 8",
       "params": [
         "q"
       ],
@@ -308,7 +311,7 @@
       "cli": false
     },
     "index_captures": {
-      "sql": "SELECT id, CASE WHEN text IS NULL OR trim(text) = '' THEN CASE status WHEN 'queued' THEN 'Recording' ELSE 'Recording (no text)' END WHEN length(trim(substr(text, 1, instr(text || char(10), char(10)) - 1))) > 90 THEN substr(trim(substr(text, 1, instr(text || char(10), char(10)) - 1)), 1, 88) || '…' ELSE trim(substr(text, 1, instr(text || char(10), char(10)) - 1)) END AS title, text AS body, CASE status WHEN 'sent' THEN 'Sent to ' || CASE sent_to WHEN 'todo' THEN 'To-do' WHEN 'notes' THEN 'Notes' WHEN 'todo-lines' THEN 'To-do' ELSE 'Kept' END WHEN 'archived' THEN 'Kept' ELSE 'In Voice inbox' END AS subtitle FROM captures WHERE _deleted IS NULL AND text IS NOT NULL AND trim(text) <> '' AND id IN (SELECT value FROM json_each(?1))",
+      "sql": "SELECT id, CASE WHEN text IS NULL OR trim(text) = '' THEN CASE status WHEN 'queued' THEN 'Recording' ELSE 'Recording (no text)' END WHEN length(trim(substr(text, 1, instr(text || char(10), char(10)) - 1))) > 90 THEN substr(trim(substr(text, 1, instr(text || char(10), char(10)) - 1)), 1, 88) || '…' ELSE trim(substr(text, 1, instr(text || char(10), char(10)) - 1)) END AS title, text AS body, CASE status WHEN 'sent' THEN 'Sent to ' || CASE sent_to WHEN 'todo' THEN 'Tasks' WHEN 'notes' THEN 'Notes' WHEN 'todo-lines' THEN 'Tasks' ELSE 'Kept' END WHEN 'archived' THEN 'Kept' ELSE 'In Voice inbox' END AS subtitle FROM captures WHERE _deleted IS NULL AND text IS NOT NULL AND trim(text) <> '' AND id IN (SELECT value FROM json_each(?1))",
       "params": [
         "ids"
       ],
@@ -316,12 +319,18 @@
       "cli": false
     },
     "ref_captures": {
-      "sql": "SELECT id, CASE WHEN text IS NULL OR trim(text) = '' THEN CASE status WHEN 'queued' THEN 'Recording' ELSE 'Recording (no text)' END WHEN length(trim(substr(text, 1, instr(text || char(10), char(10)) - 1))) > 90 THEN substr(trim(substr(text, 1, instr(text || char(10), char(10)) - 1)), 1, 88) || '…' ELSE trim(substr(text, 1, instr(text || char(10), char(10)) - 1)) END AS title, CASE status WHEN 'sent' THEN 'Sent to ' || CASE sent_to WHEN 'todo' THEN 'To-do' WHEN 'notes' THEN 'Notes' WHEN 'todo-lines' THEN 'To-do' ELSE 'Kept' END WHEN 'archived' THEN 'Kept' ELSE 'In Voice inbox' END AS subtitle FROM captures WHERE _deleted IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "sql": "SELECT id, CASE WHEN text IS NULL OR trim(text) = '' THEN CASE status WHEN 'queued' THEN 'Recording' ELSE 'Recording (no text)' END WHEN length(trim(substr(text, 1, instr(text || char(10), char(10)) - 1))) > 90 THEN substr(trim(substr(text, 1, instr(text || char(10), char(10)) - 1)), 1, 88) || '…' ELSE trim(substr(text, 1, instr(text || char(10), char(10)) - 1)) END AS title, CASE status WHEN 'sent' THEN 'Sent to ' || CASE sent_to WHEN 'todo' THEN 'Tasks' WHEN 'notes' THEN 'Notes' WHEN 'todo-lines' THEN 'Tasks' ELSE 'Kept' END WHEN 'archived' THEN 'Kept' ELSE 'In Voice inbox' END AS subtitle FROM captures WHERE _deleted IS NULL AND id IN (SELECT value FROM json_each(?1))",
       "params": [
         "ids"
       ],
       "cli": false,
       "description": "Captures by id, for links."
+    },
+    "today_review": {
+      "description": "Today view: captures waiting for review, newest first.",
+      "params": [],
+      "cli": false,
+      "sql": "SELECT id, CASE WHEN text IS NULL OR trim(text) = '' THEN 'Recording (no text)' WHEN length(trim(substr(text, 1, instr(text || char(10), char(10)) - 1))) > 90 THEN substr(trim(substr(text, 1, instr(text || char(10), char(10)) - 1)), 1, 88) || '…' ELSE trim(substr(text, 1, instr(text || char(10), char(10)) - 1)) END AS title, source = 'audio' AS is_audio FROM captures WHERE _deleted IS NULL AND status = 'ready' ORDER BY created_at DESC, id DESC LIMIT 21"
     }
   },
   "limits": {
@@ -373,6 +382,76 @@
       "resolve": "ref_captures",
       "kind": "Capture",
       "icon": "mic"
+    }
+  ],
+  "today": [
+    {
+      "id": "review",
+      "section": "sort",
+      "query": "today_review",
+      "limit": 3,
+      "count_query": "badge",
+      "link": {
+        "label": "Open Voice",
+        "action": {
+          "navigate": {
+            "state": {
+              "tab": "inbox"
+            }
+          }
+        }
+      },
+      "row": {
+        "key": "{{row.id}}",
+        "kind": "capture",
+        "title": "{{row.title}}",
+        "actions": [
+          {
+            "label": "→ Task",
+            "action": {
+              "op": "send",
+              "args": {
+                "id": "{{row.id}}",
+                "to": "todo"
+              },
+              "success": "{{result.message}}"
+            }
+          },
+          {
+            "label": "→ Note",
+            "action": {
+              "op": "send",
+              "args": {
+                "id": "{{row.id}}",
+                "to": "notes"
+              },
+              "success": "{{result.message}}"
+            }
+          },
+          {
+            "label": "Dismiss",
+            "action": {
+              "op": "archive",
+              "args": {
+                "id": "{{row.id}}"
+              },
+              "success": "Dismissed",
+              "undo": {
+                "op": "reopen",
+                "args": {
+                  "id": "{{row.id}}"
+                },
+                "success": "Back in the inbox"
+              }
+            }
+          }
+        ],
+        "open": {
+          "navigate": {
+            "item": "{{row.id}}"
+          }
+        }
+      }
     }
   ]
 }

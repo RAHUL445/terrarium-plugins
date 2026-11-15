@@ -33,6 +33,8 @@ class OrganizationQuery(unittest.TestCase):
         query = MANIFEST['queries'][name]
         if not params:
             params = [None] * len(query['params'])
+        elif len(params) < len(query['params']):
+            params = list(params) + [None] * (len(query['params']) - len(params))
         return [dict(row) for row in self.db.execute(query['sql'], params)]
 
     def test_legacy_tasks_keep_completion_and_default_organization(self):

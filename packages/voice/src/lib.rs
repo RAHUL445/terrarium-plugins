@@ -1,7 +1,7 @@
 //! Voice: capture by recording or typing, anywhere. Recordings made on a
 //! device without a speech model (the phone) wait in the inbox and are
 //! transcribed by the desktop with local Parakeet after sync; the audio is
-//! then cleared. Review the text, then send it to To-do (one task, or one
+//! then cleared. Review the text, then send it to Task manager (one task, or one
 //! per line) or Notes, or keep it in history.
 
 use std::io::Read;
@@ -352,8 +352,8 @@ fn send(args: &Args) -> Result<Value> {
         "count": count,
         "message": match (target, count) {
             ("notes", _) => "Sent to Notes".to_string(),
-            (_, 1) => "Sent to To-do".to_string(),
-            (_, n) => format!("Sent {n} tasks to To-do"),
+            (_, 1) => "Sent to Task manager".to_string(),
+            (_, n) => format!("Sent {n} tasks to Task manager"),
         },
     }))
 }

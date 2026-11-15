@@ -6,7 +6,7 @@ const host = process.env.TERRA_HOST_SOURCE;
 if (!host) throw Error("Set TERRA_HOST_SOURCE to a host checkout for routing integration tests");
 const source = fs.readFileSync(require("node:path").join(host, "ui/app.js"), "utf8");
 const routing = source.slice(source.indexOf("async function openCreation("), source.indexOf("\nfunction openPalette("));
-for (const id of ["habits", "todo", "notes", "bookmarks", "voice"]) {
+for (const id of ["habits", "tasks", "notes", "bookmarks", "voice"]) {
   const template = require(`../packages/${id}/ui/page-main.json`);
   const manifest = require(`../packages/${id}/manifest.json`);
   test(`${id} declares a creation form that saves a new record and cancels without writes`, () => {

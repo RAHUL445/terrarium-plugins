@@ -2,7 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 
 const plugins = [
-  { id: "todo", query: "workspace_tasks", count: 3 },
+  { id: "tasks", query: "workspace_tasks", count: 3 },
   { id: "notes", query: "list" },
   { id: "bookmarks", query: "list" },
 ];

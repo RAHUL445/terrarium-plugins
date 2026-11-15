@@ -1,0 +1,3136 @@
+{
+  "id": "tasks",
+  "former_ids": ["todo"],
+  "name": "Task manager",
+  "version": "0.12.4",
+  "api": "terrarium:plugin@0.1.0",
+  "requires": ["data-views-v1", "today-v1"],
+  "description": "Tasks with due dates, reminders, priorities, repeats, steps, subtasks, dependencies, custom fields, time estimates, time tracking and an archive for completed tasks.",
+  "history": [
+    "tasks"
+  ],
+  "storage": {
+    "version": 9,
+    "tables": [
+      {
+        "name": "tasks",
+        "delete_policy": "trash",
+        "columns": [
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "notes",
+            "type": "text"
+          },
+          {
+            "name": "due",
+            "type": "text"
+          },
+          {
+            "name": "tags",
+            "type": "text"
+          },
+          {
+            "name": "done",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "completed_at",
+            "type": "integer"
+          },
+          {
+            "name": "priority",
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "repeat",
+            "type": "text"
+          },
+          {
+            "name": "remind_time",
+            "type": "text"
+          },
+          {
+            "name": "remind_at",
+            "type": "integer"
+          },
+          {
+            "name": "cleared_at",
+            "type": "integer"
+          },
+          {
+            "name": "series",
+            "type": "text"
+          },
+          {
+            "name": "done_note",
+            "type": "text"
+          },
+          {
+            "name": "note_id",
+            "type": "text"
+          },
+          {
+            "name": "in_progress",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "urgent",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "important",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "list_id",
+            "type": "text"
+          },
+          {
+            "name": "group_id",
+            "type": "text"
+          },
+          {
+            "name": "status_id",
+            "type": "text"
+          },
+          {
+            "name": "previous_status_id",
+            "type": "text"
+          },
+          {
+            "name": "planned_for",
+            "type": "text"
+          },
+          {
+            "name": "sort_order",
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "parent_id",
+            "type": "text"
+          },
+          {
+            "name": "trashed_with",
+            "type": "text"
+          },
+          {
+            "name": "fields_updated_at",
+            "type": "integer"
+          },
+          {
+            "name": "estimate_min",
+            "type": "integer"
+          }
+        ]
+      },
+      {
+        "name": "task_deps",
+        "delete_policy": "delete-wins",
+        "columns": [
+          {
+            "name": "task_id",
+            "type": "text"
+          },
+          {
+            "name": "depends_on",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "name": "task_fields",
+        "columns": [
+          {
+            "name": "list_id",
+            "type": "text"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "type",
+            "type": "text"
+          },
+          {
+            "name": "options",
+            "type": "text"
+          },
+          {
+            "name": "show_on_row",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "position",
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "archived",
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      },
+      {
+        "name": "task_field_values",
+        "delete_policy": "delete-wins",
+        "columns": [
+          {
+            "name": "task_id",
+            "type": "text"
+          },
+          {
+            "name": "field_id",
+            "type": "text"
+          },
+          {
+            "name": "value",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "name": "time_entries",
+        "delete_policy": "trash",
+        "columns": [
+          {
+            "name": "task_id",
+            "type": "text"
+          },
+          {
+            "name": "started_at",
+            "type": "integer"
+          },
+          {
+            "name": "ended_at",
+            "type": "integer"
+          },
+          {
+            "name": "minutes",
+            "type": "integer"
+          },
+          {
+            "name": "note",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "name": "steps",
+        "delete_policy": "trash",
+        "columns": [
+          {
+            "name": "task_id",
+            "type": "text"
+          },
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "done",
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      },
+      {
+        "name": "task_lists",
+        "columns": [
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "color",
+            "type": "text"
+          },
+          {
+            "name": "position",
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "archived",
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      },
+      {
+        "name": "task_groups",
+        "columns": [
+          {
+            "name": "list_id",
+            "type": "text"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "color",
+            "type": "text"
+          },
+          {
+            "name": "position",
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "archived",
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      },
+      {
+        "name": "task_statuses",
+        "columns": [
+          {
+            "name": "list_id",
+            "type": "text"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "color",
+            "type": "text"
+          },
+          {
+            "name": "category",
+            "type": "text"
+          },
+          {
+            "name": "ready",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "position",
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "archived",
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      },
+      {
+        "name": "settings",
+        "columns": [
+          {
+            "name": "ask_note",
+            "type": "text"
+          },
+          {
+            "name": "note_tags",
+            "type": "text"
+          },
+          {
+            "name": "auto_archive",
+            "type": "text"
+          }
+        ]
+      }
+    ]
+  },
+  "operations": {
+    "set_estimate": {
+      "description": "Set how long a task is expected to take, or clear the estimate with an empty value. Accepts minutes (90) or text like 1h 30m, 90m, 1.5h or 45 (a bare number is minutes). A parent task's shown estimate also includes its subtasks'. Returns the previous estimate so the change can be undone.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The task."
+        },
+        "minutes": {
+          "type": "json",
+          "description": "Minutes or text like 1h 30m; empty clears the estimate."
+        }
+      },
+      "result": {
+        "estimate_min": {
+          "type": "integer"
+        },
+        "previous": {
+          "type": "string"
+        },
+        "changed": {
+          "type": "boolean"
+        }
+      },
+      "examples": [
+        {
+          "id": "<task id>",
+          "minutes": "1h 30m"
+        }
+      ]
+    },
+    "start_timer": {
+      "description": "Start tracking time on a task. Only one timer runs at a time, so a running one is stopped first (and its time kept). Starting the task that already runs changes nothing. A finished task can't be timed. Returns the entry id, what was stopped, and a message.",
+      "effect": "write",
+      "params": {
+        "task_id": {
+          "type": "id",
+          "required": true,
+          "description": "The task to time."
+        }
+      },
+      "result": {
+        "id": {
+          "type": "id"
+        },
+        "already_running": {
+          "type": "boolean"
+        },
+        "stopped_ids": {
+          "type": "string"
+        }
+      },
+      "examples": [
+        {
+          "task_id": "<task id>"
+        }
+      ]
+    },
+    "stop_timer": {
+      "description": "Stop the running timer (from whichever device started it) and keep its time, rounded to whole minutes with a minimum of 1. Nothing running is not an error. Returns the minutes logged and the task.",
+      "effect": "write",
+      "params": {},
+      "result": {
+        "stopped": {
+          "type": "integer"
+        },
+        "minutes": {
+          "type": "integer"
+        },
+        "task_id": {
+          "type": "id"
+        },
+        "ids": {
+          "type": "string"
+        }
+      }
+    },
+    "resume_timer": {
+      "description": "Undo for stop_timer: runs the stopped timer again, counting the time it already logged.",
+      "effect": "write",
+      "cli": false,
+      "params": {
+        "ids": {
+          "type": "string",
+          "required": true,
+          "description": "Entry ids from stop_timer, comma separated."
+        }
+      }
+    },
+    "undo_start_timer": {
+      "description": "Undo for start_timer: drops the new entry and runs the timers it stopped again.",
+      "effect": "write",
+      "cli": false,
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The entry start_timer made."
+        },
+        "stopped_ids": {
+          "type": "string",
+          "description": "stopped_ids from start_timer."
+        }
+      }
+    },
+    "add_time": {
+      "description": "Log time already spent on a task. Give the time as minutes or text (1h 30m, 90m, 1.5h, 45) in either `minutes` or `duration`; `date` is the day it was spent (default now) and `note` says what was done. Returns the entry id.",
+      "effect": "write",
+      "params": {
+        "task_id": {
+          "type": "id",
+          "required": true,
+          "description": "The task."
+        },
+        "minutes": {
+          "type": "json",
+          "description": "Minutes, or text like 1h 30m."
+        },
+        "duration": {
+          "type": "string",
+          "description": "Text like 1h 30m, 90m, 1.5h or 45."
+        },
+        "date": {
+          "type": "date",
+          "description": "The day it was spent; default today."
+        },
+        "note": {
+          "type": "string",
+          "description": "What was done (up to 500 characters)."
+        }
+      },
+      "result": {
+        "id": {
+          "type": "id"
+        },
+        "minutes": {
+          "type": "integer"
+        }
+      },
+      "examples": [
+        {
+          "task_id": "<task id>",
+          "duration": "45m",
+          "note": "Reviewed the draft"
+        }
+      ]
+    },
+    "update_time_entry": {
+      "description": "Change a time entry: its time (minutes or duration text), day (date) or note (empty clears it). A running timer can only get a note; stop it first. Returns the previous values.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The time entry."
+        },
+        "minutes": {
+          "type": "json",
+          "description": "Minutes, or text like 1h 30m."
+        },
+        "duration": {
+          "type": "string",
+          "description": "Text like 1h 30m, 90m, 1.5h or 45."
+        },
+        "date": {
+          "type": "date",
+          "description": "The day it was spent."
+        },
+        "note": {
+          "type": "string",
+          "description": "What was done; empty clears it."
+        }
+      },
+      "result": {
+        "previous_minutes": {
+          "type": "integer"
+        },
+        "previous_date": {
+          "type": "string"
+        },
+        "previous_note": {
+          "type": "string"
+        }
+      }
+    },
+    "delete_time_entry": {
+      "description": "Move a time entry to the trash (a running timer ends with it). It can be restored.",
+      "effect": "destructive",
+      "confirm": "Delete this time entry?",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The time entry."
+        }
+      }
+    },
+    "restore_time_entry": {
+      "description": "Bring a deleted time entry back (the undo of delete_time_entry).",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "A deleted time entry."
+        }
+      }
+    },
+    "set_parent": {
+      "description": "Make a task a subtask of another, or detach it with an empty parent_id. One level only: the parent can't itself be a subtask, and a task that has subtasks can't become one. Moving under a parent also moves the task into the parent's list and group.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The task to move."
+        },
+        "parent_id": {
+          "type": "string",
+          "required": true,
+          "description": "The new parent task's id; empty detaches the task (it becomes top-level)."
+        }
+      },
+      "result": {
+        "id": {
+          "type": "id"
+        },
+        "parent_id": {
+          "type": "string"
+        },
+        "previous_parent_id": {
+          "type": "string"
+        }
+      },
+      "examples": [
+        {
+          "id": "<task id>",
+          "parent_id": "<parent task id>"
+        },
+        {
+          "id": "<task id>",
+          "parent_id": ""
+        }
+      ]
+    },
+    "promote_step": {
+      "description": "Turn a step into a subtask of its task (same title and done state) and remove the step. Not available on a subtask's steps (one level only).",
+      "effect": "write",
+      "params": {
+        "step_id": {
+          "type": "id",
+          "required": true,
+          "description": "The step."
+        }
+      },
+      "result": {
+        "id": {
+          "type": "id"
+        },
+        "step_id": {
+          "type": "id"
+        },
+        "parent_id": {
+          "type": "id"
+        }
+      }
+    },
+    "unpromote_step": {
+      "description": "Undo promote_step: bring the step back and move the subtask made from it to the trash.",
+      "effect": "write",
+      "cli": false,
+      "params": {
+        "step_id": {
+          "type": "id",
+          "required": true,
+          "description": "The step that was promoted."
+        },
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The subtask made from it."
+        }
+      }
+    },
+    "add_dependency": {
+      "description": "Make a task wait on another (task_id is blocked until depends_on is done). Rejects a task waiting on itself and any loop; adding an existing pair changes nothing.",
+      "effect": "write",
+      "params": {
+        "task_id": {
+          "type": "id",
+          "required": true,
+          "description": "The task that waits (is blocked)."
+        },
+        "depends_on": {
+          "type": "id",
+          "required": true,
+          "description": "The task it waits on (the blocker)."
+        }
+      },
+      "result": {
+        "id": {
+          "type": "id"
+        },
+        "existing": {
+          "type": "boolean"
+        }
+      },
+      "examples": [
+        {
+          "task_id": "<task id>",
+          "depends_on": "<blocking task id>"
+        }
+      ]
+    },
+    "create_field": {
+      "description": "Create a custom field (text, number, date, select, checkbox or url) for one list, or for all lists when list_id is empty. Select options come one per line (or as a JSON array of labels). The type and the list can't change later.",
+      "effect": "write",
+      "params": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "description": "Field name, unique among the fields a task can see."
+        },
+        "type": {
+          "type": "enum",
+          "values": [
+            "text",
+            "number",
+            "date",
+            "select",
+            "checkbox",
+            "url"
+          ],
+          "required": true
+        },
+        "list_id": {
+          "type": "string",
+          "description": "The list this field belongs to; empty means all lists."
+        },
+        "options": {
+          "type": "text",
+          "description": "Select only: options, one label per line, or a JSON array."
+        },
+        "show_on_row": {
+          "type": "boolean",
+          "description": "Show its value as a chip on task rows."
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        }
+      },
+      "result": {
+        "id": {
+          "type": "id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "examples": [
+        {
+          "name": "Budget",
+          "type": "number"
+        },
+        {
+          "name": "Stage",
+          "type": "select",
+          "options": "Design\nBuild\nDone",
+          "show_on_row": true
+        }
+      ]
+    },
+    "update_field": {
+      "description": "Rename, reorder, archive or change the options of a custom field. Archiving hides it and keeps its values. For select fields, options replaces the whole list: kept options keep their id (matched by label); dropped options clear the values that used them.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "options": {
+          "type": "text",
+          "description": "Select only: the full option list, one label per line, or a JSON array."
+        },
+        "show_on_row": {
+          "type": "boolean"
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        },
+        "archived": {
+          "type": "boolean"
+        }
+      }
+    },
+    "add_field_option": {
+      "description": "Add an option to a select field.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The select field."
+        },
+        "label": {
+          "type": "string",
+          "required": true
+        },
+        "color": {
+          "type": "string",
+          "description": "#RRGGBB, optional."
+        }
+      },
+      "result": {
+        "option_id": {
+          "type": "string"
+        }
+      }
+    },
+    "update_field_option": {
+      "description": "Rename or recolor an option of a select field; tasks keep it.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The select field."
+        },
+        "option_id": {
+          "type": "string",
+          "required": true
+        },
+        "label": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string",
+          "description": "#RRGGBB, or empty to clear."
+        }
+      }
+    },
+    "remove_field_option": {
+      "description": "Remove an option from a select field and clear the value on every task that used it.",
+      "effect": "destructive",
+      "confirm": "Remove this option? Tasks that use it lose that value.",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The select field."
+        },
+        "option_id": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "result": {
+        "cleared": {
+          "type": "integer"
+        }
+      }
+    },
+    "set_field": {
+      "description": "Set a custom field on a task, or clear it with an empty value. Numbers must parse, dates look like 2026-11-01, urls start with http:// or https://, checkboxes are 1 (checked) or empty, selects take an option id or label. Returns the previous value so the change can be undone.",
+      "effect": "write",
+      "params": {
+        "task_id": {
+          "type": "id",
+          "required": true
+        },
+        "field_id": {
+          "type": "id",
+          "required": true
+        },
+        "value": {
+          "type": "json",
+          "description": "Text, number or true/false; empty clears the field."
+        }
+      },
+      "result": {
+        "value": {
+          "type": "string"
+        },
+        "previous": {
+          "type": "string"
+        },
+        "changed": {
+          "type": "boolean"
+        }
+      },
+      "examples": [
+        {
+          "task_id": "<task id>",
+          "field_id": "<field id>",
+          "value": "1200"
+        }
+      ]
+    },
+    "remove_dependency": {
+      "description": "Stop a task waiting on another.",
+      "effect": "destructive",
+      "confirm": "Stop this task waiting on that one?",
+      "params": {
+        "task_id": {
+          "type": "id",
+          "required": true,
+          "description": "The task that waits."
+        },
+        "depends_on": {
+          "type": "id",
+          "required": true,
+          "description": "The task it waits on."
+        }
+      },
+      "result": {
+        "removed": {
+          "type": "integer"
+        }
+      }
+    },
+    "create_list": {
+      "description": "Create a task list with To pick, In progress, Waiting and Done statuses.",
+      "effect": "write",
+      "params": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "color": {
+          "type": "string",
+          "description": "Optional #RRGGBB color."
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        }
+      }
+    },
+    "update_list": {
+      "description": "Rename, recolor, reorder or archive a list; keeps its tasks and references.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        },
+        "archived": {
+          "type": "boolean"
+        }
+      }
+    },
+    "create_group": {
+      "description": "Create an organizational group in a list. Empty list_id means Inbox.",
+      "effect": "write",
+      "params": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "list_id": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        }
+      }
+    },
+    "update_group": {
+      "description": "Rename, recolor, reorder or archive a group without moving its tasks.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        },
+        "archived": {
+          "type": "boolean"
+        }
+      }
+    },
+    "create_status": {
+      "description": "Create a custom status in one list (empty list_id means Inbox). ready=false excludes Waiting/Blocked from future ready-work suggestions.",
+      "effect": "write",
+      "params": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "list_id": {
+          "type": "string"
+        },
+        "category": {
+          "type": "enum",
+          "values": [
+            "not_started",
+            "active",
+            "completed"
+          ],
+          "required": true
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "color": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        }
+      }
+    },
+    "update_status": {
+      "description": "Customize a status. Changing category requires no current or previous task references; archiving preserves existing assignments.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "category": {
+          "type": "enum",
+          "values": [
+            "not_started",
+            "active",
+            "completed"
+          ]
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "color": {
+          "type": "string"
+        },
+        "position": {
+          "type": "integer",
+          "min": 0
+        },
+        "archived": {
+          "type": "boolean"
+        }
+      }
+    },
+    "organize": {
+      "description": "Move a task between lists/groups or assign a custom status. Empty ids clear assignments; moving lists clears an unspecified group and maps status by category/name. Completing through status preserves repeat and note behavior. Returns chosen destination and any completion result.",
+      "effect": "write",
+      "bulk": true,
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true
+        },
+        "list_id": {
+          "type": "string"
+        },
+        "group_id": {
+          "type": "string"
+        },
+        "status_id": {
+          "type": "string"
+        }
+      }
+    },
+    "create": {
+      "description": "Create a task. Dates, times, #tags, !priority and \"every week\" in the title are understood. Optional list_id/group_id/status_id organize the task atomically; omission captures into Inbox. Existing due, reminder, repeat and attention fields are supported. With parent_id the task is a subtask (one level only) in its parent's list and group unless list_id/group_id are given.",
+      "effect": "write",
+      "params": {
+        "parent_id": {
+          "type": "string",
+          "description": "Make it a subtask of this task. The parent can't itself be a subtask."
+        },
+        "list_id": {
+          "type": "string"
+        },
+        "group_id": {
+          "type": "string"
+        },
+        "status_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "Task title; may include a date, time, #tags, !priority and \"every week\"."
+        },
+        "notes": {
+          "type": "text",
+          "description": "Longer notes for the task."
+        },
+        "due": {
+          "type": "date",
+          "description": "Due date (YYYY-MM-DD)."
+        },
+        "remind_time": {
+          "type": "time",
+          "description": "Reminder time (HH:MM) on the due date; without a due date it means the next time it comes round."
+        },
+        "priority": {
+          "type": "integer",
+          "description": "Priority: 0 none, 1 low, 2 medium, 3 high.",
+          "min": 0,
+          "max": 3
+        },
+        "repeat": {
+          "type": "enum",
+          "description": "How the task repeats; never (or empty) for no repeat.",
+          "values": [
+            "daily",
+            "weekdays",
+            "weekly",
+            "monthly",
+            "never"
+          ]
+        },
+        "tags": {
+          "type": "string",
+          "description": "Comma-separated tags, e.g. \"work, errands\"."
+        },
+        "in_progress": {
+          "type": "boolean",
+          "description": "Task is being worked on (Doing lane)."
+        },
+        "urgent": {
+          "type": "boolean",
+          "description": "Urgent (Eisenhower matrix)."
+        },
+        "important": {
+          "type": "boolean",
+          "description": "Important (Eisenhower matrix)."
+        }
+      },
+      "examples": [
+        {
+          "title": "Call Sam tomorrow 6pm #work !high"
+        }
+      ]
+    },
+    "update": {
+      "description": "Change a task's title, notes, due, remind_time, priority (0-3), repeat (daily, weekdays, weekly, monthly) or tags; empty clears. Also accepts in_progress, urgent and important (booleans).",
+      "effect": "write",
+      "bulk": true,
+      "params": {
+        "planned_for": {
+          "type": "date",
+          "description": "Intended work date, independent of due date/reminder. Empty clears."
+        },
+        "sort_order": {
+          "type": "integer",
+          "min": 0,
+          "description": "Manual task position; applies only to views using manual order."
+        },
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The task to change."
+        },
+        "title": {
+          "type": "string",
+          "description": "New title."
+        },
+        "notes": {
+          "type": "text",
+          "description": "Longer notes; empty clears."
+        },
+        "due": {
+          "type": "date",
+          "description": "Due date (YYYY-MM-DD); empty clears."
+        },
+        "remind_time": {
+          "type": "time",
+          "description": "Reminder time (HH:MM); empty clears. Sets the due date to today if there is none."
+        },
+        "priority": {
+          "type": "integer",
+          "description": "Priority: 0 none, 1 low, 2 medium, 3 high.",
+          "min": 0,
+          "max": 3
+        },
+        "repeat": {
+          "type": "enum",
+          "description": "How the task repeats; never (or empty) for no repeat.",
+          "values": [
+            "daily",
+            "weekdays",
+            "weekly",
+            "monthly",
+            "never"
+          ]
+        },
+        "tags": {
+          "type": "string",
+          "description": "Comma-separated tags, replacing the current ones; empty clears."
+        },
+        "in_progress": {
+          "type": "boolean",
+          "description": "Task is being worked on (Doing lane)."
+        },
+        "urgent": {
+          "type": "boolean",
+          "description": "Urgent (Eisenhower matrix)."
+        },
+        "important": {
+          "type": "boolean",
+          "description": "Important (Eisenhower matrix)."
+        }
+      },
+      "examples": [
+        {
+          "id": "<task id>",
+          "due": "2026-11-14",
+          "priority": 2
+        }
+      ]
+    },
+    "move": {
+      "description": "Move a task to a board lane (todo, doing, done) or a matrix quadrant (do, schedule, delegate, eliminate).",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The task."
+        },
+        "lane": {
+          "type": "enum",
+          "required": true,
+          "values": [
+            "todo",
+            "doing",
+            "done",
+            "do",
+            "schedule",
+            "delegate",
+            "eliminate"
+          ],
+          "description": "Where to move it."
+        }
+      }
+    },
+    "toggle": {
+      "description": "Mark a task done or not done. Finishing a repeating task creates the next one. Returns ask_note (the task id) when a note should be offered.",
+      "effect": "write",
+      "bulk": true,
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The task."
+        },
+        "done": {
+          "type": "boolean",
+          "required": true,
+          "description": "true to mark done, false to reopen."
+        }
+      },
+      "examples": [
+        {
+          "id": "<task id>",
+          "done": true
+        }
+      ]
+    },
+    "delete": {
+      "description": "Move a task to trash, with its subtasks. Its dependency links stay, but a task in the trash blocks nothing.",
+      "effect": "destructive",
+      "bulk": true,
+      "confirm": "Move this task to the trash?",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The task to trash."
+        }
+      }
+    },
+    "restore": {
+      "description": "Bring a task back from trash, with the subtasks that were trashed along with it.",
+      "effect": "write",
+      "bulk": true,
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "A task in the trash."
+        }
+      }
+    },
+    "add_tag": {
+      "description": "Add a tag to a task, keeping its other tags.",
+      "effect": "write",
+      "bulk": true,
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The task."
+        },
+        "tag": {
+          "type": "string",
+          "required": true,
+          "description": "Tag to add, with or without #."
+        }
+      },
+      "examples": [
+        {
+          "id": "<task id>",
+          "tag": "work"
+        }
+      ]
+    },
+    "completed_between": {
+      "description": "Tasks completed between local dates start and end (inclusive), with their notes.",
+      "effect": "read",
+      "params": {
+        "start": {
+          "type": "date",
+          "required": true,
+          "description": "First local date (YYYY-MM-DD)."
+        },
+        "end": {
+          "type": "date",
+          "required": true,
+          "description": "Last local date, inclusive (YYYY-MM-DD)."
+        }
+      },
+      "cli": false
+    },
+    "clear_done": {
+      "description": "Archive every completed task: they leave the lists and stay in the Archive, and still count in reviews and reports. Same as archive_done. Returns cleared and archived (how many) and at (the archive time, for unarchive).",
+      "effect": "destructive",
+      "confirm": "Archive all completed tasks? They stay in the Archive and still count in reviews and reports.",
+      "params": {},
+      "result": {
+        "cleared": {"type": "integer"},
+        "archived": {"type": "integer"},
+        "at": {"type": "integer"}
+      }
+    },
+    "archive_done": {
+      "description": "Archive every completed task: they leave the lists and stay in the Archive, and still count in reviews and reports. Undo with unarchive and the returned at. Returns cleared and archived (how many) and at.",
+      "effect": "destructive",
+      "confirm": "Archive all completed tasks? They stay in the Archive and still count in reviews and reports.",
+      "params": {},
+      "result": {
+        "cleared": {"type": "integer"},
+        "archived": {"type": "integer"},
+        "at": {"type": "integer"}
+      }
+    },
+    "archive": {
+      "description": "Archive one completed task, with its completed subtasks (open subtasks stay). It leaves the lists and stays in the Archive and in reviews. Only completed tasks can be archived. Returns archived (tasks archived), at and a message; undo with unarchive.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "A completed task."
+        }
+      },
+      "result": {
+        "archived": {"type": "integer"},
+        "at": {"type": "integer"},
+        "subtasks": {"type": "integer"},
+        "message": {"type": "string"}
+      },
+      "examples": [
+        {
+          "id": "<task id>"
+        }
+      ]
+    },
+    "unarchive": {
+      "description": "Bring an archived task back to the lists (it stays completed), with the subtasks archived along with it. Give id for one task, or at (the archive time returned by archive_done) for everything archived at that moment.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "description": "An archived task."
+        },
+        "at": {
+          "type": "integer",
+          "description": "Archive time in ms: unarchives every task archived at exactly that moment."
+        }
+      },
+      "result": {
+        "unarchived": {"type": "integer"},
+        "message": {"type": "string"}
+      },
+      "examples": [
+        {
+          "id": "<task id>"
+        }
+      ]
+    },
+    "archive_settings": {
+      "description": "Set when completed tasks are archived automatically: never, end_of_day (everything finished before today, daily at 00:05), 7d or 30d (finished more than that long ago). Turns the daily schedule on or off, and runs one pass now.",
+      "effect": "write",
+      "params": {
+        "auto": {
+          "type": "enum",
+          "required": true,
+          "description": "never (default), end_of_day, 7d or 30d.",
+          "values": [
+            "never",
+            "end_of_day",
+            "7d",
+            "30d"
+          ]
+        }
+      },
+      "examples": [
+        {
+          "auto": "7d"
+        }
+      ]
+    },
+    "auto_archive": {
+      "description": "Archive completed tasks according to the Auto-archive setting. Run by the daily schedule; safe to repeat.",
+      "effect": "write",
+      "params": {},
+      "cli": false
+    },
+    "add_step": {
+      "description": "Add a step (task_id, title) to a task.",
+      "effect": "write",
+      "params": {
+        "task_id": {
+          "type": "id",
+          "required": true,
+          "description": "The task to add the step to."
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "Step text."
+        }
+      },
+      "examples": [
+        {
+          "task_id": "<task id>",
+          "title": "Book the venue"
+        }
+      ]
+    },
+    "toggle_step": {
+      "description": "Tick or untick a step (id, done).",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The step."
+        },
+        "done": {
+          "type": "boolean",
+          "required": true,
+          "description": "true to tick, false to untick."
+        }
+      }
+    },
+    "delete_step": {
+      "description": "Remove a step.",
+      "effect": "destructive",
+      "confirm": "Remove this step?",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The step to remove."
+        }
+      }
+    },
+    "save_note": {
+      "description": "Save what came of a finished task (id, text); also kept in Notes under the Tasks project. Empty text removes it from the task.",
+      "effect": "write",
+      "params": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "A finished task."
+        },
+        "text": {
+          "type": "text",
+          "description": "What came of the task; empty removes the note."
+        }
+      },
+      "examples": [
+        {
+          "id": "<task id>",
+          "text": "Sam agreed to Friday; sent the invite."
+        }
+      ]
+    },
+    "note_settings": {
+      "description": "When to offer a note on finishing a task: ask (always, tagged, never) and tags (for tagged).",
+      "effect": "write",
+      "params": {
+        "ask": {
+          "type": "enum",
+          "description": "When to offer a note on finishing a task (default always).",
+          "values": [
+            "always",
+            "tagged",
+            "never"
+          ]
+        },
+        "tags": {
+          "type": "string",
+          "description": "Comma-separated tags whose tasks ask for a note; required when ask is tagged."
+        }
+      },
+      "examples": [
+        {
+          "ask": "tagged",
+          "tags": "work, clients"
+        }
+      ]
+    },
+    "open_tasks": {
+      "description": "Open tasks for reviews: overdue, due up to end (YYYY-MM-DD, default a week from today), and undated.",
+      "effect": "read",
+      "params": {
+        "today": {
+          "type": "date",
+          "description": "Override today's date (YYYY-MM-DD) for the overdue cut-off."
+        },
+        "end": {
+          "type": "date",
+          "description": "Include tasks due up to this date (default a week from today)."
+        }
+      },
+      "cli": false
+    },
+    "import": {
+      "description": "Add a task from an import: the title is kept as written. Takes the same fields as create, plus done.",
+      "effect": "write",
+      "params": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "notes": {
+          "type": "text"
+        },
+        "due": {
+          "type": "date"
+        },
+        "remind_time": {
+          "type": "time"
+        },
+        "priority": {
+          "type": "integer",
+          "min": 0,
+          "max": 3
+        },
+        "repeat": {
+          "type": "enum",
+          "values": [
+            "daily",
+            "weekdays",
+            "weekly",
+            "monthly",
+            "never"
+          ]
+        },
+        "tags": {
+          "type": "string"
+        },
+        "in_progress": {
+          "type": "boolean"
+        },
+        "urgent": {
+          "type": "boolean"
+        },
+        "important": {
+          "type": "boolean"
+        },
+        "done": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "queries": {
+    "time_entries": {
+      "sql": "SELECT id, task_id, started_at, ended_at, running, minutes, CASE WHEN running = 1 THEN (CASE WHEN minutes < 60 THEN minutes || 'm' WHEN minutes % 60 = 0 THEN (minutes / 60) || 'h' ELSE (minutes / 60) || 'h ' || (minutes % 60) || 'm' END) || ' · running' ELSE (CASE WHEN minutes < 60 THEN minutes || 'm' WHEN minutes % 60 = 0 THEN (minutes / 60) || 'h' ELSE (minutes / 60) || 'h ' || (minutes % 60) || 'm' END) END AS duration_label, date_text AS date, CASE WHEN date_text = ?4 THEN 'Today' WHEN julianday(?4) - julianday(date_text) = 1 THEN 'Yesterday' ELSE CAST(strftime('%d', date_text) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', date_text) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date_text, 1, 4) <> substr(?4, 1, 4) THEN ' ' || substr(date_text, 1, 4) ELSE '' END END AS date_label, CASE WHEN running = 1 THEN from_time || ' – now' WHEN ended_at > started_at THEN from_time || ' – ' || to_time END AS range_label, note FROM (SELECT e.id, e.task_id, e.started_at, e.ended_at, CASE WHEN e.ended_at IS NULL THEN 1 ELSE 0 END AS running, CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?2 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END AS minutes, date(e.started_at + COALESCE(?3, 0) / 1000, 'unixepoch') AS date_text, strftime('%H:%M', e.started_at + COALESCE(?3, 0) / 1000, 'unixepoch') AS from_time, strftime('%H:%M', e.ended_at + COALESCE(?3, 0) / 1000, 'unixepoch') AS to_time, e.note AS note FROM time_entries e WHERE e.task_id = ?1 AND e._deleted IS NULL) ORDER BY started_at DESC, id DESC LIMIT 200",
+      "params": [
+        "task_id",
+        "now_ms",
+        "utc_offset_ms",
+        "today"
+      ],
+      "description": "Time entries of one task, newest first: id, date, minutes, duration_label (1h 20m), range_label (14:05 – 14:35, for timed entries), note and running (a timer still running counts its elapsed time).",
+      "types": {
+        "task_id": {
+          "type": "id",
+          "required": true,
+          "description": "The task."
+        }
+      }
+    },
+    "running_timer": {
+      "sql": "SELECT e.id, e.task_id, t.title, e.started_at, strftime('%H:%M', e.started_at + COALESCE(?2, 0) / 1000, 'unixepoch') AS started_time, m.minutes AS elapsed_min, (CASE WHEN m.minutes < 60 THEN m.minutes || 'm' WHEN m.minutes % 60 = 0 THEN (m.minutes / 60) || 'h' ELSE (m.minutes / 60) || 'h ' || (m.minutes % 60) || 'm' END) AS elapsed_label, '● ' || (CASE WHEN m.minutes < 60 THEN m.minutes || 'm' WHEN m.minutes % 60 = 0 THEN (m.minutes / 60) || 'h' ELSE (m.minutes / 60) || 'h ' || (m.minutes % 60) || 'm' END) || ' · ' || t.title AS label, (SELECT COUNT(*) FROM time_entries r JOIN tasks rt ON rt.id = r.task_id AND rt._deleted IS NULL WHERE r.ended_at IS NULL AND r._deleted IS NULL) AS running_count FROM time_entries e JOIN tasks t ON t.id = e.task_id AND t._deleted IS NULL JOIN (SELECT id, MAX(0, (CAST(?1 AS INTEGER) / 1000 - started_at + 30) / 60) AS minutes FROM time_entries) m ON m.id = e.id WHERE e.ended_at IS NULL AND e._deleted IS NULL ORDER BY e.started_at DESC, e.id DESC LIMIT 1",
+      "params": [
+        "now_ms",
+        "utc_offset_ms"
+      ],
+      "description": "The task whose timer is running (none when no timer runs): task_id, title, started_at, started_time, elapsed_min and elapsed_label so far."
+    },
+    "time_summary": {
+      "sql": "SELECT id, title, list_name, minutes, (CASE WHEN minutes < 60 THEN minutes || 'm' WHEN minutes % 60 = 0 THEN (minutes / 60) || 'h' ELSE (minutes / 60) || 'h ' || (minutes % 60) || 'm' END) AS duration_label, entries, tasks FROM (SELECT CASE WHEN ?3 = 'list' THEN COALESCE(t.list_id, '') ELSE t.id END AS id, CASE WHEN ?3 = 'list' THEN COALESCE((SELECT l.name FROM task_lists l WHERE l.id = t.list_id AND l._deleted IS NULL), 'Inbox') ELSE t.title END AS title, COALESCE((SELECT l.name FROM task_lists l WHERE l.id = t.list_id AND l._deleted IS NULL), 'Inbox') AS list_name, SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?4 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) AS minutes, COUNT(*) AS entries, COUNT(DISTINCT t.id) AS tasks FROM time_entries e JOIN tasks t ON t.id = e.task_id AND t._deleted IS NULL WHERE e._deleted IS NULL AND (?1 IS NULL OR ?1 = '' OR date(e.started_at + COALESCE(?5, 0) / 1000, 'unixepoch') >= ?1) AND (?2 IS NULL OR ?2 = '' OR date(e.started_at + COALESCE(?5, 0) / 1000, 'unixepoch') <= ?2) GROUP BY 1) ORDER BY minutes DESC, title LIMIT 500",
+      "params": [
+        "from",
+        "to",
+        "by",
+        "now_ms",
+        "utc_offset_ms"
+      ],
+      "description": "Time tracked between two local dates (inclusive; either may be empty for open-ended), per task or, with by=list, per list (Inbox for tasks without one). Own entries only, no subtask rollup, so totals add up. Tasks in the trash are left out. A running timer counts its elapsed time.",
+      "types": {
+        "from": {
+          "type": "date",
+          "description": "First day, e.g. 2026-11-01."
+        },
+        "to": {
+          "type": "date",
+          "description": "Last day, e.g. 2026-11-07."
+        },
+        "by": {
+          "type": "enum",
+          "values": [
+            "task",
+            "list"
+          ],
+          "description": "Group by task (default) or by list."
+        }
+      }
+    },
+    "subtasks": {
+      "sql": "SELECT c.id, c.title, COALESCE(c.done, 0) AS done, c.due, CASE WHEN c.due IS NULL THEN NULL WHEN julianday(c.due) - julianday(?2) = 0 THEN 'Today' WHEN julianday(c.due) - julianday(?2) = 1 THEN 'Tomorrow' WHEN julianday(c.due) - julianday(?2) = -1 THEN 'Yesterday' ELSE CAST(strftime('%d', c.due) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', c.due) AS INTEGER) - 1) * 3 + 1, 3) END AS due_label, CASE WHEN COALESCE(c.done, 0) = 0 AND c.due < ?2 THEN 'danger' WHEN COALESCE(c.done, 0) = 0 AND c.due = ?2 THEN 'accent' END AS due_tone, COALESCE(c.priority, 0) AS priority, c.planned_for, c.parent_id, CASE WHEN COALESCE(c.done, 0) = 0 AND EXISTS (SELECT 1 FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = c.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0) THEN 'Blocked' END AS blocked_label FROM tasks c WHERE c.parent_id = ?1 AND c._deleted IS NULL ORDER BY COALESCE(c.done, 0), COALESCE(c.sort_order, 0), c.id LIMIT 200",
+      "params": [
+        "parent_id",
+        "today"
+      ],
+      "description": "Subtasks of a task (done ones last), with due labels and whether each is blocked.",
+      "types": {
+        "parent_id": {
+          "type": "id",
+          "required": true,
+          "description": "The parent task."
+        }
+      }
+    },
+    "fields": {
+      "sql": "SELECT f.id, f.list_id, f.name, f.type, CASE f.type WHEN 'text' THEN 'Text' WHEN 'number' THEN 'Number' WHEN 'date' THEN 'Date' WHEN 'select' THEN 'Select' WHEN 'checkbox' THEN 'Checkbox' WHEN 'url' THEN 'URL' ELSE f.type END AS type_label, COALESCE(f.options, '[]') AS options, COALESCE(f.show_on_row, 0) AS show_on_row, COALESCE(f.position, 0) AS position, COALESCE(f.archived, 0) AS archived, CASE WHEN COALESCE(f.list_id, '') = '' THEN 'All lists' ELSE COALESCE((SELECT l.name FROM task_lists l WHERE l.id = f.list_id AND l._deleted IS NULL), 'A list') END AS scope_label FROM task_fields f WHERE f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND (COALESCE(f.list_id, '') = '' OR f.list_id = NULLIF(?1, '')) ORDER BY f.position, f.name COLLATE NOCASE, f.id LIMIT 200",
+      "params": [
+        "list_id"
+      ],
+      "description": "Custom fields that apply to a list: the list's own and the all-lists ones, not archived, in position order. An empty list_id means Inbox (all-lists fields only).",
+      "types": {
+        "list_id": {
+          "type": "string",
+          "description": "The list; empty for Inbox."
+        }
+      }
+    },
+    "task_field_values": {
+      "sql": "SELECT t.id AS task_id, f.id, f.id AS field_id, f.name, f.type, CASE f.type WHEN 'text' THEN 'Text' WHEN 'number' THEN 'Number' WHEN 'date' THEN 'Date' WHEN 'select' THEN 'Select' WHEN 'checkbox' THEN 'Checkbox' WHEN 'url' THEN 'URL' ELSE f.type END AS type_label, COALESCE(f.options, '[]') AS options, COALESCE(f.show_on_row, 0) AS show_on_row, COALESCE(ev.value, '') AS value, CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = ev.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN ev.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN ev.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', ev.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', ev.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN ?2 IS NULL OR substr(ev.value, 1, 4) <> substr(?2, 1, 4) THEN ' ' || substr(ev.value, 1, 4) ELSE '' END, ev.value) END ELSE COALESCE(ev.value, '') END AS display, CASE WHEN f.type = 'checkbox' AND ev.value = '1' THEN 1 ELSE 0 END AS checked, CASE WHEN CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = ev.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN ev.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN ev.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', ev.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', ev.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN ?2 IS NULL OR substr(ev.value, 1, 4) <> substr(?2, 1, 4) THEN ' ' || substr(ev.value, 1, 4) ELSE '' END, ev.value) END ELSE COALESCE(ev.value, '') END <> '' THEN 1 ELSE 0 END AS has_value FROM tasks t JOIN task_fields f ON f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND (COALESCE(f.list_id, '') = '' OR f.list_id = t.list_id) LEFT JOIN task_field_values ev ON ev.task_id = t.id AND ev.field_id = f.id AND ev._deleted IS NULL AND ev.id = (SELECT MAX(w.id) FROM task_field_values w WHERE w.task_id = ev.task_id AND w.field_id = ev.field_id AND w._deleted IS NULL) WHERE t.id = ?1 AND t._deleted IS NULL ORDER BY f.position, f.name COLLATE NOCASE, f.id LIMIT 200",
+      "params": [
+        "task_id",
+        "today"
+      ],
+      "description": "Every custom field that applies to a task's list, with the task's value (dates in the current year drop the year in display; value is the stored text, display the readable text, checked is 1 for a ticked checkbox). Fields with no value come back with an empty value.",
+      "types": {
+        "task_id": {
+          "type": "id",
+          "required": true,
+          "description": "The task."
+        }
+      }
+    },
+    "field_choices": {
+      "sql": "SELECT f.id AS field_id, json_extract(o.value, '$.id') AS value, json_extract(o.value, '$.label') AS label, COALESCE(json_extract(o.value, '$.color'), '') AS color FROM task_fields f, json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE f.id = ?1 AND f._deleted IS NULL ORDER BY o.key LIMIT 100",
+      "params": [
+        "field_id"
+      ],
+      "description": "The options of a select field, in order.",
+      "cli": false
+    },
+    "field_filter_choices": {
+      "sql": "SELECT value, label FROM (SELECT f.id || '=' || json_extract(o.value, '$.id') AS value, f.name || ': ' || json_extract(o.value, '$.label') AS label, f.position AS pos, f.name AS nm, o.key AS k FROM task_fields f, json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND f.type = 'select' UNION ALL SELECT f.id || '=1', f.name || ': Yes', f.position, f.name, 0 FROM task_fields f WHERE f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND f.type = 'checkbox') ORDER BY pos, nm COLLATE NOCASE, k, value LIMIT 500",
+      "params": [],
+      "description": "Choices for filtering tasks by a select or checkbox field: field=option pairs.",
+      "cli": false
+    },
+    "field_defs": {
+      "sql": "SELECT f.id, f.list_id, f.name, f.type, CASE f.type WHEN 'text' THEN 'Text' WHEN 'number' THEN 'Number' WHEN 'date' THEN 'Date' WHEN 'select' THEN 'Select' WHEN 'checkbox' THEN 'Checkbox' WHEN 'url' THEN 'URL' ELSE f.type END AS type_label, COALESCE(f.options, '[]') AS options, COALESCE(f.show_on_row, 0) AS show_on_row, COALESCE(f.position, 0) AS position, COALESCE(f.archived, 0) AS archived, CASE WHEN COALESCE(f.list_id, '') = '' THEN 'All lists' ELSE COALESCE((SELECT l.name FROM task_lists l WHERE l.id = f.list_id AND l._deleted IS NULL), 'A list') END AS scope_label, CASE f.type WHEN 'text' THEN 'Text' WHEN 'number' THEN 'Number' WHEN 'date' THEN 'Date' WHEN 'select' THEN 'Select' WHEN 'checkbox' THEN 'Checkbox' WHEN 'url' THEN 'URL' ELSE f.type END || CASE WHEN f.type = 'select' THEN ' · ' || json_array_length(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) || ' options' ELSE '' END || CASE WHEN COALESCE(f.show_on_row, 0) = 1 THEN ' · on rows' ELSE '' END || CASE WHEN COALESCE(f.archived, 0) = 1 THEN ' · archived' ELSE '' END AS summary FROM task_fields f WHERE f._deleted IS NULL AND COALESCE(f.list_id, '') = CASE WHEN ?1 IN ('@inbox', '@all') THEN '' ELSE COALESCE(?1, '') END ORDER BY COALESCE(f.archived, 0), f.position, f.name COLLATE NOCASE, f.id LIMIT 200",
+      "params": [
+        "list_id"
+      ],
+      "description": "Fields defined for one list, archived ones last; '@inbox' or '@all' means the all-lists fields.",
+      "cli": false
+    },
+    "field_detail": {
+      "sql": "SELECT f.id, f.list_id, f.name, f.type, CASE f.type WHEN 'text' THEN 'Text' WHEN 'number' THEN 'Number' WHEN 'date' THEN 'Date' WHEN 'select' THEN 'Select' WHEN 'checkbox' THEN 'Checkbox' WHEN 'url' THEN 'URL' ELSE f.type END AS type_label, COALESCE(f.options, '[]') AS options, COALESCE(f.show_on_row, 0) AS show_on_row, COALESCE(f.position, 0) AS position, COALESCE(f.archived, 0) AS archived, CASE WHEN COALESCE(f.list_id, '') = '' THEN 'All lists' ELSE COALESCE((SELECT l.name FROM task_lists l WHERE l.id = f.list_id AND l._deleted IS NULL), 'A list') END AS scope_label FROM task_fields f WHERE f.id = ?1 AND f._deleted IS NULL",
+      "params": [
+        "id"
+      ],
+      "cli": false
+    },
+    "field_scope": {
+      "sql": "SELECT CASE WHEN ?1 IN ('@inbox', '@all') THEN '' ELSE ?1 END AS list_id",
+      "params": [
+        "id"
+      ],
+      "cli": false
+    },
+    "field_scope_choices": {
+      "sql": "SELECT value, label FROM (SELECT l.id AS value, 'This list (' || l.name || ')' AS label, 0 AS ord FROM task_lists l WHERE l.id = NULLIF(?1, '') AND l._deleted IS NULL UNION ALL SELECT '', 'All lists', 1) ORDER BY ord",
+      "params": [
+        "list_id"
+      ],
+      "cli": false
+    },
+    "dependencies": {
+      "sql": "SELECT * FROM (SELECT 'waiting_on' AS direction, b.id AS id, b.title, COALESCE(b.done, 0) AS done, CASE WHEN b.done = 1 THEN 'Done' END AS state_label, d.task_id AS blocked_id, d.depends_on AS blocker_id FROM task_deps d JOIN tasks b ON b.id = d.depends_on AND b._deleted IS NULL WHERE d.task_id = ?1 AND d._deleted IS NULL UNION SELECT 'blocking', b.id, b.title, COALESCE(b.done, 0), CASE WHEN b.done = 1 THEN 'Done' END, d.task_id, d.depends_on FROM task_deps d JOIN tasks b ON b.id = d.task_id AND b._deleted IS NULL WHERE d.depends_on = ?1 AND d._deleted IS NULL) WHERE ?2 IS NULL OR ?2 = '' OR direction = ?2 ORDER BY direction DESC, done, title COLLATE NOCASE, id LIMIT 200",
+      "params": [
+        "task_id",
+        "direction"
+      ],
+      "description": "A task's dependencies in both directions: waiting_on (tasks it waits on) and blocking (tasks waiting on it). Tasks in the trash are left out; a task is blocked while one it waits on is not done.",
+      "types": {
+        "task_id": {
+          "type": "id",
+          "required": true,
+          "description": "The task."
+        },
+        "direction": {
+          "type": "string",
+          "description": "waiting_on or blocking; empty for both."
+        }
+      }
+    },
+    "task_choices": {
+      "sql": "WITH RECURSIVE down(id) AS (SELECT ?1 UNION SELECT d.task_id FROM task_deps d JOIN down ON d.depends_on = down.id WHERE d._deleted IS NULL) SELECT t.id, t.title, ?1 AS for_id, CASE WHEN t.done = 1 THEN 'Done' ELSE COALESCE((SELECT name FROM task_lists l WHERE l.id = t.list_id AND l._deleted IS NULL), 'Inbox') END AS subtitle FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL AND trim(COALESCE(?2, '')) <> '' AND t.title LIKE '%' || trim(?2) || '%' AND t.id NOT IN (SELECT id FROM down) AND NOT EXISTS (SELECT 1 FROM task_deps d WHERE d.task_id = ?1 AND d.depends_on = t.id AND d._deleted IS NULL) ORDER BY COALESCE(t.done, 0), t.title COLLATE NOCASE, t.id LIMIT 8",
+      "params": [
+        "task_id",
+        "q"
+      ],
+      "description": "Tasks a task could wait on, by title: not itself, not already waited on, and none that would make a loop.",
+      "cli": false
+    },
+    "today_my_day": {
+      "description": "Today view: open tasks planned for today.",
+      "params": [
+        "today",
+        "now"
+      ],
+      "cli": false,
+      "sql": "SELECT t.id, t.title, t.planned_for, t.due, t.remind_time, COALESCE(t.done, 0) AS done, COALESCE((SELECT name FROM task_lists l WHERE l.id = t.list_id AND l._deleted IS NULL), 'Inbox') AS list_name, CASE WHEN t.tags IS NOT NULL AND t.tags <> '' THEN '#' || replace(t.tags, ', ', ' #') END AS tags_label, (SELECT CASE WHEN COUNT(*) > 0 THEN SUM(s.done = 1) || '/' || COUNT(*) || ' steps' END FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS steps_label, CASE WHEN (t.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL AND p.cleared_at IS NULL)) THEN '↳ ' || (SELECT p.title FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL) END AS parent_label, CASE WHEN COALESCE(t.done, 0) = 0 AND EXISTS (SELECT 1 FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0) THEN 'Blocked' END AS blocked_label, CASE WHEN COALESCE(t.done, 0) = 0 THEN (SELECT group_concat(title, ', ') FROM (SELECT DISTINCT b.title AS title FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0 ORDER BY b.title)) END AS blocked_by, t.remind_time AS time_label, CASE WHEN t.due IS NOT NULL AND (t.due < ?1 OR (t.due = ?1 AND t.remind_at IS NOT NULL AND t.remind_at < CAST(?2 AS INTEGER))) THEN 'overdue' END AS tone, (SELECT CASE WHEN st IS NOT NULL AND tc IS NOT NULL THEN st || ' · ' || tc ELSE COALESCE(st, tc) END FROM (SELECT (SELECT CASE WHEN COUNT(*) > 0 THEN SUM(s.done = 1) || '/' || COUNT(*) || ' steps' END FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS st, (SELECT CASE WHEN run = 1 THEN '● Running' || CASE WHEN CASE WHEN m > 0 AND e IS NOT NULL THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) || ' / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) WHEN m > 0 THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) WHEN e IS NOT NULL THEN '0m / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) END IS NOT NULL THEN ' · ' || (CASE WHEN m > 0 AND e IS NOT NULL THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) || ' / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) WHEN m > 0 THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) WHEN e IS NOT NULL THEN '0m / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) END) ELSE '' END ELSE CASE WHEN m > 0 AND e IS NOT NULL THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) || ' / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) WHEN m > 0 THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) WHEN e IS NOT NULL THEN '0m / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) END END FROM (SELECT COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?2 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e WHERE e.task_id = t.id AND e._deleted IS NULL), 0) + COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?2 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e._deleted IS NULL), 0) AS m, NULLIF(COALESCE(t.estimate_min, 0) + COALESCE((SELECT SUM(c.estimate_min) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL), 0), 0) AS e, CASE WHEN EXISTS (SELECT 1 FROM time_entries e WHERE e.task_id = t.id AND e.ended_at IS NULL AND e._deleted IS NULL) OR EXISTS (SELECT 1 FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e.ended_at IS NULL AND e._deleted IS NULL) THEN 1 ELSE 0 END AS run)) AS tc)) AS note_label FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL AND COALESCE(t.done, 0) = 0 AND t.planned_for = ?1 ORDER BY t.sort_order, blocked_label IS NOT NULL, t.remind_time IS NULL, t.remind_time, COALESCE(t.priority, 0) DESC, t.id DESC LIMIT 51"
+    },
+    "today_earlier": {
+      "description": "Today view: unfinished tasks planned on an earlier day.",
+      "params": [
+        "today",
+        "now"
+      ],
+      "cli": false,
+      "sql": "SELECT t.id, t.title, t.planned_for, t.due, t.remind_time, COALESCE(t.done, 0) AS done, COALESCE((SELECT name FROM task_lists l WHERE l.id = t.list_id AND l._deleted IS NULL), 'Inbox') AS list_name, CASE WHEN t.tags IS NOT NULL AND t.tags <> '' THEN '#' || replace(t.tags, ', ', ' #') END AS tags_label, (SELECT CASE WHEN COUNT(*) > 0 THEN SUM(s.done = 1) || '/' || COUNT(*) || ' steps' END FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS steps_label, CASE WHEN (t.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL AND p.cleared_at IS NULL)) THEN '↳ ' || (SELECT p.title FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL) END AS parent_label, CASE WHEN COALESCE(t.done, 0) = 0 AND EXISTS (SELECT 1 FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0) THEN 'Blocked' END AS blocked_label, CASE WHEN COALESCE(t.done, 0) = 0 THEN (SELECT group_concat(title, ', ') FROM (SELECT DISTINCT b.title AS title FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0 ORDER BY b.title)) END AS blocked_by, 'planned ' || CASE WHEN julianday(?1) - julianday(t.planned_for) = 1 THEN 'yesterday' WHEN julianday(?1) - julianday(t.planned_for) BETWEEN 2 AND 6 THEN substr('SunMonTueWedThuFriSat', CAST(strftime('%w', t.planned_for) AS INTEGER) * 3 + 1, 3) ELSE CAST(strftime('%d', t.planned_for) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', t.planned_for) AS INTEGER) - 1) * 3 + 1, 3) END AS planned_label, (SELECT CASE WHEN st IS NOT NULL AND tc IS NOT NULL THEN st || ' · ' || tc ELSE COALESCE(st, tc) END FROM (SELECT (SELECT CASE WHEN COUNT(*) > 0 THEN SUM(s.done = 1) || '/' || COUNT(*) || ' steps' END FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS st, (SELECT CASE WHEN run = 1 THEN '● Running' || CASE WHEN CASE WHEN m > 0 AND e IS NOT NULL THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) || ' / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) WHEN m > 0 THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) WHEN e IS NOT NULL THEN '0m / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) END IS NOT NULL THEN ' · ' || (CASE WHEN m > 0 AND e IS NOT NULL THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) || ' / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) WHEN m > 0 THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) WHEN e IS NOT NULL THEN '0m / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) END) ELSE '' END ELSE CASE WHEN m > 0 AND e IS NOT NULL THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) || ' / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) WHEN m > 0 THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) WHEN e IS NOT NULL THEN '0m / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) END END FROM (SELECT COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?2 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e WHERE e.task_id = t.id AND e._deleted IS NULL), 0) + COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?2 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e._deleted IS NULL), 0) AS m, NULLIF(COALESCE(t.estimate_min, 0) + COALESCE((SELECT SUM(c.estimate_min) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL), 0), 0) AS e, CASE WHEN EXISTS (SELECT 1 FROM time_entries e WHERE e.task_id = t.id AND e.ended_at IS NULL AND e._deleted IS NULL) OR EXISTS (SELECT 1 FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e.ended_at IS NULL AND e._deleted IS NULL) THEN 1 ELSE 0 END AS run)) AS tc)) AS note_label FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL AND COALESCE(t.done, 0) = 0 AND t.planned_for < ?1 ORDER BY blocked_label IS NOT NULL, t.planned_for DESC, t.id DESC LIMIT 51"
+    },
+    "today_due": {
+      "description": "Today view: overdue tasks, tasks due today and today's reminders, excluding tasks planned for today or earlier.",
+      "params": [
+        "today",
+        "utc_offset_ms",
+        "now"
+      ],
+      "cli": false,
+      "sql": "SELECT t.id, t.title, t.planned_for, t.due, t.remind_time, COALESCE(t.done, 0) AS done, COALESCE((SELECT name FROM task_lists l WHERE l.id = t.list_id AND l._deleted IS NULL), 'Inbox') AS list_name, CASE WHEN t.tags IS NOT NULL AND t.tags <> '' THEN '#' || replace(t.tags, ', ', ' #') END AS tags_label, (SELECT CASE WHEN COUNT(*) > 0 THEN SUM(s.done = 1) || '/' || COUNT(*) || ' steps' END FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS steps_label, CASE WHEN (t.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL AND p.cleared_at IS NULL)) THEN '↳ ' || (SELECT p.title FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL) END AS parent_label, CASE WHEN COALESCE(t.done, 0) = 0 AND EXISTS (SELECT 1 FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0) THEN 'Blocked' END AS blocked_label, CASE WHEN COALESCE(t.done, 0) = 0 THEN (SELECT group_concat(title, ', ') FROM (SELECT DISTINCT b.title AS title FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0 ORDER BY b.title)) END AS blocked_by, CASE WHEN t.due < ?1 OR (t.due = ?1 AND t.remind_at IS NOT NULL AND t.remind_at < CAST(?3 AS INTEGER)) THEN 'overdue' END AS tone, CASE WHEN t.due < ?1 THEN 'overdue · ' || CASE WHEN julianday(?1) - julianday(t.due) = 1 THEN 'yesterday' WHEN julianday(?1) - julianday(t.due) BETWEEN 2 AND 6 THEN substr('SunMonTueWedThuFriSat', CAST(strftime('%w', t.due) AS INTEGER) * 3 + 1, 3) ELSE CAST(strftime('%d', t.due) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', t.due) AS INTEGER) - 1) * 3 + 1, 3) END ELSE t.remind_time END AS time_label, CASE WHEN t.due IS NULL OR t.due >= ?1 THEN t.remind_at END AS sort_ms, CASE WHEN t.remind_time IS NOT NULL AND (t.due IS NULL OR t.due >= ?1) THEN 'reminder' ELSE 'task' END AS kind, (SELECT CASE WHEN st IS NOT NULL AND tc IS NOT NULL THEN st || ' · ' || tc ELSE COALESCE(st, tc) END FROM (SELECT (SELECT CASE WHEN COUNT(*) > 0 THEN SUM(s.done = 1) || '/' || COUNT(*) || ' steps' END FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS st, (SELECT CASE WHEN run = 1 THEN '● Running' || CASE WHEN CASE WHEN m > 0 AND e IS NOT NULL THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) || ' / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) WHEN m > 0 THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) WHEN e IS NOT NULL THEN '0m / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) END IS NOT NULL THEN ' · ' || (CASE WHEN m > 0 AND e IS NOT NULL THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) || ' / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) WHEN m > 0 THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) WHEN e IS NOT NULL THEN '0m / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) END) ELSE '' END ELSE CASE WHEN m > 0 AND e IS NOT NULL THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) || ' / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) WHEN m > 0 THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) WHEN e IS NOT NULL THEN '0m / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) END END FROM (SELECT COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?3 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e WHERE e.task_id = t.id AND e._deleted IS NULL), 0) + COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?3 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e._deleted IS NULL), 0) AS m, NULLIF(COALESCE(t.estimate_min, 0) + COALESCE((SELECT SUM(c.estimate_min) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL), 0), 0) AS e, CASE WHEN EXISTS (SELECT 1 FROM time_entries e WHERE e.task_id = t.id AND e.ended_at IS NULL AND e._deleted IS NULL) OR EXISTS (SELECT 1 FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e.ended_at IS NULL AND e._deleted IS NULL) THEN 1 ELSE 0 END AS run)) AS tc)) AS note_label FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL AND COALESCE(t.done, 0) = 0 AND NOT (t.planned_for IS NOT NULL AND t.planned_for <= ?1) AND (t.due <= ?1 OR (t.remind_at >= (CAST(ROUND((julianday(?1) - 2440587.5) * 86400000) AS INTEGER) - COALESCE(?2, 0)) AND t.remind_at < (CAST(ROUND((julianday(?1) - 2440587.5) * 86400000) AS INTEGER) - COALESCE(?2, 0)) + 86400000)) ORDER BY blocked_label IS NOT NULL, CASE WHEN t.due < ?1 THEN 0 WHEN t.remind_at IS NULL THEN 2 ELSE 1 END, CASE WHEN t.due < ?1 THEN t.due END, t.remind_at, COALESCE(t.priority, 0) DESC, t.id DESC LIMIT 51"
+    },
+    "today_inbox": {
+      "description": "Today view: Inbox tasks (no list) that are not planned or due by today.",
+      "params": [
+        "today",
+        "now"
+      ],
+      "cli": false,
+      "sql": "SELECT t.id, t.title, t.planned_for, t.due, t.remind_time, COALESCE(t.done, 0) AS done, COALESCE((SELECT name FROM task_lists l WHERE l.id = t.list_id AND l._deleted IS NULL), 'Inbox') AS list_name, CASE WHEN t.tags IS NOT NULL AND t.tags <> '' THEN '#' || replace(t.tags, ', ', ' #') END AS tags_label, (SELECT CASE WHEN COUNT(*) > 0 THEN SUM(s.done = 1) || '/' || COUNT(*) || ' steps' END FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS steps_label, CASE WHEN (t.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL AND p.cleared_at IS NULL)) THEN '↳ ' || (SELECT p.title FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL) END AS parent_label, CASE WHEN COALESCE(t.done, 0) = 0 AND EXISTS (SELECT 1 FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0) THEN 'Blocked' END AS blocked_label, CASE WHEN COALESCE(t.done, 0) = 0 THEN (SELECT group_concat(title, ', ') FROM (SELECT DISTINCT b.title AS title FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0 ORDER BY b.title)) END AS blocked_by, (SELECT CASE WHEN st IS NOT NULL AND tc IS NOT NULL THEN st || ' · ' || tc ELSE COALESCE(st, tc) END FROM (SELECT (SELECT CASE WHEN COUNT(*) > 0 THEN SUM(s.done = 1) || '/' || COUNT(*) || ' steps' END FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS st, (SELECT CASE WHEN run = 1 THEN '● Running' || CASE WHEN CASE WHEN m > 0 AND e IS NOT NULL THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) || ' / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) WHEN m > 0 THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) WHEN e IS NOT NULL THEN '0m / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) END IS NOT NULL THEN ' · ' || (CASE WHEN m > 0 AND e IS NOT NULL THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) || ' / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) WHEN m > 0 THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) WHEN e IS NOT NULL THEN '0m / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) END) ELSE '' END ELSE CASE WHEN m > 0 AND e IS NOT NULL THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) || ' / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) WHEN m > 0 THEN (CASE WHEN m < 60 THEN m || 'm' WHEN m % 60 = 0 THEN (m / 60) || 'h' ELSE (m / 60) || 'h ' || (m % 60) || 'm' END) WHEN e IS NOT NULL THEN '0m / ' || (CASE WHEN e < 60 THEN e || 'm' WHEN e % 60 = 0 THEN (e / 60) || 'h' ELSE (e / 60) || 'h ' || (e % 60) || 'm' END) END END FROM (SELECT COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?2 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e WHERE e.task_id = t.id AND e._deleted IS NULL), 0) + COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?2 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e._deleted IS NULL), 0) AS m, NULLIF(COALESCE(t.estimate_min, 0) + COALESCE((SELECT SUM(c.estimate_min) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL), 0), 0) AS e, CASE WHEN EXISTS (SELECT 1 FROM time_entries e WHERE e.task_id = t.id AND e.ended_at IS NULL AND e._deleted IS NULL) OR EXISTS (SELECT 1 FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e.ended_at IS NULL AND e._deleted IS NULL) THEN 1 ELSE 0 END AS run)) AS tc)) AS note_label FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL AND COALESCE(t.done, 0) = 0 AND t.list_id IS NULL AND (t.planned_for IS NULL OR t.planned_for > ?1) AND (t.due IS NULL OR t.due > ?1) ORDER BY blocked_label IS NOT NULL, t.id DESC LIMIT 51"
+    },
+    "today_inbox_count": {
+      "description": "Today view: how many tasks today_inbox would list.",
+      "params": [
+        "today"
+      ],
+      "cli": false,
+      "sql": "SELECT COUNT(*) AS count FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL AND COALESCE(t.done, 0) = 0 AND t.list_id IS NULL AND (t.planned_for IS NULL OR t.planned_for > ?1) AND (t.due IS NULL OR t.due > ?1)"
+    },
+    "today_done": {
+      "description": "Today view: tasks completed today (local day).",
+      "params": [
+        "today",
+        "utc_offset_ms"
+      ],
+      "cli": false,
+      "sql": "SELECT t.id, t.title, t.planned_for, t.due, t.remind_time, COALESCE(t.done, 0) AS done, COALESCE((SELECT name FROM task_lists l WHERE l.id = t.list_id AND l._deleted IS NULL), 'Inbox') AS list_name, CASE WHEN t.tags IS NOT NULL AND t.tags <> '' THEN '#' || replace(t.tags, ', ', ' #') END AS tags_label, (SELECT CASE WHEN COUNT(*) > 0 THEN SUM(s.done = 1) || '/' || COUNT(*) || ' steps' END FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS steps_label, CASE WHEN (t.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL AND p.cleared_at IS NULL)) THEN '↳ ' || (SELECT p.title FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL) END AS parent_label, CASE WHEN COALESCE(t.done, 0) = 0 AND EXISTS (SELECT 1 FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0) THEN 'Blocked' END AS blocked_label, CASE WHEN COALESCE(t.done, 0) = 0 THEN (SELECT group_concat(title, ', ') FROM (SELECT DISTINCT b.title AS title FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0 ORDER BY b.title)) END AS blocked_by FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL AND t.done = 1 AND t.completed_at >= (CAST(ROUND((julianday(?1) - 2440587.5) * 86400000) AS INTEGER) - COALESCE(?2, 0)) AND t.completed_at < (CAST(ROUND((julianday(?1) - 2440587.5) * 86400000) AS INTEGER) - COALESCE(?2, 0)) + 86400000 ORDER BY t.completed_at DESC, t.id DESC LIMIT 51"
+    },
+    "today_done_count": {
+      "description": "Today view: how many tasks were completed today.",
+      "params": [
+        "today",
+        "utc_offset_ms"
+      ],
+      "cli": false,
+      "sql": "SELECT COUNT(*) AS count FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL AND t.done = 1 AND t.completed_at >= (CAST(ROUND((julianday(?1) - 2440587.5) * 86400000) AS INTEGER) - COALESCE(?2, 0)) AND t.completed_at < (CAST(ROUND((julianday(?1) - 2440587.5) * 86400000) AS INTEGER) - COALESCE(?2, 0)) + 86400000"
+    },
+    "review_tasks": {
+      "sql": "SELECT id, title, completed_at, done_note FROM tasks WHERE _deleted IS NULL AND done = 1 AND completed_at IS NOT NULL AND (?1 IS NULL OR completed_at >= ?1) AND (?2 IS NULL OR completed_at < ?2) ORDER BY CASE WHEN ?5 = 'title' AND ?6 = 'asc' THEN title END COLLATE NOCASE ASC, CASE WHEN ?5 = 'title' AND ?6 = 'desc' THEN title END COLLATE NOCASE DESC, CASE WHEN ?5 = 'completed_at' AND ?6 = 'asc' THEN completed_at END ASC, CASE WHEN ?5 = 'completed_at' AND ?6 = 'desc' THEN completed_at END DESC, id ASC LIMIT ?3 OFFSET ?4",
+      "params": [
+        "start_ms",
+        "end_ms",
+        "page_size",
+        "offset",
+        "sort",
+        "direction"
+      ],
+      "types": {
+        "start_ms": {
+          "type": "integer"
+        },
+        "end_ms": {
+          "type": "integer"
+        },
+        "page_size": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "sort": {
+          "type": "string"
+        },
+        "direction": {
+          "type": "string"
+        }
+      },
+      "description": "Completed tasks in a half-open completion-time range, with outcomes.",
+      "cli": false,
+      "view": {
+        "version": 1,
+        "title": "Completed tasks",
+        "columns": [
+          {
+            "key": "title",
+            "label": "Task",
+            "type": "string"
+          },
+          {
+            "key": "completed_at",
+            "label": "Completed",
+            "type": "date"
+          },
+          {
+            "key": "done_note",
+            "label": "Outcome",
+            "type": "string"
+          }
+        ],
+        "temporal": {
+          "start_param": "start_ms",
+          "end_param": "end_ms"
+        },
+        "pagination": {
+          "page_size_param": "page_size",
+          "offset_param": "offset",
+          "default_page_size": 100,
+          "max_page_size": 1000
+        },
+        "sorts": [
+          {
+            "param": "sort",
+            "values": [
+              "title",
+              "completed_at"
+            ],
+            "direction_param": "direction",
+            "directions": [
+              "asc",
+              "desc"
+            ]
+          }
+        ],
+        "params": {
+          "sort": "completed_at",
+          "direction": "desc"
+        }
+      }
+    },
+    "organization_tasks": {
+      "sql": "SELECT t.id, t.list_id, t.group_id, t.status_id, t.previous_status_id, t.planned_for, COALESCE(t.sort_order, 0) AS sort_order, COALESCE(l.name, 'Inbox') AS list_name, COALESCE(g.name, 'Ungrouped') AS group_name, COALESCE(s.name, CASE WHEN t.done = 1 THEN 'Done' WHEN t.in_progress = 1 THEN 'In progress' ELSE 'To pick' END) AS status_name, CASE WHEN t.done = 1 THEN 'completed' WHEN t.in_progress = 1 THEN 'active' ELSE 'not_started' END AS status_category, t.list_id IS NOT NULL AND l.id IS NULL AS invalid_list, t.group_id IS NOT NULL AND g.id IS NULL AS invalid_group, t.status_id IS NOT NULL AND s.id IS NULL AS invalid_status FROM tasks t LEFT JOIN task_lists l ON l.id = t.list_id AND l._deleted IS NULL LEFT JOIN task_groups g ON g.id = t.group_id AND g._deleted IS NULL AND g.list_id IS t.list_id LEFT JOIN task_statuses s ON s.id = t.status_id AND s._deleted IS NULL AND s.list_id IS t.list_id AND s.category = CASE WHEN t.done = 1 THEN 'completed' WHEN t.in_progress = 1 THEN 'active' ELSE 'not_started' END WHERE t._deleted IS NULL AND t.cleared_at IS NULL AND (?1 IS NULL OR ?1 = '' OR t.id = ?1) ORDER BY COALESCE(t.sort_order, 0), t.id LIMIT 500",
+      "params": [
+        "id"
+      ],
+      "description": "Organization metadata with legacy defaults and invalid-reference flags; optional task id. Does not change task data.",
+      "types": {
+        "id": {
+          "type": "string",
+          "description": "Optional task id; empty returns up to 500 current tasks."
+        }
+      },
+      "cli": false
+    },
+    "task_lists": {
+      "sql": "SELECT id, name, color, position, archived FROM task_lists WHERE _deleted IS NULL ORDER BY position, name, id",
+      "params": [],
+      "description": "User-created lists, including archived lists. Inbox is the implicit null-list destination.",
+      "cli": false
+    },
+    "task_groups": {
+      "sql": "SELECT id, list_id, name, color, position, archived FROM task_groups WHERE _deleted IS NULL AND list_id IS NULLIF(?1, '') ORDER BY position, name, id",
+      "params": [
+        "list_id"
+      ],
+      "description": "Groups belonging to one list; empty list id means Inbox.",
+      "cli": false
+    },
+    "task_statuses": {
+      "sql": "SELECT CASE category WHEN 'not_started' THEN 'Not started' WHEN 'active' THEN 'Active' ELSE 'Completed' END AS category_label, id, list_id, name, color, category, ready, position, archived FROM task_statuses WHERE _deleted IS NULL AND list_id IS NULLIF(?1, '') ORDER BY position, name, id",
+      "params": [
+        "list_id"
+      ],
+      "description": "Custom statuses belonging to one list; empty list id means Inbox. Tasks without an assignment derive status from their completion flags.",
+      "cli": false
+    },
+    "focus_suggestions": {
+      "sql": "WITH RECURSIVE s(tag, rest) AS (SELECT '', tags || ', ' FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND tags IS NOT NULL AND tags <> '' UNION ALL SELECT trim(substr(rest, 1, instr(rest, ', ') - 1)), substr(rest, instr(rest, ', ') + 2) FROM s WHERE rest <> '') SELECT tag AS value, COUNT(*) AS count FROM s WHERE tag <> '' GROUP BY tag ORDER BY count DESC, tag LIMIT 30",
+      "params": [],
+      "description": "Tags in use on current tasks, most used first.",
+      "cli": false
+    },
+    "tasks": {
+      "sql": "SELECT id, title, notes, due, tags, COALESCE(in_progress, 0) AS in_progress, COALESCE(urgent, 0) AS urgent, COALESCE(important, 0) AS important, CASE WHEN done = 1 THEN 'done' WHEN in_progress = 1 THEN 'doing' ELSE 'todo' END AS board_lane, CASE WHEN in_progress = 1 THEN 'Move to To do' ELSE 'Start task' END AS move_label, CASE WHEN urgent = 1 AND important = 1 THEN 'do' WHEN important = 1 THEN 'schedule' WHEN urgent = 1 THEN 'delegate' ELSE 'eliminate' END AS matrix_lane, COALESCE(priority, 0) AS priority, repeat, remind_time, done, CASE WHEN due IS NULL THEN NULL WHEN d = 0 THEN 'Today' WHEN d = 1 THEN 'Tomorrow' WHEN d = -1 THEN 'Yesterday' WHEN d BETWEEN 2 AND 6 THEN CASE strftime('%w', due) WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END ELSE CAST(strftime('%d', due) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', due) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(due, 1, 4) <> substr(?1, 1, 4) THEN ' ' || substr(due, 1, 4) ELSE '' END END || CASE WHEN remind_time IS NOT NULL THEN ' ' || remind_time ELSE '' END AS due_label, CASE WHEN done = 0 AND (d < 0 OR (d = 0 AND remind_at IS NOT NULL AND remind_at < CAST(?5 AS INTEGER))) THEN 'danger' WHEN done = 0 AND d = 0 THEN 'accent' END AS due_tone, CASE WHEN done = 1 THEN 'Completed' WHEN due IS NULL THEN 'No date' WHEN d < 0 THEN 'Overdue' WHEN d = 0 THEN 'Today' WHEN d = 1 THEN 'Tomorrow' WHEN d <= 6 THEN CASE strftime('%w', due) WHEN '0' THEN 'Sunday' WHEN '1' THEN 'Monday' WHEN '2' THEN 'Tuesday' WHEN '3' THEN 'Wednesday' WHEN '4' THEN 'Thursday' WHEN '5' THEN 'Friday' ELSE 'Saturday' END ELSE 'Later' END AS section, CASE WHEN done = 0 AND d < 0 THEN 'danger' END AS section_tone, CASE repeat WHEN 'daily' THEN 'Daily' WHEN 'weekdays' THEN 'Weekdays' WHEN 'weekly' THEN 'Weekly' WHEN 'monthly' THEN 'Monthly' END AS repeat_label, CASE WHEN steps_total > 0 THEN steps_done || '/' || steps_total END AS steps_label, CASE WHEN done_note IS NOT NULL THEN 'Note' END AS note_chip, parent_id, parent_title, CASE WHEN nested = 1 THEN '↳ ' || parent_title END AS parent_label, subtasks_total, subtasks_done, CASE WHEN subtasks_total > 0 THEN subtasks_done || '/' || subtasks_total END AS subtasks_label, CASE WHEN done = 0 THEN blocked ELSE 0 END AS blocked, CASE WHEN done = 0 AND blocked = 1 THEN 'Blocked' END AS blocked_label, CASE WHEN done = 0 AND blocked = 1 THEN blocked_by END AS blocked_by, tt_total AS tracked_min, est_total AS estimate_min, tt_run AS running, CASE WHEN tt_total > 0 AND est_total IS NOT NULL THEN (CASE WHEN tt_total < 60 THEN tt_total || 'm' WHEN tt_total % 60 = 0 THEN (tt_total / 60) || 'h' ELSE (tt_total / 60) || 'h ' || (tt_total % 60) || 'm' END) || ' / ' || (CASE WHEN est_total < 60 THEN est_total || 'm' WHEN est_total % 60 = 0 THEN (est_total / 60) || 'h' ELSE (est_total / 60) || 'h ' || (est_total % 60) || 'm' END) WHEN tt_total > 0 THEN (CASE WHEN tt_total < 60 THEN tt_total || 'm' WHEN tt_total % 60 = 0 THEN (tt_total / 60) || 'h' ELSE (tt_total / 60) || 'h ' || (tt_total % 60) || 'm' END) WHEN est_total IS NOT NULL THEN '0m / ' || (CASE WHEN est_total < 60 THEN est_total || 'm' WHEN est_total % 60 = 0 THEN (est_total / 60) || 'h' ELSE (est_total / 60) || 'h ' || (est_total % 60) || 'm' END) END AS time_label, CASE WHEN est_total IS NOT NULL AND tt_total > est_total THEN 'danger' END AS time_tone, CASE WHEN est_total IS NOT NULL THEN (CASE WHEN tt_total < 60 THEN tt_total || 'm' WHEN tt_total % 60 = 0 THEN (tt_total / 60) || 'h' ELSE (tt_total / 60) || 'h ' || (tt_total % 60) || 'm' END) || ' tracked of ' || (CASE WHEN est_total < 60 THEN est_total || 'm' WHEN est_total % 60 = 0 THEN (est_total / 60) || 'h' ELSE (est_total / 60) || 'h ' || (est_total % 60) || 'm' END) || ' estimated' WHEN tt_total > 0 THEN (CASE WHEN tt_total < 60 THEN tt_total || 'm' WHEN tt_total % 60 = 0 THEN (tt_total / 60) || 'h' ELSE (tt_total / 60) || 'h ' || (tt_total % 60) || 'm' END) || ' tracked' END AS time_title, CASE WHEN tt_run = 1 OR tt_sub = 1 THEN '● Running' END AS running_label FROM (SELECT t.*, COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?5 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e WHERE e.task_id = t.id AND e._deleted IS NULL), 0) + COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?5 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e._deleted IS NULL), 0) AS tt_total, NULLIF(COALESCE(t.estimate_min, 0) + COALESCE((SELECT SUM(c.estimate_min) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL), 0), 0) AS est_total, CASE WHEN EXISTS (SELECT 1 FROM time_entries e WHERE e.task_id = t.id AND e.ended_at IS NULL AND e._deleted IS NULL) THEN 1 ELSE 0 END AS tt_run, CASE WHEN EXISTS (SELECT 1 FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e.ended_at IS NULL AND e._deleted IS NULL) THEN 1 ELSE 0 END AS tt_sub, CAST(julianday(t.due) - julianday(?1) AS INTEGER) AS d, (SELECT COUNT(*) FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS steps_total, (SELECT COUNT(*) FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL AND s.done = 1) AS steps_done, CASE WHEN (t.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL AND p.cleared_at IS NULL)) THEN 1 ELSE 0 END AS nested, (SELECT p.title FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL) AS parent_title, (SELECT COUNT(*) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL) AS subtasks_total, (SELECT COUNT(*) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL AND c.done = 1) AS subtasks_done, CASE WHEN EXISTS (SELECT 1 FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0) THEN 1 ELSE 0 END AS blocked, (SELECT group_concat(title, ', ') FROM (SELECT DISTINCT b.title AS title FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0 ORDER BY b.title)) AS blocked_by FROM tasks t WHERE t._deleted IS NULL AND (t.cleared_at IS NULL OR COALESCE(?6, 0) IN (1, '1', 'true'))) WHERE (?3 IS NULL OR ?3 = '' OR title LIKE '%' || ?3 || '%' OR tags LIKE '%' || ?3 || '%' OR notes LIKE '%' || ?3 || '%') AND (?4 IS NULL OR ?4 = '' OR EXISTS (WITH RECURSIVE f(tag, rest) AS (SELECT '', ?4 || ',' UNION ALL SELECT lower(ltrim(trim(substr(rest, 1, instr(rest, ',') - 1)), '#')), substr(rest, instr(rest, ',') + 1) FROM f WHERE rest <> '') SELECT 1 FROM f WHERE tag <> '' AND instr(', ' || lower(COALESCE(tags, '')) || ', ', ', ' || tag || ', ') > 0)) AND CASE ?2 WHEN 'today' THEN done = 0 AND (due IS NULL OR d <= 0) WHEN 'upcoming' THEN done = 0 AND d > 0 WHEN 'done' THEN done = 1 WHEN 'everything' THEN 1 ELSE done = 0 END ORDER BY CASE WHEN done = 1 THEN 6 WHEN due IS NULL THEN 5 WHEN d < 0 THEN 0 WHEN d = 0 THEN 1 WHEN d <= 6 THEN 2 ELSE 4 END, CASE WHEN done = 0 THEN blocked ELSE 0 END, due, COALESCE(priority, 0) DESC, CASE WHEN done = 1 THEN -completed_at END, id DESC LIMIT 500",
+      "params": [
+        "today",
+        "filter",
+        "q",
+        "tags",
+        "now",
+        "include_archived"
+      ],
+      "description": "List tasks with due labels, steps progress and board/matrix lanes.",
+      "types": {
+        "filter": {
+          "type": "string",
+          "description": "Which tasks: today (open, due today/overdue or undated), upcoming (open, due later), done, everything; any other value (e.g. open or empty) means all open tasks."
+        },
+        "q": {
+          "type": "string",
+          "description": "Text to find in title, tags or notes."
+        },
+        "tags": {
+          "type": "string",
+          "description": "Comma-separated tags; tasks with any of them match (# optional)."
+        },
+        "now": {
+          "type": "integer",
+          "description": "Current time in ms since the epoch; a task due today whose reminder time has passed gets the overdue tone. Optional."
+        },
+        "include_archived": {
+          "type": "boolean",
+          "description": "true also lists archived tasks (default: no)."
+        }
+      },
+      "view": {
+        "title": "Tasks",
+        "title_column": "title",
+        "params": {
+          "filter": "everything",
+          "q": "",
+          "tags": ""
+        },
+        "columns": [
+          {
+            "key": "title",
+            "label": "Task",
+            "type": "string"
+          },
+          {
+            "key": "due",
+            "label": "Due",
+            "type": "date"
+          },
+          {
+            "key": "board_lane",
+            "label": "Status",
+            "type": "enum",
+            "values": [
+              "todo",
+              "doing",
+              "done"
+            ],
+            "labels": [
+              "To do",
+              "In progress",
+              "Done"
+            ],
+            "move": {
+              "op": "move",
+              "args": {
+                "id": "{{row.id}}",
+                "lane": "{{value}}"
+              }
+            }
+          },
+          {
+            "key": "matrix_lane",
+            "label": "Quadrant",
+            "type": "enum",
+            "values": [
+              "do",
+              "schedule",
+              "delegate",
+              "eliminate"
+            ],
+            "labels": [
+              "Do first",
+              "Schedule",
+              "Delegate",
+              "Eliminate"
+            ],
+            "board": "matrix",
+            "move": {
+              "op": "move",
+              "args": {
+                "id": "{{row.id}}",
+                "lane": "{{value}}"
+              }
+            }
+          },
+          {
+            "key": "priority",
+            "label": "Priority",
+            "type": "integer"
+          },
+          {
+            "key": "tags",
+            "label": "Tags",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "trash": {
+      "sql": "SELECT id, title FROM tasks WHERE _deleted IS NOT NULL ORDER BY _deleted DESC LIMIT 100",
+      "params": [],
+      "description": "Tasks in the trash, most recently deleted first."
+    },
+    "summary": {
+      "sql": "SELECT COALESCE(SUM(done = 0 AND (due IS NULL OR due <= ?1)), 0) AS today, COALESCE(SUM(done = 0 AND due < ?1), 0) AS overdue, COALESCE(SUM(done = 0), 0) AS open FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL",
+      "params": [
+        "today"
+      ],
+      "description": "Counts of tasks for today, overdue and open."
+    },
+    "badge": {
+      "sql": "SELECT COUNT(*) AS count FROM tasks WHERE _deleted IS NULL AND done = 0 AND due IS NOT NULL AND due <= ?1",
+      "params": [
+        "today"
+      ],
+      "description": "Number of open tasks due today or overdue.",
+      "cli": false
+    },
+    "search": {
+      "sql": "SELECT id, title, COALESCE('↳ ' || (SELECT p.title FROM tasks p WHERE p.id = tasks.parent_id AND p._deleted IS NULL) || ' · ', '') || CASE WHEN done = 1 THEN 'Done' ELSE COALESCE(due, 'No date') END || CASE WHEN COALESCE(tags, '') <> '' THEN ' · ' || tags ELSE '' END || CASE WHEN COALESCE(notes, '') <> '' THEN ' · ' || substr(notes, 1, 100) ELSE '' END AS subtitle FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND (title LIKE '%' || ?1 || '%' OR notes LIKE '%' || ?1 || '%' OR tags LIKE '%' || ?1 || '%' OR EXISTS (SELECT 1 FROM task_fields f JOIN task_field_values v ON v.task_id = tasks.id AND v.field_id = f.id AND v._deleted IS NULL AND v.id = (SELECT MAX(w.id) FROM task_field_values w WHERE w.task_id = v.task_id AND w.field_id = v.field_id AND w._deleted IS NULL) WHERE f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND (COALESCE(f.list_id, '') = '' OR f.list_id = tasks.list_id) AND f.type IN ('text', 'url', 'select') AND CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN NULL IS NULL OR substr(v.value, 1, 4) <> substr(NULL, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END LIKE '%' || ?1 || '%')) ORDER BY done, due IS NULL, due LIMIT 8",
+      "params": [
+        "q"
+      ],
+      "description": "Find tasks by title, notes or tags (for global search).",
+      "types": {
+        "q": {
+          "type": "string",
+          "required": true,
+          "description": "Text to find."
+        }
+      },
+      "cli": false
+    },
+    "task": {
+      "sql": "SELECT CASE WHEN t.cleared_at IS NOT NULL THEN 1 ELSE 0 END AS archived, CASE WHEN t.cleared_at IS NOT NULL THEN 'Archived ' || CAST(strftime('%d', date(t.cleared_at / 1000 + COALESCE(?3, 0) / 1000, 'unixepoch')) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', date(t.cleared_at / 1000 + COALESCE(?3, 0) / 1000, 'unixepoch')) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN ?2 IS NOT NULL AND substr(date(t.cleared_at / 1000 + COALESCE(?3, 0) / 1000, 'unixepoch'), 1, 4) <> strftime('%Y', CAST(?2 AS INTEGER) / 1000 + COALESCE(?3, 0) / 1000, 'unixepoch') THEN ' ' || substr(date(t.cleared_at / 1000 + COALESCE(?3, 0) / 1000, 'unixepoch'), 1, 4) ELSE '' END END AS archived_label, CASE WHEN COALESCE(t.done, 0) = 1 AND t.cleared_at IS NULL THEN 1 ELSE 0 END AS can_archive, CASE WHEN t.cleared_at IS NULL AND COALESCE(t.tt_run, 0) = 0 THEN 1 ELSE 0 END AS can_start_timer, t.list_id, t.group_id, t.status_id, t.planned_for, t.sort_order, COALESCE(t.in_progress, 0) AS in_progress, COALESCE(t.urgent, 0) AS urgent, COALESCE(t.important, 0) AS important, t.id, t.title, t.note_id, COALESCE(t.notes, '') AS notes, t.due, COALESCE(t.tags, '') AS tags, COALESCE(t.priority, 0) AS priority, COALESCE(t.repeat, '') AS repeat, t.remind_time, t.done, CASE WHEN t.done = 1 THEN 'Mark not done' ELSE 'Mark done' END AS done_label, COALESCE(t.done_note, '') AS done_note, t.done = 1 AS can_note, (SELECT p.done_note FROM tasks p WHERE p._deleted IS NULL AND p.id <> t.id AND p.done = 1 AND p.done_note IS NOT NULL AND COALESCE(p.series, p.id) = COALESCE(t.series, t.id) ORDER BY p.completed_at DESC LIMIT 1) AS last_note, (SELECT 'Last time (' || date(p.completed_at / 1000, 'unixepoch') || ')' FROM tasks p WHERE p._deleted IS NULL AND p.id <> t.id AND p.done = 1 AND p.done_note IS NOT NULL AND COALESCE(p.series, p.id) = COALESCE(t.series, t.id) ORDER BY p.completed_at DESC LIMIT 1) AS last_note_title, t.parent_id, (SELECT p.title FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL) AS parent_title, CASE WHEN t.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NOT NULL) THEN 1 ELSE 0 END AS parent_in_trash, CASE WHEN t.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tasks p WHERE p.id = t.parent_id) THEN 0 ELSE 1 END AS can_have_subtasks, (SELECT COUNT(*) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL) AS subtask_count, (SELECT COUNT(*) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL AND c.done = 1) AS subtask_done, CASE WHEN (SELECT COUNT(*) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL) > 0 THEN 'Subtasks · ' || (SELECT COUNT(*) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL AND c.done = 1) || '/' || (SELECT COUNT(*) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL) ELSE 'Subtasks' END AS subtasks_title, CASE WHEN EXISTS (SELECT 1 FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0) THEN 1 ELSE 0 END AS blocked, (SELECT group_concat(title, ', ') FROM (SELECT DISTINCT b.title AS title FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0 ORDER BY b.title)) AS blocked_by, (SELECT COUNT(DISTINCT d.depends_on) FROM task_deps d JOIN tasks b ON b.id = d.depends_on AND b._deleted IS NULL WHERE d.task_id = t.id AND d._deleted IS NULL) AS waiting_count, (SELECT COUNT(DISTINCT d.task_id) FROM task_deps d JOIN tasks b ON b.id = d.task_id AND b._deleted IS NULL WHERE d.depends_on = t.id AND d._deleted IS NULL) AS blocking_count, COALESCE((SELECT group_concat(txt, ' · ') FROM (SELECT CASE WHEN f.type = 'checkbox' THEN f.name ELSE f.name || ': ' || CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN NULL IS NULL OR substr(v.value, 1, 4) <> substr(NULL, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END END AS txt FROM task_fields f JOIN task_field_values v ON v.task_id = t.id AND v.field_id = f.id AND v._deleted IS NULL AND v.id = (SELECT MAX(w.id) FROM task_field_values w WHERE w.task_id = v.task_id AND w.field_id = v.field_id AND w._deleted IS NULL) WHERE f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND (COALESCE(f.list_id, '') = '' OR f.list_id = t.list_id) AND CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN NULL IS NULL OR substr(v.value, 1, 4) <> substr(NULL, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END <> '' ORDER BY f.position, f.name COLLATE NOCASE, f.id)), '') AS fields, COALESCE(NULLIF(t.list_id, ''), '@inbox') AS field_scope, t.estimate_min AS own_estimate_min, NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) AS estimate_min, t.own_tt AS own_tracked_min, (t.own_tt + t.child_tt) AS tracked_min, t.tt_run AS running, t.tt_sub AS running_sub, COALESCE(CASE WHEN t.estimate_min IS NOT NULL THEN (CASE WHEN t.estimate_min < 60 THEN t.estimate_min || 'm' WHEN t.estimate_min % 60 = 0 THEN (t.estimate_min / 60) || 'h' ELSE (t.estimate_min / 60) || 'h ' || (t.estimate_min % 60) || 'm' END) END, '') AS estimate_text, CASE WHEN (t.own_tt + t.child_tt) > 0 AND NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) IS NOT NULL THEN (CASE WHEN (t.own_tt + t.child_tt) < 60 THEN (t.own_tt + t.child_tt) || 'm' WHEN (t.own_tt + t.child_tt) % 60 = 0 THEN ((t.own_tt + t.child_tt) / 60) || 'h' ELSE ((t.own_tt + t.child_tt) / 60) || 'h ' || ((t.own_tt + t.child_tt) % 60) || 'm' END) || ' / ' || (CASE WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) < 60 THEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) || 'm' WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) % 60 = 0 THEN (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) / 60) || 'h' ELSE (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) / 60) || 'h ' || (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) % 60) || 'm' END) WHEN (t.own_tt + t.child_tt) > 0 THEN (CASE WHEN (t.own_tt + t.child_tt) < 60 THEN (t.own_tt + t.child_tt) || 'm' WHEN (t.own_tt + t.child_tt) % 60 = 0 THEN ((t.own_tt + t.child_tt) / 60) || 'h' ELSE ((t.own_tt + t.child_tt) / 60) || 'h ' || ((t.own_tt + t.child_tt) % 60) || 'm' END) WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) IS NOT NULL THEN '0m / ' || (CASE WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) < 60 THEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) || 'm' WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) % 60 = 0 THEN (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) / 60) || 'h' ELSE (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) / 60) || 'h ' || (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) % 60) || 'm' END) END AS time_label, CASE WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) IS NOT NULL AND (t.own_tt + t.child_tt) > NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) THEN 'danger' END AS time_tone, CASE WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) IS NOT NULL THEN (CASE WHEN (t.own_tt + t.child_tt) < 60 THEN (t.own_tt + t.child_tt) || 'm' WHEN (t.own_tt + t.child_tt) % 60 = 0 THEN ((t.own_tt + t.child_tt) / 60) || 'h' ELSE ((t.own_tt + t.child_tt) / 60) || 'h ' || ((t.own_tt + t.child_tt) % 60) || 'm' END) || ' tracked of ' || (CASE WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) < 60 THEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) || 'm' WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) % 60 = 0 THEN (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) / 60) || 'h' ELSE (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) / 60) || 'h ' || (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) % 60) || 'm' END) || ' estimated' WHEN (t.own_tt + t.child_tt) > 0 THEN (CASE WHEN (t.own_tt + t.child_tt) < 60 THEN (t.own_tt + t.child_tt) || 'm' WHEN (t.own_tt + t.child_tt) % 60 = 0 THEN ((t.own_tt + t.child_tt) / 60) || 'h' ELSE ((t.own_tt + t.child_tt) / 60) || 'h ' || ((t.own_tt + t.child_tt) % 60) || 'm' END) || ' tracked' END AS time_title, CASE WHEN t.tt_run = 1 OR t.tt_sub = 1 THEN '● Running' END AS running_label, CASE WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) IS NOT NULL AND (t.own_tt + t.child_tt) > NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) THEN 'Over by ' || (CASE WHEN ((t.own_tt + t.child_tt) - NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0)) < 60 THEN ((t.own_tt + t.child_tt) - NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0)) || 'm' WHEN ((t.own_tt + t.child_tt) - NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0)) % 60 = 0 THEN (((t.own_tt + t.child_tt) - NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0)) / 60) || 'h' ELSE (((t.own_tt + t.child_tt) - NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0)) / 60) || 'h ' || (((t.own_tt + t.child_tt) - NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0)) % 60) || 'm' END) END AS time_over, CASE WHEN (t.own_tt + t.child_tt) > 0 AND NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) IS NOT NULL THEN (CASE WHEN (t.own_tt + t.child_tt) < 60 THEN (t.own_tt + t.child_tt) || 'm' WHEN (t.own_tt + t.child_tt) % 60 = 0 THEN ((t.own_tt + t.child_tt) / 60) || 'h' ELSE ((t.own_tt + t.child_tt) / 60) || 'h ' || ((t.own_tt + t.child_tt) % 60) || 'm' END) || ' of ' || (CASE WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) < 60 THEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) || 'm' WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) % 60 = 0 THEN (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) / 60) || 'h' ELSE (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) / 60) || 'h ' || (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) % 60) || 'm' END) WHEN (t.own_tt + t.child_tt) > 0 THEN (CASE WHEN (t.own_tt + t.child_tt) < 60 THEN (t.own_tt + t.child_tt) || 'm' WHEN (t.own_tt + t.child_tt) % 60 = 0 THEN ((t.own_tt + t.child_tt) / 60) || 'h' ELSE ((t.own_tt + t.child_tt) / 60) || 'h ' || ((t.own_tt + t.child_tt) % 60) || 'm' END) || ' tracked' WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) IS NOT NULL THEN '0m of ' || (CASE WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) < 60 THEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) || 'm' WHEN NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) % 60 = 0 THEN (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) / 60) || 'h' ELSE (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) / 60) || 'h ' || (NULLIF(COALESCE(t.estimate_min, 0) + t.child_et, 0) % 60) || 'm' END) ELSE 'Nothing tracked yet' END AS time_summary, CASE WHEN t.child_tt > 0 OR t.child_et > 0 THEN 'Includes subtasks: ' || (CASE WHEN t.child_tt < 60 THEN t.child_tt || 'm' WHEN t.child_tt % 60 = 0 THEN (t.child_tt / 60) || 'h' ELSE (t.child_tt / 60) || 'h ' || (t.child_tt % 60) || 'm' END) || CASE WHEN t.child_et > 0 THEN ' of ' || (CASE WHEN t.child_et < 60 THEN t.child_et || 'm' WHEN t.child_et % 60 = 0 THEN (t.child_et / 60) || 'h' ELSE (t.child_et / 60) || 'h ' || (t.child_et % 60) || 'm' END) ELSE '' END END AS time_subtasks, CASE WHEN t.tt_run = 1 THEN 'Running since ' || COALESCE(t.run_since, '?') || ' · ' || (CASE WHEN t.run_min < 60 THEN t.run_min || 'm' WHEN t.run_min % 60 = 0 THEN (t.run_min / 60) || 'h' ELSE (t.run_min / 60) || 'h ' || (t.run_min % 60) || 'm' END) || ' so far' END AS timer_note FROM (SELECT tt.*, COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?2 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e WHERE e.task_id = tt.id AND e._deleted IS NULL), 0) AS own_tt, COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?2 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = tt.id AND c._deleted IS NULL AND e._deleted IS NULL), 0) AS child_tt, COALESCE((SELECT SUM(c.estimate_min) FROM tasks c WHERE c.parent_id = tt.id AND c._deleted IS NULL), 0) AS child_et, COALESCE((SELECT SUM(MAX(0, (CAST(?2 AS INTEGER) / 1000 - e.started_at + 30) / 60)) FROM time_entries e WHERE e.task_id = tt.id AND e.ended_at IS NULL AND e._deleted IS NULL), 0) AS run_min, CASE WHEN EXISTS (SELECT 1 FROM time_entries e WHERE e.task_id = tt.id AND e.ended_at IS NULL AND e._deleted IS NULL) THEN 1 ELSE 0 END AS tt_run, CASE WHEN EXISTS (SELECT 1 FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = tt.id AND c._deleted IS NULL AND e.ended_at IS NULL AND e._deleted IS NULL) THEN 1 ELSE 0 END AS tt_sub, (SELECT strftime('%H:%M', e.started_at + COALESCE(?3, 0) / 1000, 'unixepoch') FROM time_entries e WHERE e.task_id = tt.id AND e.ended_at IS NULL AND e._deleted IS NULL ORDER BY e.started_at LIMIT 1) AS run_since FROM tasks tt WHERE tt.id = ?1 AND tt._deleted IS NULL) t",
+      "params": [
+        "id",
+        "now_ms",
+        "utc_offset_ms"
+      ],
+      "description": "One task with its details, its custom fields summary (Budget: 1200 · Stage: Design) and the note from its last completion. archived (0/1) and archived_label (Archived 12 Oct) say whether it is in the Archive.",
+      "types": {
+        "id": {
+          "type": "id",
+          "required": true,
+          "description": "The task."
+        }
+      }
+    },
+    "steps": {
+      "sql": "SELECT id, title, done, task_id, CASE WHEN EXISTS (SELECT 1 FROM tasks t WHERE t.id = steps.task_id AND t.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tasks p WHERE p.id = t.parent_id)) THEN 0 ELSE 1 END AS can_promote FROM steps WHERE task_id = ?1 AND _deleted IS NULL ORDER BY id",
+      "params": [
+        "task_id"
+      ],
+      "description": "Steps of a task.",
+      "types": {
+        "task_id": {
+          "type": "id",
+          "required": true,
+          "description": "The task."
+        }
+      }
+    },
+    "counts": {
+      "sql": "SELECT COALESCE(SUM(done = 0 AND (due IS NULL OR due <= ?1)), 0) AS today, COALESCE(SUM(done = 0 AND due > ?1), 0) AS upcoming, COALESCE(SUM(done = 0), 0) AS open, COALESCE(SUM(done = 1), 0) AS done FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL",
+      "params": [
+        "today"
+      ],
+      "description": "Counts of tasks for today, upcoming, open and done."
+    },
+    "due_reminders": {
+      "sql": "SELECT id, remind_at AS at_ms, title, CASE WHEN notes IS NOT NULL THEN substr(notes, 1, 120) ELSE 'Task reminder' END AS body, 'both' AS notify_on FROM tasks WHERE _deleted IS NULL AND done = 0 AND remind_at IS NOT NULL AND remind_at >= ?1",
+      "params": [
+        "now_ms"
+      ],
+      "description": "Pending task reminders for the reminder scheduler.",
+      "cli": false
+    },
+    "note_settings": {
+      "sql": "SELECT COALESCE((SELECT ask_note FROM settings WHERE _deleted IS NULL ORDER BY id LIMIT 1), 'always') AS ask, COALESCE((SELECT note_tags FROM settings WHERE _deleted IS NULL ORDER BY id LIMIT 1), '') AS tags",
+      "params": [],
+      "description": "Current settings for offering a note on finishing a task."
+    },
+    "archived": {
+      "sql": "SELECT x.id, x.title, x.list_id, x.list_name, x.done_note, CASE WHEN instr(x.done_note, char(10)) > 0 THEN substr(x.done_note, 1, instr(x.done_note, char(10)) - 1) ELSE x.done_note END AS done_line, x.tt_total AS tracked_min, x.est_total AS estimate_min, CASE WHEN x.tt_total > 0 AND x.est_total IS NOT NULL THEN (CASE WHEN x.tt_total < 60 THEN x.tt_total || 'm' WHEN x.tt_total % 60 = 0 THEN (x.tt_total / 60) || 'h' ELSE (x.tt_total / 60) || 'h ' || (x.tt_total % 60) || 'm' END) || ' / ' || (CASE WHEN x.est_total < 60 THEN x.est_total || 'm' WHEN x.est_total % 60 = 0 THEN (x.est_total / 60) || 'h' ELSE (x.est_total / 60) || 'h ' || (x.est_total % 60) || 'm' END) WHEN x.tt_total > 0 THEN (CASE WHEN x.tt_total < 60 THEN x.tt_total || 'm' WHEN x.tt_total % 60 = 0 THEN (x.tt_total / 60) || 'h' ELSE (x.tt_total / 60) || 'h ' || (x.tt_total % 60) || 'm' END) WHEN x.est_total IS NOT NULL THEN '0m / ' || (CASE WHEN x.est_total < 60 THEN x.est_total || 'm' WHEN x.est_total % 60 = 0 THEN (x.est_total / 60) || 'h' ELSE (x.est_total / 60) || 'h ' || (x.est_total % 60) || 'm' END) END AS time_label, CASE WHEN x.est_total IS NOT NULL AND x.tt_total > x.est_total THEN 'danger' END AS time_tone, CASE WHEN x.subtasks_total > 0 THEN x.subtasks_done || '/' || x.subtasks_total END AS subtasks_label, CASE x.repeat WHEN 'daily' THEN 'Daily' WHEN 'weekdays' THEN 'Weekdays' WHEN 'weekly' THEN 'Weekly' WHEN 'monthly' THEN 'Monthly' END AS repeat_label, CASE WHEN x.parent_title IS NOT NULL THEN '↳ ' || x.parent_title END AS parent_label, x.completed_at, x.completed_date, CASE WHEN x.completed_date IS NULL THEN NULL ELSE CAST(strftime('%d', x.completed_date) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', x.completed_date) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(x.completed_date, 1, 4) <> substr(?5, 1, 4) THEN ' ' || substr(x.completed_date, 1, 4) ELSE '' END END AS completed_label, CASE WHEN x.completed_date IS NULL THEN 'Earlier' WHEN CAST(julianday(?5) - julianday(x.completed_date) AS INTEGER) <= 0 THEN 'Today' WHEN CAST(julianday(?5) - julianday(x.completed_date) AS INTEGER) = 1 THEN 'Yesterday' WHEN CAST(julianday(?5) - julianday(x.completed_date) AS INTEGER) <= 6 THEN 'This week' ELSE CASE strftime('%m', x.completed_date) WHEN '01' THEN 'January' WHEN '02' THEN 'February' WHEN '03' THEN 'March' WHEN '04' THEN 'April' WHEN '05' THEN 'May' WHEN '06' THEN 'June' WHEN '07' THEN 'July' WHEN '08' THEN 'August' WHEN '09' THEN 'September' WHEN '10' THEN 'October' WHEN '11' THEN 'November' WHEN '12' THEN 'December' END || ' ' || strftime('%Y', x.completed_date) END AS group_label FROM (SELECT t.id, t.title, t.notes, t.tags, t.list_id, t.done_note, t.repeat, t.estimate_min AS own_estimate_min, t.completed_at, t.cleared_at, COALESCE((SELECT l.name FROM task_lists l WHERE l.id = t.list_id AND l._deleted IS NULL), 'Inbox') AS list_name, COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?6 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e WHERE e.task_id = t.id AND e._deleted IS NULL), 0) + COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?6 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e._deleted IS NULL), 0) AS tt_total, NULLIF(COALESCE(t.estimate_min, 0) + COALESCE((SELECT SUM(c.estimate_min) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL), 0), 0) AS est_total, (SELECT COUNT(*) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL) AS subtasks_total, (SELECT COUNT(*) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL AND c.done = 1) AS subtasks_done, (SELECT p.title FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL) AS parent_title, CASE WHEN t.completed_at IS NULL THEN NULL ELSE date(t.completed_at / 1000 + COALESCE(?7, 0) / 1000, 'unixepoch') END AS completed_date FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NOT NULL) x WHERE (?1 IS NULL OR ?1 = '' OR x.completed_date >= ?1) AND (?2 IS NULL OR ?2 = '' OR x.completed_date <= ?2) AND (?3 IS NULL OR ?3 = '' OR (?3 = '@inbox' AND COALESCE(x.list_id, '') = '') OR COALESCE(x.list_id, '') = ?3) AND (?4 IS NULL OR ?4 = '' OR x.title LIKE '%' || ?4 || '%' OR x.notes LIKE '%' || ?4 || '%' OR x.tags LIKE '%' || ?4 || '%' OR x.done_note LIKE '%' || ?4 || '%') ORDER BY x.completed_at IS NULL, x.completed_at DESC, x.id DESC LIMIT 500",
+      "params": [
+        "from",
+        "to",
+        "list_id",
+        "q",
+        "today",
+        "now_ms",
+        "utc_offset_ms"
+      ],
+      "description": "Archived (finished) tasks, for questions like 'what did I finish in October'; from/to are local dates on completion.",
+      "types": {
+        "from": {
+          "type": "date",
+          "description": "First local completion date, e.g. 2026-10-01. Empty for no start."
+        },
+        "to": {
+          "type": "date",
+          "description": "Last local completion date, inclusive. Empty for no end."
+        },
+        "list_id": {
+          "type": "string",
+          "description": "Only this list's tasks (@inbox for tasks without a list). Empty for all."
+        },
+        "q": {
+          "type": "string",
+          "description": "Text to find in title, notes, tags or the note on finishing."
+        }
+      }
+    },
+    "archive_stats": {
+      "sql": "SELECT done_month, tracked_month, done_month || ' done this month' || CASE WHEN tracked_month > 0 THEN ' · ' || (CASE WHEN tracked_month < 60 THEN tracked_month || 'm' WHEN tracked_month % 60 = 0 THEN (tracked_month / 60) || 'h' ELSE (tracked_month / 60) || 'h ' || (tracked_month % 60) || 'm' END) || ' tracked' ELSE '' END AS label FROM (SELECT (SELECT COUNT(*) FROM tasks t WHERE t._deleted IS NULL AND t.done = 1 AND t.completed_at IS NOT NULL AND substr(date(t.completed_at / 1000 + COALESCE(?2, 0) / 1000, 'unixepoch'), 1, 7) = substr(?1, 1, 7)) AS done_month, COALESCE((SELECT SUM(COALESCE(e.minutes, 0)) FROM time_entries e JOIN tasks t ON t.id = e.task_id AND t._deleted IS NULL WHERE e._deleted IS NULL AND substr(date(e.started_at + COALESCE(?2, 0) / 1000, 'unixepoch'), 1, 7) = substr(?1, 1, 7)), 0) AS tracked_month)",
+      "params": [
+        "today",
+        "utc_offset_ms"
+      ],
+      "description": "Tasks completed this local month (archived or not) and minutes tracked this month, for the Archive header.",
+      "cli": false
+    },
+    "archive_settings": {
+      "sql": "SELECT COALESCE(NULLIF((SELECT auto_archive FROM settings WHERE _deleted IS NULL ORDER BY id LIMIT 1), ''), 'never') AS auto",
+      "params": [],
+      "description": "Current Auto-archive setting: never, end_of_day, 7d or 30d."
+    },
+    "index_tasks": {
+      "sql": "SELECT id, title, substr(COALESCE(notes, ''), 1, 20000) AS body, TRIM(COALESCE(tags, '') || ' ' || COALESCE((SELECT group_concat(CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN NULL IS NULL OR substr(v.value, 1, 4) <> substr(NULL, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END, ' ') FROM task_fields f JOIN task_field_values v ON v.task_id = tasks.id AND v.field_id = f.id AND v._deleted IS NULL AND v.id = (SELECT MAX(w.id) FROM task_field_values w WHERE w.task_id = v.task_id AND w.field_id = v.field_id AND w._deleted IS NULL) WHERE f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND (COALESCE(f.list_id, '') = '' OR f.list_id = tasks.list_id) AND f.type IN ('text', 'url', 'select') AND CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN NULL IS NULL OR substr(v.value, 1, 4) <> substr(NULL, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END <> ''), '')) AS keywords, COALESCE('↳ ' || (SELECT p.title FROM tasks p WHERE p.id = tasks.parent_id AND p._deleted IS NULL) || ' · ', '') || CASE WHEN done = 1 THEN 'Done' ELSE COALESCE(due, 'No date') END || CASE WHEN COALESCE(tags, '') <> '' THEN ' · ' || tags ELSE '' END || CASE WHEN COALESCE(notes, '') <> '' THEN ' · ' || substr(notes, 1, 100) ELSE '' END AS subtitle FROM tasks WHERE _deleted IS NULL AND cleared_at IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "params": [
+        "ids"
+      ],
+      "description": "Tasks by id, for the host's search index.",
+      "cli": false
+    },
+    "ref_tasks": {
+      "sql": "SELECT id, title, CASE WHEN done = 1 THEN 'Done' ELSE due END AS subtitle, done FROM tasks WHERE _deleted IS NULL AND id IN (SELECT value FROM json_each(?1))",
+      "params": [
+        "ids"
+      ],
+      "cli": false,
+      "description": "Tasks by id, for links."
+    },
+    "export_tasks": {
+      "sql": "SELECT title, notes, due, remind_time, COALESCE(priority, 0) AS priority, repeat, tags, CASE WHEN done = 1 THEN 'true' ELSE 'false' END AS done, CASE WHEN in_progress = 1 THEN 'true' ELSE 'false' END AS in_progress, CASE WHEN urgent = 1 THEN 'true' ELSE 'false' END AS urgent, CASE WHEN important = 1 THEN 'true' ELSE 'false' END AS important, (SELECT p.title FROM tasks p WHERE p.id = tasks.parent_id AND p._deleted IS NULL) AS parent, (SELECT group_concat(title, '; ') FROM (SELECT DISTINCT b.title AS title FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = tasks.id AND d._deleted IS NULL AND b._deleted IS NULL ORDER BY b.title)) AS waiting_on, (SELECT group_concat(txt, ' · ') FROM (SELECT CASE WHEN f.type = 'checkbox' THEN f.name ELSE f.name || ': ' || CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN NULL IS NULL OR substr(v.value, 1, 4) <> substr(NULL, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END END AS txt FROM task_fields f JOIN task_field_values v ON v.task_id = tasks.id AND v.field_id = f.id AND v._deleted IS NULL AND v.id = (SELECT MAX(w.id) FROM task_field_values w WHERE w.task_id = v.task_id AND w.field_id = v.field_id AND w._deleted IS NULL) WHERE f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND (COALESCE(f.list_id, '') = '' OR f.list_id = tasks.list_id) AND CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN NULL IS NULL OR substr(v.value, 1, 4) <> substr(NULL, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END <> '' ORDER BY f.position, f.name COLLATE NOCASE, f.id)) AS custom_fields, CASE WHEN estimate_min IS NOT NULL THEN (CASE WHEN estimate_min < 60 THEN estimate_min || 'm' WHEN estimate_min % 60 = 0 THEN (estimate_min / 60) || 'h' ELSE (estimate_min / 60) || 'h ' || (estimate_min % 60) || 'm' END) END AS estimate, CASE WHEN own_tt > 0 THEN (CASE WHEN own_tt < 60 THEN own_tt || 'm' WHEN own_tt % 60 = 0 THEN (own_tt / 60) || 'h' ELSE (own_tt / 60) || 'h ' || (own_tt % 60) || 'm' END) END AS tracked FROM (SELECT tasks.*, COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?1 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e WHERE e.task_id = tasks.id AND e._deleted IS NULL), 0) AS own_tt FROM tasks WHERE _deleted IS NULL) AS tasks ORDER BY COALESCE(due, '9999'), title",
+      "params": [
+        "now_ms"
+      ],
+      "description": "Every task, for exports.",
+      "cli": false
+    },
+    "workspace_tasks": {
+      "sql": "WITH base AS (SELECT t.*, COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?15 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e WHERE e.task_id = t.id AND e._deleted IS NULL), 0) + COALESCE((SELECT SUM(CASE WHEN e.ended_at IS NULL THEN MAX(0, (CAST(?15 AS INTEGER) / 1000 - e.started_at + 30) / 60) ELSE COALESCE(e.minutes, 0) END) FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e._deleted IS NULL), 0) AS tt_total, NULLIF(COALESCE(t.estimate_min, 0) + COALESCE((SELECT SUM(c.estimate_min) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL), 0), 0) AS est_total, CASE WHEN EXISTS (SELECT 1 FROM time_entries e WHERE e.task_id = t.id AND e.ended_at IS NULL AND e._deleted IS NULL) THEN 1 ELSE 0 END AS tt_run, CASE WHEN EXISTS (SELECT 1 FROM time_entries e JOIN tasks c ON c.id = e.task_id WHERE c.parent_id = t.id AND c._deleted IS NULL AND e.ended_at IS NULL AND e._deleted IS NULL) THEN 1 ELSE 0 END AS tt_sub, COALESCE((SELECT name FROM task_lists l WHERE l.id=t.list_id AND l._deleted IS NULL), 'Inbox') AS list_name, COALESCE((SELECT name FROM task_groups g WHERE g.id=t.group_id AND g.list_id IS t.list_id AND g._deleted IS NULL), 'Ungrouped') AS group_name, COALESCE((SELECT name FROM task_statuses s WHERE s.id=t.status_id AND s.list_id IS t.list_id AND s._deleted IS NULL AND s.category=CASE WHEN t.done=1 THEN 'completed' WHEN t.in_progress=1 THEN 'active' ELSE 'not_started' END), CASE WHEN t.done=1 THEN 'Done' WHEN t.in_progress=1 THEN 'In progress' ELSE 'To pick' END) AS status_name, CASE WHEN t.done=1 THEN 'completed' WHEN t.in_progress=1 THEN 'active' ELSE 'not_started' END AS status_category, COALESCE(t.status_id, CASE WHEN t.done=1 THEN '@completed' WHEN t.in_progress=1 THEN '@active' ELSE '@not_started' END) AS workflow_id, COALESCE((SELECT ready FROM task_statuses s WHERE s.id=t.status_id AND s.list_id IS t.list_id AND s._deleted IS NULL), 1) AS ready,  CAST(julianday(t.due) - julianday(?1) AS INTEGER) AS d, (SELECT COUNT(*) FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL) AS steps_total, (SELECT COUNT(*) FROM steps s WHERE s.task_id = t.id AND s._deleted IS NULL AND s.done = 1) AS steps_done, CASE WHEN (t.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL AND p.cleared_at IS NULL)) THEN 1 ELSE 0 END AS nested, (SELECT p.title FROM tasks p WHERE p.id = t.parent_id AND p._deleted IS NULL) AS parent_title, (SELECT COUNT(*) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL) AS subtasks_total, (SELECT COUNT(*) FROM tasks c WHERE c.parent_id = t.id AND c._deleted IS NULL AND c.done = 1) AS subtasks_done, CASE WHEN EXISTS (SELECT 1 FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0) THEN 1 ELSE 0 END AS blocked, (SELECT group_concat(title, ', ') FROM (SELECT DISTINCT b.title AS title FROM task_deps d JOIN tasks b ON b.id = d.depends_on WHERE d.task_id = t.id AND d._deleted IS NULL AND b._deleted IS NULL AND COALESCE(b.done, 0) = 0 ORDER BY b.title)) AS blocked_by, (SELECT CASE WHEN f.type = 'checkbox' THEN f.name ELSE f.name || ': ' || CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN ?1 IS NULL OR substr(v.value, 1, 4) <> substr(?1, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END END FROM task_fields f JOIN task_field_values v ON v.task_id = t.id AND v.field_id = f.id AND v._deleted IS NULL AND v.id = (SELECT MAX(w.id) FROM task_field_values w WHERE w.task_id = v.task_id AND w.field_id = v.field_id AND w._deleted IS NULL) WHERE f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND (COALESCE(f.list_id, '') = '' OR f.list_id = t.list_id) AND COALESCE(f.show_on_row, 0) = 1 AND CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN ?1 IS NULL OR substr(v.value, 1, 4) <> substr(?1, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END <> '' ORDER BY f.position, f.name COLLATE NOCASE, f.id LIMIT 1 OFFSET 0) AS field_chip_1, (SELECT CASE WHEN f.type = 'checkbox' THEN f.name ELSE f.name || ': ' || CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN ?1 IS NULL OR substr(v.value, 1, 4) <> substr(?1, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END END FROM task_fields f JOIN task_field_values v ON v.task_id = t.id AND v.field_id = f.id AND v._deleted IS NULL AND v.id = (SELECT MAX(w.id) FROM task_field_values w WHERE w.task_id = v.task_id AND w.field_id = v.field_id AND w._deleted IS NULL) WHERE f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND (COALESCE(f.list_id, '') = '' OR f.list_id = t.list_id) AND COALESCE(f.show_on_row, 0) = 1 AND CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN ?1 IS NULL OR substr(v.value, 1, 4) <> substr(?1, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END <> '' ORDER BY f.position, f.name COLLATE NOCASE, f.id LIMIT 1 OFFSET 1) AS field_chip_2, (SELECT CASE WHEN f.type = 'checkbox' THEN f.name ELSE f.name || ': ' || CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN ?1 IS NULL OR substr(v.value, 1, 4) <> substr(?1, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END END FROM task_fields f JOIN task_field_values v ON v.task_id = t.id AND v.field_id = f.id AND v._deleted IS NULL AND v.id = (SELECT MAX(w.id) FROM task_field_values w WHERE w.task_id = v.task_id AND w.field_id = v.field_id AND w._deleted IS NULL) WHERE f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND (COALESCE(f.list_id, '') = '' OR f.list_id = t.list_id) AND COALESCE(f.show_on_row, 0) = 1 AND CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN ?1 IS NULL OR substr(v.value, 1, 4) <> substr(?1, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END <> '' ORDER BY f.position, f.name COLLATE NOCASE, f.id LIMIT 1 OFFSET 2) AS field_chip_3 FROM tasks t WHERE t._deleted IS NULL AND (t.cleared_at IS NULL OR COALESCE(?17, 0) IN (1, '1', 'true'))), flagged AS (SELECT x.*, CASE WHEN (?3 IS NULL OR ?3 = '' OR title LIKE '%' || ?3 || '%' OR tags LIKE '%' || ?3 || '%' OR notes LIKE '%' || ?3 || '%' OR EXISTS (SELECT 1 FROM task_fields f JOIN task_field_values v ON v.task_id = x.id AND v.field_id = f.id AND v._deleted IS NULL AND v.id = (SELECT MAX(w.id) FROM task_field_values w WHERE w.task_id = v.task_id AND w.field_id = v.field_id AND w._deleted IS NULL) WHERE f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND (COALESCE(f.list_id, '') = '' OR f.list_id = x.list_id) AND f.type IN ('text', 'url', 'select') AND CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN NULL IS NULL OR substr(v.value, 1, 4) <> substr(NULL, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END LIKE '%' || ?3 || '%')) AND (?4 IS NULL OR ?4 = '' OR EXISTS (WITH RECURSIVE f(tag, rest) AS (SELECT '', ?4 || ',' UNION ALL SELECT lower(ltrim(trim(substr(rest, 1, instr(rest, ',') - 1)), '#')), substr(rest, instr(rest, ',') + 1) FROM f WHERE rest <> '') SELECT 1 FROM f WHERE tag <> '' AND instr(', ' || lower(COALESCE(tags, '')) || ', ', ', ' || tag || ', ') > 0))  AND (?5 IS NULL OR ?5 = '' OR instr(',' || ?5 || ',', ',' || COALESCE(list_id, '@inbox') || ',') > 0) AND (?6 IS NULL OR ?6 = '' OR instr(',' || ?6 || ',', ',' || COALESCE(group_id, '@ungrouped') || ',') > 0) AND (?7 IS NULL OR ?7 = '' OR instr(',' || ?7 || ',', ',' || COALESCE(workflow_id, '') || ',') > 0) AND (?9 IS NULL OR ?9 = '' OR status_category = ?9) AND (?8 IS NULL OR ?8 <> 'all' OR NOT EXISTS (WITH RECURSIVE f(tag, rest) AS (SELECT '', COALESCE(?4, '') || ',' UNION ALL SELECT lower(ltrim(trim(substr(rest, 1, instr(rest, ',') - 1)), '#')), substr(rest, instr(rest, ',') + 1) FROM f WHERE rest <> '') SELECT 1 FROM f WHERE tag <> '' AND instr(', ' || lower(COALESCE(tags, '')) || ', ', ', ' || tag || ', ') = 0)) AND (?12 IS NULL OR ?12='' OR title LIKE '%' || ?12 || '%' OR notes LIKE '%' || ?12 || '%' OR tags LIKE '%' || ?12 || '%' OR EXISTS (SELECT 1 FROM task_fields f JOIN task_field_values v ON v.task_id = x.id AND v.field_id = f.id AND v._deleted IS NULL AND v.id = (SELECT MAX(w.id) FROM task_field_values w WHERE w.task_id = v.task_id AND w.field_id = v.field_id AND w._deleted IS NULL) WHERE f._deleted IS NULL AND COALESCE(f.archived, 0) = 0 AND (COALESCE(f.list_id, '') = '' OR f.list_id = x.list_id) AND f.type IN ('text', 'url', 'select') AND CASE f.type WHEN 'select' THEN COALESCE((SELECT json_extract(o.value, '$.label') FROM json_each(CASE WHEN json_valid(f.options) THEN f.options ELSE '[]' END) o WHERE json_extract(o.value, '$.id') = v.value LIMIT 1), '') WHEN 'checkbox' THEN CASE WHEN v.value = '1' THEN 'Yes' ELSE '' END WHEN 'date' THEN CASE WHEN v.value IS NULL THEN '' ELSE COALESCE(CAST(strftime('%d', v.value) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', v.value) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN NULL IS NULL OR substr(v.value, 1, 4) <> substr(NULL, 1, 4) THEN ' ' || substr(v.value, 1, 4) ELSE '' END, v.value) END ELSE COALESCE(v.value, '') END LIKE '%' || ?12 || '%')) AND (?16 IS NULL OR ?16 = '' OR NOT EXISTS (WITH RECURSIVE fv(fid, oid, rest) AS (SELECT '', '', ?16 || ',' UNION ALL SELECT substr(trim(substr(rest, 1, instr(rest, ',') - 1)), 1, instr(trim(substr(rest, 1, instr(rest, ',') - 1)), '=') - 1), substr(trim(substr(rest, 1, instr(rest, ',') - 1)), instr(trim(substr(rest, 1, instr(rest, ',') - 1)), '=') + 1), substr(rest, instr(rest, ',') + 1) FROM fv WHERE rest <> '') SELECT 1 FROM fv WHERE fid <> '' AND NOT EXISTS (SELECT 1 FROM fv g JOIN task_field_values v ON v.field_id = g.fid AND v.value = g.oid AND v.task_id = x.id AND v._deleted IS NULL AND v.id = (SELECT MAX(w.id) FROM task_field_values w WHERE w.task_id = v.task_id AND w.field_id = v.field_id AND w._deleted IS NULL) WHERE g.fid = fv.fid))) AND CASE ?2 WHEN 'my_day' THEN done = 0 AND planned_for IS NOT NULL AND planned_for <= ?1 WHEN 'inbox' THEN done = 0 AND list_id IS NULL WHEN 'ready' THEN done = 0 AND ready = 1 AND (planned_for IS NULL OR planned_for <= ?1) WHEN 'today' THEN done = 0 AND d <= 0 WHEN 'upcoming' THEN done = 0 AND d > 0 WHEN 'done' THEN done = 1 WHEN 'everything' THEN 1 ELSE done = 0 END THEN 1 ELSE 0 END AS in_view, COALESCE(x.parent_id, x.id) AS fam FROM base AS x), ranked AS (SELECT x.*, ROW_NUMBER() OVER (ORDER BY CASE WHEN ?10 = 'manual' THEN sort_order END, CASE WHEN ?10 = 'title' THEN title END COLLATE NOCASE, CASE WHEN ?10 = 'priority' THEN -COALESCE(priority,0) END, CASE WHEN ?10 = 'tracked' THEN -tt_total END, CASE WHEN ?10 = 'estimate' THEN -COALESCE(est_total, 0) END, CASE WHEN ?2 IN ('my_day', 'today', 'ready') AND done = 0 THEN blocked END, CASE WHEN done = 1 THEN 6 WHEN due IS NULL THEN 5 WHEN d < 0 THEN 0 WHEN d = 0 THEN 1 WHEN d <= 6 THEN 2 ELSE 4 END, due, COALESCE(priority, 0) DESC, CASE WHEN done = 1 THEN -completed_at END, id DESC) AS own_pos, MAX(CASE WHEN id = fam THEN in_view END) OVER (PARTITION BY fam) AS parent_in_view FROM flagged AS x), keyed AS (SELECT x.*, CASE WHEN COALESCE(?18, '') IN ('tree', 'fold') AND x.parent_id IS NOT NULL AND x.parent_in_view = 1 THEN 1 ELSE 0 END AS depth, MAX(CASE WHEN id = fam THEN own_pos END) OVER (PARTITION BY fam) AS par_pos, MAX(CASE WHEN id = fam THEN planned_for END) OVER (PARTITION BY fam) AS par_planned_for, MAX(CASE WHEN id = fam THEN list_name END) OVER (PARTITION BY fam) AS par_list_name, MAX(CASE WHEN id = fam THEN group_name END) OVER (PARTITION BY fam) AS par_group_name, MAX(CASE WHEN id = fam THEN status_name END) OVER (PARTITION BY fam) AS par_status_name FROM ranked AS x), final AS (SELECT x.*, CASE WHEN depth = 1 THEN par_pos ELSE own_pos END AS rk_pos, CASE WHEN depth = 1 THEN par_planned_for ELSE planned_for END AS rk_planned_for, CASE WHEN depth = 1 THEN par_list_name ELSE list_name END AS rk_list_name, CASE WHEN depth = 1 THEN par_group_name ELSE group_name END AS rk_group_name, CASE WHEN depth = 1 THEN par_status_name ELSE status_name END AS rk_status_name FROM keyed AS x) SELECT id, COALESCE(list_id, '') AS list_key, COALESCE(group_id, '') AS group_key, list_id, group_id, status_id, planned_for, sort_order, list_name, group_name, status_name, status_category, workflow_id, CASE ?11 WHEN 'list' THEN rk_list_name WHEN 'group' THEN rk_group_name WHEN 'status' THEN rk_status_name WHEN 'none' THEN '' ELSE CASE WHEN rk_planned_for IS NOT NULL AND rk_planned_for < ?1 THEN 'Earlier plans' WHEN rk_planned_for = ?1 THEN 'Planned today' ELSE rk_list_name END END AS workspace_group, title, notes, due, tags, COALESCE(in_progress, 0) AS in_progress, COALESCE(urgent, 0) AS urgent, COALESCE(important, 0) AS important, CASE WHEN done = 1 THEN 'done' WHEN in_progress = 1 THEN 'doing' ELSE 'todo' END AS board_lane, CASE WHEN in_progress = 1 THEN 'Move to To do' ELSE 'Start task' END AS move_label, CASE WHEN urgent = 1 AND important = 1 THEN 'do' WHEN important = 1 THEN 'schedule' WHEN urgent = 1 THEN 'delegate' ELSE 'eliminate' END AS matrix_lane, COALESCE(priority, 0) AS priority, repeat, remind_time, done, CASE WHEN done = 1 THEN 'Mark not done' ELSE 'Mark done' END AS done_label, CASE WHEN due IS NULL THEN NULL WHEN d = 0 THEN 'Today' WHEN d = 1 THEN 'Tomorrow' WHEN d = -1 THEN 'Yesterday' WHEN d BETWEEN 2 AND 6 THEN CASE strftime('%w', due) WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END ELSE CAST(strftime('%d', due) AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', due) AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(due, 1, 4) <> substr(?1, 1, 4) THEN ' ' || substr(due, 1, 4) ELSE '' END END || CASE WHEN remind_time IS NOT NULL THEN ' ' || remind_time ELSE '' END AS due_label, CASE WHEN done = 0 AND (d < 0 OR (d = 0 AND remind_at IS NOT NULL AND remind_at < CAST(?15 AS INTEGER))) THEN 'danger' WHEN done = 0 AND d = 0 THEN 'accent' END AS due_tone, CASE WHEN done = 1 THEN 'Completed' WHEN due IS NULL THEN 'No date' WHEN d < 0 THEN 'Overdue' WHEN d = 0 THEN 'Today' WHEN d = 1 THEN 'Tomorrow' WHEN d <= 6 THEN CASE strftime('%w', due) WHEN '0' THEN 'Sunday' WHEN '1' THEN 'Monday' WHEN '2' THEN 'Tuesday' WHEN '3' THEN 'Wednesday' WHEN '4' THEN 'Thursday' WHEN '5' THEN 'Friday' ELSE 'Saturday' END ELSE 'Later' END AS section, CASE WHEN done = 0 AND d < 0 THEN 'danger' END AS section_tone, CASE repeat WHEN 'daily' THEN 'Daily' WHEN 'weekdays' THEN 'Weekdays' WHEN 'weekly' THEN 'Weekly' WHEN 'monthly' THEN 'Monthly' END AS repeat_label, CASE WHEN steps_total > 0 THEN steps_done || '/' || steps_total END AS steps_label, CASE WHEN done_note IS NOT NULL THEN 'Note' END AS note_chip, parent_id, depth, parent_title, CASE WHEN nested = 1 AND NOT (COALESCE(?18, '') IN ('tree', 'fold') AND depth = 1) THEN '↳ ' || parent_title END AS parent_label, subtasks_total, subtasks_done, CASE WHEN subtasks_total > 0 THEN subtasks_done || '/' || subtasks_total END AS subtasks_label, CASE WHEN done = 0 THEN blocked ELSE 0 END AS blocked, CASE WHEN done = 0 AND blocked = 1 THEN 'Blocked' END AS blocked_label, CASE WHEN done = 0 AND blocked = 1 THEN blocked_by END AS blocked_by, field_chip_1, field_chip_2, field_chip_3, tt_total AS tracked_min, est_total AS estimate_min, tt_run AS running, CASE WHEN tt_total > 0 AND est_total IS NOT NULL THEN (CASE WHEN tt_total < 60 THEN tt_total || 'm' WHEN tt_total % 60 = 0 THEN (tt_total / 60) || 'h' ELSE (tt_total / 60) || 'h ' || (tt_total % 60) || 'm' END) || ' / ' || (CASE WHEN est_total < 60 THEN est_total || 'm' WHEN est_total % 60 = 0 THEN (est_total / 60) || 'h' ELSE (est_total / 60) || 'h ' || (est_total % 60) || 'm' END) WHEN tt_total > 0 THEN (CASE WHEN tt_total < 60 THEN tt_total || 'm' WHEN tt_total % 60 = 0 THEN (tt_total / 60) || 'h' ELSE (tt_total / 60) || 'h ' || (tt_total % 60) || 'm' END) WHEN est_total IS NOT NULL THEN '0m / ' || (CASE WHEN est_total < 60 THEN est_total || 'm' WHEN est_total % 60 = 0 THEN (est_total / 60) || 'h' ELSE (est_total / 60) || 'h ' || (est_total % 60) || 'm' END) END AS time_label, CASE WHEN est_total IS NOT NULL AND tt_total > est_total THEN 'danger' END AS time_tone, CASE WHEN est_total IS NOT NULL THEN (CASE WHEN tt_total < 60 THEN tt_total || 'm' WHEN tt_total % 60 = 0 THEN (tt_total / 60) || 'h' ELSE (tt_total / 60) || 'h ' || (tt_total % 60) || 'm' END) || ' tracked of ' || (CASE WHEN est_total < 60 THEN est_total || 'm' WHEN est_total % 60 = 0 THEN (est_total / 60) || 'h' ELSE (est_total / 60) || 'h ' || (est_total % 60) || 'm' END) || ' estimated' WHEN tt_total > 0 THEN (CASE WHEN tt_total < 60 THEN tt_total || 'm' WHEN tt_total % 60 = 0 THEN (tt_total / 60) || 'h' ELSE (tt_total / 60) || 'h ' || (tt_total % 60) || 'm' END) || ' tracked' END AS time_title, CASE WHEN tt_run = 1 OR tt_sub = 1 THEN '● Running' END AS running_label FROM final AS x WHERE in_view = 1 AND CASE ?18 WHEN 'tree' THEN 1 WHEN 'fold' THEN CASE WHEN depth = 0 THEN 1 ELSE 0 END ELSE CASE WHEN (nested = 0 OR ?2 IN ('my_day', 'inbox', 'today', 'upcoming', 'ready') OR COALESCE(?3, '') <> '' OR COALESCE(?4, '') <> '' OR COALESCE(?12, '') <> '') THEN 1 ELSE 0 END END ORDER BY rk_pos, depth, own_pos LIMIT COALESCE(?13, 500) OFFSET COALESCE(?14, 0)",
+      "params": [
+        "today",
+        "filter",
+        "q",
+        "tags",
+        "lists",
+        "groups",
+        "statuses",
+        "tags_mode",
+        "category",
+        "sort",
+        "grouping",
+        "page_focus",
+        "page_size",
+        "offset",
+        "now",
+        "field_values",
+        "include_archived",
+        "nesting"
+      ],
+      "description": "Tasks for capture and focus. My Day includes unfinished earlier plans; dates, organization and tag filters run before the result limit.",
+      "cli": false,
+      "types": {
+        "page_size": {"type": "integer"},
+        "offset": {"type": "integer"},
+        "include_archived": {"type": "boolean"},
+        "nesting": {"type": "string", "description": "How subtasks are listed: tree (every task; a subtask whose parent is also in the result follows it with depth 1 and no parent label), fold (a subtask whose parent is in the result is left out; boards use it), anything else keeps the older rule (subtasks only in My Day, Inbox, Today, Upcoming, Ready, or when searching or filtering by tag)."}
+      },
+      "view": {
+        "version": 1,
+        "title": "Task workspace",
+        "row_action": {
+          "label": "Complete",
+          "action": {"op": "toggle", "args": {"id": "{{row.id}}", "done": true}},
+          "success": "{{result.message}}",
+          "followup": {
+            "label": "Add note",
+            "if": "{{result.ask_note}}",
+            "action": {"navigate": {"item": "{{result.ask_note}}"}}
+          }
+        },
+        "pagination": {
+          "page_size_param": "page_size",
+          "offset_param": "offset",
+          "default_page_size": 100,
+          "max_page_size": 1000
+        },
+        "title_column": "title",
+        "params": {
+          "page_size": 500,
+          "offset": 0,
+          "filter": "all",
+          "q": "",
+          "tags": "",
+          "lists": "",
+          "groups": "",
+          "statuses": "",
+          "tags_mode": "any",
+          "category": "",
+          "sort": "manual",
+          "grouping": "none",
+          "page_focus": "",
+          "field_values": ""
+        },
+        "columns": [
+          {
+            "key": "title",
+            "label": "Task",
+            "type": "string"
+          },
+          {
+            "key": "list_key",
+            "label": "List",
+            "type": "enum",
+            "choices_query": "view_list_choices",
+            "move": {
+              "op": "organize",
+              "args": {
+                "id": "{{row.id}}",
+                "list_id": "{{value}}"
+              }
+            }
+          },
+          {
+            "key": "group_key",
+            "label": "Group",
+            "type": "enum",
+            "choices_query": "view_group_choices",
+            "move": {
+              "op": "organize",
+              "args": {
+                "id": "{{row.id}}",
+                "group_id": "{{value}}"
+              }
+            }
+          },
+          {
+            "key": "workflow_id",
+            "label": "Status",
+            "type": "enum",
+            "choices_query": "view_status_choices",
+            "move": {
+              "op": "organize",
+              "args": {
+                "id": "{{row.id}}",
+                "status_id": "{{value}}"
+              }
+            }
+          },
+          {
+            "key": "due",
+            "label": "Due",
+            "type": "date"
+          },
+          {
+            "key": "planned_for",
+            "label": "Plan for",
+            "type": "date"
+          },
+          {
+            "key": "priority",
+            "label": "Priority",
+            "type": "integer"
+          },
+          {
+            "key": "tags",
+            "label": "Tags",
+            "type": "string"
+          },
+          {
+            "key": "board_lane",
+            "label": "Stage",
+            "type": "enum",
+            "values": ["todo", "doing", "done"],
+            "labels": ["To do", "In progress", "Done"],
+            "move": {"op": "move", "args": {"id": "{{row.id}}", "lane": "{{value}}"}}
+          },
+          {
+            "key": "matrix_lane",
+            "label": "Quadrant",
+            "type": "enum",
+            "values": ["do", "schedule", "delegate", "eliminate"],
+            "labels": ["Do first", "Schedule", "Delegate", "Unsorted"],
+            "board": "matrix",
+            "move": {"op": "move", "args": {"id": "{{row.id}}", "lane": "{{value}}"}}
+          }
+        ],
+        "filters": [
+          {
+            "param": "lists",
+            "label": "Lists",
+            "multiple": true,
+            "choices_query": "filter_list_choices"
+          },
+          {
+            "param": "groups",
+            "label": "Groups",
+            "multiple": true,
+            "choices_query": "filter_group_choices"
+          },
+          {
+            "param": "statuses",
+            "label": "Statuses",
+            "multiple": true,
+            "choices_query": "view_status_choices"
+          },
+          {
+            "param": "category",
+            "label": "Status category",
+            "values": [
+              "",
+              "not_started",
+              "active",
+              "completed"
+            ],
+            "labels": [
+              "Any",
+              "Not started",
+              "Active",
+              "Completed"
+            ]
+          },
+          {
+            "param": "filter",
+            "label": "Show",
+            "values": [
+              "everything",
+              "all",
+              "my_day",
+              "ready",
+              "today",
+              "upcoming",
+              "done"
+            ],
+            "labels": [
+              "All tasks",
+              "Open tasks",
+              "My Day",
+              "Anytime",
+              "Due",
+              "Upcoming",
+              "Done"
+            ]
+          },
+          {
+            "param": "tags",
+            "label": "Tags"
+          },
+          {
+            "param": "tags_mode",
+            "label": "Match tags",
+            "values": [
+              "any",
+              "all"
+            ],
+            "labels": [
+              "Any tag",
+              "All tags"
+            ]
+          },
+          {
+            "param": "field_values",
+            "label": "Custom fields",
+            "multiple": true,
+            "choices_query": "field_filter_choices"
+          },
+          {
+            "param": "q",
+            "label": "Search"
+          }
+        ]
+      }
+    },
+    "list_choices": {
+      "sql": "SELECT id AS value, name AS label FROM task_lists WHERE _deleted IS NULL AND archived = 0 ORDER BY position,name,id",
+      "params": [],
+      "cli": false
+    },
+    "nav_counts": {
+      "sql": "SELECT COALESCE(SUM(CASE WHEN done = 0 AND planned_for IS NOT NULL AND planned_for <= ?1 THEN 1 ELSE 0 END), 0) AS my_day, COALESCE(SUM(CASE WHEN done = 0 AND list_id IS NULL THEN 1 ELSE 0 END), 0) AS inbox, COALESCE(SUM(CASE WHEN done = 0 AND d <= 0 THEN 1 ELSE 0 END), 0) AS today, COALESCE(SUM(CASE WHEN done = 0 AND d > 0 THEN 1 ELSE 0 END), 0) AS upcoming, COALESCE(SUM(CASE WHEN done = 0 AND ready = 1 AND (planned_for IS NULL OR planned_for <= ?1) THEN 1 ELSE 0 END), 0) AS ready, COALESCE(SUM(CASE WHEN done = 0 THEN 1 ELSE 0 END), 0) AS open FROM (SELECT t.list_id, t.done, t.planned_for, CAST(julianday(t.due) - julianday(?1) AS INTEGER) AS d, COALESCE((SELECT ready FROM task_statuses s WHERE s.id=t.status_id AND s.list_id IS t.list_id AND s._deleted IS NULL), 1) AS ready FROM tasks t WHERE t._deleted IS NULL AND t.cleared_at IS NULL)",
+      "params": [
+        "today"
+      ],
+      "description": "Open-task counts for the Task manager smart views, using the same rules as workspace_tasks. Every open task counts, subtasks included, so a count equals the rows its view shows.",
+      "cli": false
+    },
+    "nav_lists": {
+      "sql": "SELECT id, name, color, icon, open, filter, list_id, nav FROM (SELECT 0 AS ord, 0 AS position, 'inbox' AS id, 'Inbox' AS name, NULL AS color, 'inbox' AS icon, (SELECT COUNT(*) FROM tasks t WHERE t.list_id IS NULL AND t._deleted IS NULL AND t.cleared_at IS NULL AND t.done = 0) AS open, 'inbox' AS filter, '' AS list_id, 'list-inbox' AS nav UNION ALL SELECT 1, l.position, l.id, l.name, l.color, '', (SELECT COUNT(*) FROM tasks t WHERE t.list_id = l.id AND t._deleted IS NULL AND t.cleared_at IS NULL AND t.done = 0), 'all', l.id, l.id FROM task_lists l WHERE l._deleted IS NULL AND l.archived = 0) ORDER BY ord, position, name, id",
+      "params": [],
+      "description": "Inbox first, then the active lists, each with its open-task count (subtasks included), for the Task manager sidebar. icon, filter, list_id and nav say which view a row opens.",
+      "cli": false
+    },
+    "group_choices": {
+      "sql": "SELECT id AS value, name AS label FROM task_groups WHERE _deleted IS NULL AND archived = 0 AND list_id IS NULLIF(?1, '') ORDER BY position,name,id",
+      "params": [
+        "list_id"
+      ],
+      "cli": false
+    },
+    "all_group_choices": {
+      "sql": "SELECT d.id AS value, d.name || ' (' || COALESCE(l.name, 'Inbox') || ')' AS label FROM task_groups d LEFT JOIN task_lists l ON l.id=d.list_id AND l._deleted IS NULL WHERE d._deleted IS NULL AND d.archived=0 ORDER BY l.name,d.position,d.name,d.id",
+      "params": [],
+      "cli": false
+    },
+    "status_choices": {
+      "sql": "SELECT id AS value, name AS label FROM task_statuses WHERE _deleted IS NULL AND archived = 0 AND list_id IS NULLIF(?1, '') ORDER BY position,name,id",
+      "params": [
+        "list_id"
+      ],
+      "cli": false
+    },
+    "all_status_choices": {
+      "sql": "SELECT d.id AS value, d.name || ' (' || COALESCE(l.name, 'Inbox') || ')' AS label FROM task_statuses d LEFT JOIN task_lists l ON l.id=d.list_id AND l._deleted IS NULL WHERE d._deleted IS NULL AND d.archived=0 ORDER BY l.name,d.position,d.name,d.id",
+      "params": [],
+      "cli": false
+    },
+    "list_detail": {
+      "sql": "SELECT id,name,color,archived FROM task_lists WHERE id=?1 AND _deleted IS NULL UNION ALL SELECT '', 'Inbox', '', 0 WHERE ?1='@inbox'",
+      "params": [
+        "id"
+      ],
+      "cli": false
+    },
+    "group_detail": {
+      "sql": "SELECT * FROM task_groups WHERE id=?1 AND _deleted IS NULL",
+      "params": [
+        "id"
+      ],
+      "cli": false
+    },
+    "group_scope": {
+      "sql": "SELECT CASE WHEN ?1='@inbox' THEN '' ELSE ?1 END AS list_id",
+      "params": [
+        "id"
+      ],
+      "cli": false
+    },
+    "status_detail": {
+      "sql": "SELECT * FROM task_statuses WHERE id=?1 AND _deleted IS NULL",
+      "params": [
+        "id"
+      ],
+      "cli": false
+    },
+    "status_scope": {
+      "sql": "SELECT CASE WHEN ?1='@inbox' THEN '' ELSE ?1 END AS list_id",
+      "params": [
+        "id"
+      ],
+      "cli": false
+    },
+    "view_list_choices": {
+      "sql": "SELECT '' AS value,'Inbox' AS label UNION ALL SELECT id,name || CASE WHEN archived=1 THEN ' (archived)' ELSE '' END FROM task_lists WHERE _deleted IS NULL UNION SELECT DISTINCT list_id, 'Unavailable list' FROM tasks WHERE _deleted IS NULL AND list_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM task_lists l WHERE l.id=tasks.list_id AND l._deleted IS NULL)",
+      "params": [],
+      "cli": false
+    },
+    "view_group_choices": {
+      "sql": "SELECT '' AS value,'Ungrouped' AS label UNION ALL SELECT d.id AS value, d.name || ' (' || COALESCE(l.name, 'Inbox') || ')' || CASE WHEN d.archived=1 THEN ' (archived)' ELSE '' END AS label FROM task_groups d LEFT JOIN task_lists l ON l.id=d.list_id AND l._deleted IS NULL WHERE d._deleted IS NULL UNION SELECT DISTINCT group_id, 'Unavailable group' FROM tasks WHERE _deleted IS NULL AND group_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM task_groups d WHERE d.id=tasks.group_id AND d._deleted IS NULL)",
+      "params": [],
+      "cli": false
+    },
+    "view_status_choices": {
+      "sql": "SELECT '@not_started' AS value,'To pick (default)' AS label UNION ALL SELECT '@active','In progress (default)' UNION ALL SELECT '@completed','Done (default)' UNION ALL SELECT d.id AS value, d.name || ' (' || COALESCE(l.name, 'Inbox') || ')' || CASE WHEN d.archived=1 THEN ' (archived)' ELSE '' END AS label FROM task_statuses d LEFT JOIN task_lists l ON l.id=d.list_id AND l._deleted IS NULL WHERE d._deleted IS NULL UNION SELECT DISTINCT status_id, 'Unavailable status' FROM tasks WHERE _deleted IS NULL AND status_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM task_statuses d WHERE d.id=tasks.status_id AND d._deleted IS NULL)",
+      "params": [],
+      "cli": false
+    },
+    "filter_list_choices": {
+      "sql": "SELECT '@inbox' AS value,'Inbox' AS label UNION ALL SELECT id,name FROM task_lists WHERE _deleted IS NULL AND archived=0",
+      "params": [],
+      "cli": false
+    },
+    "filter_group_choices": {
+      "sql": "SELECT '@ungrouped' AS value,'Ungrouped' AS label UNION ALL SELECT d.id AS value, d.name || ' (' || COALESCE(l.name, 'Inbox') || ')' AS label FROM task_groups d LEFT JOIN task_lists l ON l.id=d.list_id AND l._deleted IS NULL WHERE d._deleted IS NULL AND d.archived=0",
+      "params": [],
+      "cli": false
+    }
+  },
+  "reminders": {
+    "query": "due_reminders"
+  },
+  "pages": [
+    {
+      "id": "main",
+      "title": "Tasks",
+      "template": "ui/page-main.json"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "quick-add",
+      "title": "Create task",
+      "template": "ui/widget-quick-add.json"
+    },
+    {
+      "id": "today",
+      "title": "Today",
+      "template": "ui/widget-today.json"
+    },
+    {
+      "id": "my-day-view",
+      "title": "My Day",
+      "template": "ui/widget-my-day.json"
+    }
+  ],
+  "provides": {
+    "tasks": {
+      "operations": [
+        "create",
+        "completed_between",
+        "open_tasks"
+      ]
+    }
+  },
+  "icon": "check",
+  "color": "#2563EB",
+  "badge": "badge",
+  "search": "search",
+  "quick_actions": [
+    {
+      "label": "New task",
+      "op": "create",
+      "arg": "title"
+    }
+  ],
+  "uses": [
+    "notes"
+  ],
+  "open": {
+    "page": "main"
+  },
+  "index": [
+    {
+      "table": "tasks",
+      "query": "index_tasks",
+      "kind": "Task"
+    }
+  ],
+  "refs": [
+    {
+      "table": "tasks",
+      "resolve": "ref_tasks",
+      "kind": "Task",
+      "icon": "check"
+    }
+  ],
+  "export": [
+    {
+      "query": "export_tasks",
+      "format": "csv",
+      "path": "tasks.csv",
+      "columns": [
+        "title",
+        "notes",
+        "due",
+        "remind_time",
+        "priority",
+        "repeat",
+        "tags",
+        "done",
+        "in_progress",
+        "urgent",
+        "important",
+        "parent",
+        "waiting_on",
+        "custom_fields",
+        "estimate",
+        "tracked"
+      ]
+    }
+  ],
+  "import": [
+    {
+      "id": "tasks_csv",
+      "label": "Tasks from a CSV file",
+      "format": "csv",
+      "op": "import",
+      "fields": {
+        "title": "title",
+        "notes": "notes",
+        "due": "due",
+        "remind_time": "remind_time",
+        "priority": "priority",
+        "repeat": "repeat",
+        "tags": "tags",
+        "done": "done",
+        "in_progress": "in_progress",
+        "urgent": "urgent",
+        "important": "important"
+      }
+    },
+    {
+      "id": "titles_csv",
+      "label": "Task titles from a CSV file",
+      "format": "csv",
+      "op": "import",
+      "fields": {
+        "title": "title"
+      }
+    }
+  ],
+  "events": {
+    "task_done": {
+      "description": "A task was marked done.",
+      "payload": {
+        "task_id": {
+          "type": "id",
+          "required": true
+        },
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "tags": {
+          "type": "string"
+        },
+        "completed_date": {
+          "type": "date",
+          "required": true
+        }
+      }
+    }
+  },
+  "today": [
+    {
+      "id": "my-day",
+      "section": "my_day",
+      "query": "today_my_day",
+      "params": {
+        "today": "{{$today}}",
+        "now": "{{$now}}"
+      },
+      "limit": 50,
+      "link": {
+        "label": "+ Plan from Inbox",
+        "action": {
+          "navigate": {
+            "state": {
+              "filter": "inbox"
+            }
+          }
+        }
+      },
+      "row": {
+        "key": "{{row.id}}",
+        "kind": "task",
+        "title": "{{row.title}}",
+        "note": "{{row.note_label}}",
+        "time": "{{row.time_label}}",
+        "tone": "{{row.tone}}",
+        "done": "{{row.done}}",
+        "chips": [
+          {
+            "text": "{{row.blocked_label}}"
+          },
+          {
+            "text": "{{row.parent_label}}"
+          },
+          {
+            "text": "{{row.tags_label}}",
+            "tone": "accent"
+          },
+          {
+            "text": "{{row.list_name}}"
+          }
+        ],
+        "check": {
+          "action": {
+            "op": "toggle",
+            "args": {
+              "id": "{{row.id}}",
+              "done": "{{value}}"
+            },
+            "followup": {
+              "label": "Add note",
+              "if": "{{result.ask_note}}",
+              "action": {
+                "navigate": {
+                  "item": "{{result.ask_note}}"
+                }
+              }
+            }
+          }
+        },
+        "actions": [
+          {
+            "label": "Tomorrow",
+            "key": "s",
+            "action": {
+              "op": "update",
+              "args": {
+                "id": "{{row.id}}",
+                "planned_for": "{{$tomorrow}}"
+              },
+              "success": "Planned for tomorrow",
+              "undo": {
+                "op": "update",
+                "args": {
+                  "id": "{{row.id}}",
+                  "planned_for": "{{row.planned_for}}"
+                },
+                "success": "Restored previous plan"
+              }
+            }
+          },
+          {
+            "label": "Not today",
+            "action": {
+              "op": "update",
+              "args": {
+                "id": "{{row.id}}",
+                "planned_for": null
+              },
+              "success": "Removed from My Day",
+              "undo": {
+                "op": "update",
+                "args": {
+                  "id": "{{row.id}}",
+                  "planned_for": "{{row.planned_for}}"
+                },
+                "success": "Restored previous plan"
+              }
+            }
+          }
+        ],
+        "open": {
+          "navigate": {
+            "item": "{{row.id}}"
+          }
+        }
+      }
+    },
+    {
+      "id": "earlier",
+      "section": "earlier",
+      "query": "today_earlier",
+      "params": {
+        "today": "{{$today}}",
+        "now": "{{$now}}"
+      },
+      "limit": 20,
+      "link": {
+        "label": "Keep all",
+        "each": "all",
+        "action": {
+          "op": "update",
+          "args": {
+            "id": "{{row.id}}",
+            "planned_for": "{{$today}}"
+          }
+        }
+      },
+      "row": {
+        "key": "{{row.id}}",
+        "kind": "task",
+        "title": "{{row.title}}",
+        "note": "{{row.note_label}}",
+        "time": "{{row.planned_label}}",
+        "done": "{{row.done}}",
+        "chips": [
+          {
+            "text": "{{row.blocked_label}}"
+          },
+          {
+            "text": "{{row.parent_label}}"
+          },
+          {
+            "text": "{{row.tags_label}}",
+            "tone": "accent"
+          },
+          {
+            "text": "{{row.list_name}}"
+          }
+        ],
+        "check": {
+          "action": {
+            "op": "toggle",
+            "args": {
+              "id": "{{row.id}}",
+              "done": "{{value}}"
+            },
+            "followup": {
+              "label": "Add note",
+              "if": "{{result.ask_note}}",
+              "action": {
+                "navigate": {
+                  "item": "{{result.ask_note}}"
+                }
+              }
+            }
+          }
+        },
+        "actions": [
+          {
+            "label": "Keep",
+            "key": "t",
+            "action": {
+              "op": "update",
+              "args": {
+                "id": "{{row.id}}",
+                "planned_for": "{{$today}}"
+              },
+              "success": "Planned for today",
+              "undo": {
+                "op": "update",
+                "args": {
+                  "id": "{{row.id}}",
+                  "planned_for": "{{row.planned_for}}"
+                },
+                "success": "Restored previous plan"
+              }
+            }
+          },
+          {
+            "label": "Drop",
+            "action": {
+              "op": "update",
+              "args": {
+                "id": "{{row.id}}",
+                "planned_for": null
+              },
+              "success": "Unplanned",
+              "undo": {
+                "op": "update",
+                "args": {
+                  "id": "{{row.id}}",
+                  "planned_for": "{{row.planned_for}}"
+                },
+                "success": "Restored previous plan"
+              }
+            }
+          }
+        ],
+        "open": {
+          "navigate": {
+            "item": "{{row.id}}"
+          }
+        }
+      }
+    },
+    {
+      "id": "due",
+      "section": "due",
+      "query": "today_due",
+      "params": {
+        "today": "{{$today}}",
+        "utc_offset_ms": "{{$utc_offset_ms}}",
+        "now": "{{$now}}"
+      },
+      "limit": 20,
+      "link": {
+        "label": "Move all to today",
+        "each": "overdue",
+        "action": {
+          "op": "update",
+          "args": {
+            "id": "{{row.id}}",
+            "due": "{{$today}}"
+          }
+        }
+      },
+      "row": {
+        "key": "{{row.id}}",
+        "kind": "{{row.kind}}",
+        "title": "{{row.title}}",
+        "note": "{{row.note_label}}",
+        "time": "{{row.time_label}}",
+        "sort": "{{row.sort_ms}}",
+        "tone": "{{row.tone}}",
+        "done": "{{row.done}}",
+        "chips": [
+          {
+            "text": "{{row.blocked_label}}"
+          },
+          {
+            "text": "{{row.parent_label}}"
+          },
+          {
+            "text": "{{row.tags_label}}",
+            "tone": "accent"
+          },
+          {
+            "text": "{{row.list_name}}"
+          }
+        ],
+        "check": {
+          "action": {
+            "op": "toggle",
+            "args": {
+              "id": "{{row.id}}",
+              "done": "{{value}}"
+            },
+            "followup": {
+              "label": "Add note",
+              "if": "{{result.ask_note}}",
+              "action": {
+                "navigate": {
+                  "item": "{{result.ask_note}}"
+                }
+              }
+            }
+          }
+        },
+        "actions": [
+          {
+            "label": "Today",
+            "key": "t",
+            "action": {
+              "op": "update",
+              "args": {
+                "id": "{{row.id}}",
+                "planned_for": "{{$today}}"
+              },
+              "success": "Added to My Day",
+              "undo": {
+                "op": "update",
+                "args": {
+                  "id": "{{row.id}}",
+                  "planned_for": "{{row.planned_for}}"
+                },
+                "success": "Restored previous plan"
+              }
+            }
+          },
+          {
+            "label": "Tomorrow",
+            "key": "s",
+            "action": {
+              "op": "update",
+              "args": {
+                "id": "{{row.id}}",
+                "due": "{{$tomorrow}}"
+              },
+              "success": "Due tomorrow",
+              "undo": {
+                "op": "update",
+                "args": {
+                  "id": "{{row.id}}",
+                  "due": "{{row.due}}"
+                },
+                "success": "Restored due date"
+              }
+            }
+          }
+        ],
+        "open": {
+          "navigate": {
+            "item": "{{row.id}}"
+          }
+        }
+      }
+    },
+    {
+      "id": "inbox",
+      "section": "sort",
+      "query": "today_inbox",
+      "params": {
+        "today": "{{$today}}",
+        "now": "{{$now}}"
+      },
+      "limit": 5,
+      "count_query": "today_inbox_count",
+      "link": {
+        "label": "Open Inbox",
+        "action": {
+          "navigate": {
+            "state": {
+              "filter": "inbox"
+            }
+          }
+        }
+      },
+      "row": {
+        "key": "{{row.id}}",
+        "kind": "task",
+        "title": "{{row.title}}",
+        "note": "{{row.note_label}}",
+        "done": "{{row.done}}",
+        "chips": [
+          {
+            "text": "{{row.blocked_label}}"
+          },
+          {
+            "text": "{{row.parent_label}}"
+          },
+          {
+            "text": "Inbox"
+          }
+        ],
+        "check": {
+          "action": {
+            "op": "toggle",
+            "args": {
+              "id": "{{row.id}}",
+              "done": "{{value}}"
+            },
+            "followup": {
+              "label": "Add note",
+              "if": "{{result.ask_note}}",
+              "action": {
+                "navigate": {
+                  "item": "{{result.ask_note}}"
+                }
+              }
+            }
+          }
+        },
+        "actions": [
+          {
+            "label": "My Day",
+            "key": "t",
+            "action": {
+              "op": "update",
+              "args": {
+                "id": "{{row.id}}",
+                "planned_for": "{{$today}}"
+              },
+              "success": "Added to My Day",
+              "undo": {
+                "op": "update",
+                "args": {
+                  "id": "{{row.id}}",
+                  "planned_for": "{{row.planned_for}}"
+                },
+                "success": "Restored previous plan"
+              }
+            }
+          }
+        ],
+        "open": {
+          "navigate": {
+            "item": "{{row.id}}"
+          }
+        }
+      }
+    },
+    {
+      "id": "done",
+      "section": "done",
+      "query": "today_done",
+      "params": {
+        "today": "{{$today}}",
+        "utc_offset_ms": "{{$utc_offset_ms}}"
+      },
+      "limit": 20,
+      "count_query": "today_done_count",
+      "row": {
+        "key": "{{row.id}}",
+        "kind": "task",
+        "title": "{{row.title}}",
+        "note": "{{row.steps_label}}",
+        "done": "{{row.done}}",
+        "chips": [
+          {
+            "text": "{{row.blocked_label}}"
+          },
+          {
+            "text": "{{row.parent_label}}"
+          },
+          {
+            "text": "{{row.list_name}}"
+          }
+        ],
+        "check": {
+          "action": {
+            "op": "toggle",
+            "args": {
+              "id": "{{row.id}}",
+              "done": "{{value}}"
+            }
+          }
+        },
+        "open": {
+          "navigate": {
+            "item": "{{row.id}}"
+          }
+        }
+      }
+    }
+  ]
+}

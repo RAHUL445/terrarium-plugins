@@ -1,6 +1,10 @@
-//! To-do plugin: tasks with due dates, reminders, priority, repeats, tags
-//! and steps. Lists are host-run queries declared in the manifest; this
-//! component handles the write operations.
+//! Task manager plugin (id `tasks`, stored as `todo`): tasks with due dates, reminders, priority, repeats, tags,
+//! steps, subtasks (one level), dependencies, custom fields, time estimates and
+//! time tracking. Lists are host-run queries
+//! declared in the manifest; this component handles the write operations.
+//!
+//! Finished tasks can be archived (`archive.rs`), which hides them from the
+//! lists but keeps them in the Archive and in reviews.
 //!
 //! Finishing a task can save a note of what came of it (`done_note`). It is
 //! also kept in Notes, in the Tasks project: one note per task, or per
@@ -9,13 +13,17 @@
 use serde_json::{json, Map, Value};
 use terrarium_guest::{clock, events, interop, storage, Args, Error, Plugin, Result};
 
+mod archive;
+mod fields;
 mod organization;
 mod quick;
+mod structure;
+mod time;
 
 struct Todo;
 
-const TABLE: &str = "tasks";
-const STEPS: &str = "steps";
+pub(crate) const TABLE: &str = "tasks";
+pub(crate) const STEPS: &str = "steps";
 
 impl Plugin for Todo {
     fn handle(operation: &str, args: Args) -> Result<Value> {
@@ -33,15 +41,33 @@ impl Plugin for Todo {
             "update_status" => organization::save_definition(&args, "status", false),
             "add_tag" => add_tag(&args),
             "toggle" => toggle(&args),
-            "delete" => {
-                storage::delete(TABLE, args.str("id")?)?;
-                Ok(Value::Null)
-            }
-            "restore" => {
-                storage::restore(TABLE, args.str("id")?)?;
-                Ok(Value::Null)
-            }
-            "clear_done" => clear_done(),
+            "delete" => structure::trash(args.str("id")?),
+            "restore" => structure::restore(args.str("id")?),
+            "set_parent" => structure::set_parent(&args),
+            "promote_step" => structure::promote_step(&args),
+            "unpromote_step" => structure::unpromote_step(&args),
+            "add_dependency" => structure::add_dependency(&args),
+            "remove_dependency" => structure::remove_dependency(&args),
+            "create_field" => fields::create_field(&args),
+            "update_field" => fields::update_field(&args),
+            "add_field_option" => fields::add_field_option(&args),
+            "update_field_option" => fields::update_field_option(&args),
+            "remove_field_option" => fields::remove_field_option(&args),
+            "set_field" => fields::set_field(&args),
+            "set_estimate" => time::set_estimate(&args),
+            "start_timer" => time::start_timer(&args),
+            "stop_timer" => time::stop_timer(),
+            "resume_timer" => time::resume_timer(&args),
+            "undo_start_timer" => time::undo_start_timer(&args),
+            "add_time" => time::add_time(&args),
+            "update_time_entry" => time::update_time_entry(&args),
+            "delete_time_entry" => time::delete_time_entry(&args),
+            "restore_time_entry" => time::restore_time_entry(&args),
+            "clear_done" | "archive_done" => archive::archive_done(),
+            "archive" => archive::archive(&args),
+            "unarchive" => archive::unarchive(&args),
+            "archive_settings" => archive::archive_settings(&args),
+            "auto_archive" => archive::auto_archive(&args),
             "add_step" => add_step(&args),
             "toggle_step" => {
                 let mut values = Map::new();
@@ -63,7 +89,8 @@ impl Plugin for Todo {
 }
 
 /// Creates a task. Dates, times, `#tags`, `!priority` and "every …" in the
-/// title are read out of it; explicit `due`, `tags` and `notes` win.
+/// title are read out of it; explicit `due`, `tags` and `notes` win. With
+/// `parent_id` it is a subtask, in its parent's list and group unless given.
 fn create(args: &Args) -> Result<Value> {
     create_task(args, true)
 }
@@ -95,8 +122,29 @@ fn create_task(args: &Args, parse: bool) -> Result<Value> {
         }
     };
     let title = clean_title(&parsed.title)?;
+    let parent = match args
+        .opt_str("parent_id")
+        .map(str::trim)
+        .filter(|p| !p.is_empty())
+    {
+        Some(id) => Some(structure::parent_for(id)?),
+        None => None,
+    };
     let mut values = Map::new();
     values.insert("title".into(), json!(title));
+    if let Some(parent) = &parent {
+        // Empty organization fields mean "not given" for a subtask.
+        let given: Map<String, Value> = args
+            .0
+            .iter()
+            .filter(|(k, v)| {
+                !["list_id", "group_id"].contains(&k.as_str())
+                    || v.as_str().is_some_and(|s| !s.trim().is_empty())
+            })
+            .map(|(k, v)| (k.clone(), v.clone()))
+            .collect();
+        structure::inherit(parent, &Args(given), &mut values);
+    }
 
     let time = match args.opt_str("remind_time").filter(|t| !t.trim().is_empty()) {
         Some(t) => Some(clean_time(t)?),
@@ -151,15 +199,24 @@ fn create_task(args: &Args, parse: bool) -> Result<Value> {
     attention_fields(args, &mut values)?;
     let id = storage::insert(TABLE, &values)?;
     let mut result = json!({ "id": id, "title": title, "due": due });
+    if let Some(parent) = &parent {
+        result["parent_id"] = parent["id"].clone();
+    }
+    // A subtask keeps its inherited list and group unless a value is given.
+    let given = |key: &str| match args.get(key) {
+        Some(Value::String(s)) if parent.is_some() => !s.trim().is_empty(),
+        Some(_) => true,
+        None => false,
+    };
     if ["list_id", "group_id", "status_id"]
         .iter()
-        .any(|key| args.get(key).is_some())
+        .any(|key| given(key))
     {
         let mut fields = Map::new();
         fields.insert("id".into(), json!(id));
         for key in ["list_id", "group_id", "status_id"] {
-            if let Some(value) = args.get(key) {
-                fields.insert(key.into(), value.clone());
+            if given(key) {
+                fields.insert(key.into(), args.get(key).cloned().unwrap_or(Value::Null));
             }
         }
         result["organization"] = organization::organize(&Args(fields))?;
@@ -352,7 +409,8 @@ fn move_task(args: &Args) -> Result<Value> {
 }
 
 /// Marks a task done or not done. Finishing a repeating task also creates
-/// its next occurrence, steps unticked.
+/// its next occurrence, steps unticked. Its subtasks and dependencies are
+/// not copied (a repeating subtask's next occurrence stays under its parent).
 fn toggle(args: &Args) -> Result<Value> {
     let id = args.str("id")?;
     let done = args.bool("done")?;
@@ -372,6 +430,29 @@ fn toggle(args: &Args) -> Result<Value> {
     {
         return Ok(json!({ "message": message }));
     }
+    // Finishing a blocked task is allowed; the message says so.
+    let blockers = if done {
+        structure::open_blockers(id)?
+    } else {
+        0
+    };
+    let message = match blockers {
+        0 => message.to_string(),
+        1 => "Done — was waiting on 1 task".to_string(),
+        n => format!("Done — was waiting on {n} tasks"),
+    };
+    // Finishing a task stops its running timer (the time is kept).
+    let message = match done
+        .then(|| time::stop_for_tasks(&[id]))
+        .transpose()?
+        .flatten()
+    {
+        Some(minutes) => format!(
+            "{message} · timer stopped at {}",
+            time::format_minutes(minutes)
+        ),
+        None => message,
+    };
     let mut values = Map::new();
     values.insert("done".into(), json!(done));
     values.insert("in_progress".into(), json!(false));
@@ -422,6 +503,8 @@ fn toggle(args: &Args) -> Result<Value> {
         "priority",
         "repeat",
         "remind_time",
+        "parent_id",
+        "estimate_min",
     ] {
         if !task[key].is_null() {
             copy.insert(key.into(), task[key].clone());
@@ -587,21 +670,6 @@ fn open_tasks(args: &Args) -> Result<Value> {
         &[json!(today), json!(end)],
     )?;
     Ok(json!({ "tasks": rows }))
-}
-
-/// Hides finished tasks from the lists. They stay in the data, so reviews
-/// of completed work still count them.
-fn clear_done() -> Result<Value> {
-    let rows = storage::query(
-        "SELECT id FROM tasks WHERE _deleted IS NULL AND done = 1 AND cleared_at IS NULL",
-        &[],
-    )?;
-    let mut values = Map::new();
-    values.insert("cleared_at".into(), json!(clock::now_ms() as i64));
-    for row in &rows {
-        storage::update(TABLE, row["id"].as_str().unwrap_or_default(), &values)?;
-    }
-    Ok(json!({ "cleared": rows.len() }))
 }
 
 fn add_step(args: &Args) -> Result<Value> {

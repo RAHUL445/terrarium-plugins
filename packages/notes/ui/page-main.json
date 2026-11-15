@@ -1,113 +1,906 @@
 {
-  "creation": {"operation": "create", "bind": "state.creating", "prefill": "state.newText"},
+  "creation": {
+    "operation": "create",
+    "bind": "state.creating",
+    "prefill": "state.newText"
+  },
   "state": {
     "creating": "",
-    "newText": "", "q": "", "project": "", "open": "" },
+    "newText": "",
+    "q": "",
+    "project": "",
+    "open": "",
+    "view": "all",
+    "title": "All notes",
+    "empty": "No notes yet.",
+    "sidebar": false,
+    "selecting": ""
+  },
   "body": {
-    "type": "stack", "gap": 16,
+    "type": "stack",
+    "gap": 16,
     "children": [
-      { "type": "heading", "text": "Notes" },
       {
-        "type": "stack", "direction": "row", "gap": 12, "wrap": true, "align": "center",
-        "children": [
-          {
-            "type": "button", "label": "New note", "icon": "plus", "variant": "primary",
-            "action": { "set": { "state.newText": "", "state.creating": "new" } }
-          },
-          { "type": "search-field", "bind": "state.q", "label": "Search notes", "label_hidden": true, "placeholder": "Search notes", "grow": 1, "basis": 220 }
-        ]
-      },
-      {
-        "type": "list", "query": "projects", "layout": "chips", "params": { "project": "{{state.project}}" },
-        "item": {
-          "type": "button", "variant": "chip", "label": "{{row.label}} · {{row.count}}", "pressed": "{{row.selected}}",
-          "action": { "set": { "state.project": "{{row.project}}" } }
-        }
-      },
-      {
-        "type": "list", "query": "list", "group": "section",
-        "params": { "q": "{{state.q}}", "project": "{{state.project}}", "utc_offset_ms": "{{$utc_offset_ms}}", "today": "{{$today}}" },
-        "select": {
-          "label": "Select notes",
-          "actions": [
-            { "label": "Move", "icon": "folder", "op": "update", "ask": { "name": "project", "label": "Project", "title": "Move {{count}} notes to a project" }, "success": "Moved {{count}} notes" },
-            { "label": "Pin", "icon": "pin", "op": "update", "args": { "pinned": true }, "success": "Pinned {{count}} notes" },
-            { "label": "Delete", "icon": "trash", "variant": "danger", "op": "delete", "confirm": "Move {{count}} notes to the trash?", "success": "Moved {{count}} notes to the trash", "undo": { "op": "restore", "success": "Restored {{count}} notes" } }
-          ]
-        },
-        "empty": "No notes here yet. Start one with New note.",
-        "item": {
-          "type": "item", "title": "{{row.title}}", "subtitle": "{{row.snippet}}",
-          "action": { "set": { "state.open": "{{row.id}}" } },
-          "chips": [
-            { "text": "{{row.edited}}" },
-            { "text": "{{row.checklist}}", "icon": "steps" },
-            { "text": "{{row.project}}", "icon": "folder" }
-          ]
-        }
-      },
-      {
-        "type": "section", "title": "Trash", "collapsible": true,
-        "children": [
-          {
-            "type": "list", "query": "trash", "empty": "Trash is empty.",
-            "item": {
-              "type": "stack", "direction": "row", "align": "center", "gap": 12,
-              "children": [
-                { "type": "text", "text": "{{row.title}}", "tone": "muted", "grow": 1 },
+        "type": "workspace",
+        "label": "Notes",
+        "menu_label": "View",
+        "collapsible": true,
+        "collapsed": "state.sidebar",
+        "navigation": {
+          "type": "stack",
+          "gap": 16,
+          "children": [
+            {
+              "type": "nav",
+              "label": "Views",
+              "query": "nav_counts",
+              "params": {
+                "utc_offset_ms": "{{$utc_offset_ms}}",
+                "today": "{{$today}}"
+              },
+              "items": [
                 {
-                  "type": "button", "label": "Restore", "aria_label": "Restore {{row.title}}",
-                  "action": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored" }
+                  "label": "All notes",
+                  "icon": "note",
+                  "count": "{{row.all_count}}",
+                  "key": "all",
+                  "selected": "{{state.view == all && !state.project}}",
+                  "action": {
+                    "set": {
+                      "state.view": "all",
+                      "state.project": "",
+                      "state.title": "All notes",
+                      "state.empty": "No notes yet.",
+                      "state.q": "",
+                      "state.selecting": ""
+                    }
+                  }
+                },
+                {
+                  "label": "Pinned",
+                  "icon": "pin",
+                  "count": "{{row.pinned}}",
+                  "key": "pinned",
+                  "selected": "{{state.view == pinned}}",
+                  "action": {
+                    "set": {
+                      "state.view": "pinned",
+                      "state.project": "",
+                      "state.title": "Pinned",
+                      "state.empty": "Nothing pinned. Pin a note from its menu.",
+                      "state.q": "",
+                      "state.selecting": ""
+                    }
+                  }
+                },
+                {
+                  "label": "Recent",
+                  "icon": "clock",
+                  "count": "{{row.recent}}",
+                  "key": "recent",
+                  "tooltip": "Edited in the last 7 days.",
+                  "selected": "{{state.view == recent}}",
+                  "action": {
+                    "set": {
+                      "state.view": "recent",
+                      "state.project": "",
+                      "state.title": "Recent",
+                      "state.empty": "Nothing edited in the last 7 days.",
+                      "state.q": "",
+                      "state.selecting": ""
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "nav",
+              "title": "Projects",
+              "query": "nav_projects",
+              "params": {
+                "project": "{{state.project}}"
+              },
+              "item": {
+                "label": "{{row.project}}",
+                "icon": "folder",
+                "count": "{{row.count}}",
+                "key": "project-{{row.project}}",
+                "selected": "{{row.selected}}",
+                "action": {
+                  "set": {
+                    "state.view": "project",
+                    "state.project": "{{row.project}}",
+                    "state.title": "{{row.project}}",
+                    "state.empty": "No notes in this project.",
+                    "state.q": "",
+                    "state.selecting": ""
+                  }
+                }
+              },
+              "empty": "Give a note a project to see it here"
+            },
+            {
+              "type": "nav",
+              "title": "More",
+              "collapsible": true,
+              "collapsed": true,
+              "query": "nav_counts",
+              "params": {
+                "utc_offset_ms": "{{$utc_offset_ms}}",
+                "today": "{{$today}}"
+              },
+              "items": [
+                {
+                  "label": "Task notes",
+                  "icon": "check",
+                  "count": "{{row.tasks}}",
+                  "key": "tasks",
+                  "tooltip": "Notes saved from finished tasks.",
+                  "selected": "{{state.view == tasks}}",
+                  "action": {
+                    "set": {
+                      "state.view": "tasks",
+                      "state.project": "",
+                      "state.title": "Task notes",
+                      "state.empty": "No task notes yet.",
+                      "state.q": "",
+                      "state.selecting": ""
+                    }
+                  }
+                },
+                {
+                  "label": "Trash",
+                  "icon": "trash",
+                  "count": "{{row.trash}}",
+                  "key": "trash",
+                  "selected": "{{state.view == trash}}",
+                  "action": {
+                    "set": {
+                      "state.view": "trash",
+                      "state.project": "",
+                      "state.title": "Trash",
+                      "state.empty": "Trash is empty.",
+                      "state.q": "",
+                      "state.selecting": ""
+                    }
+                  }
                 }
               ]
             }
-          }
-        ]
+          ]
+        },
+        "content": {
+          "type": "stack",
+          "gap": 12,
+          "children": [
+            {
+              "type": "stack",
+              "direction": "row",
+              "gap": 12,
+              "wrap": true,
+              "align": "center",
+              "children": [
+                {
+                  "type": "heading",
+                  "level": 2,
+                  "style": "title",
+                  "text": "{{state.title}}",
+                  "if": "{{!state.project}}",
+                  "grow": 1
+                },
+                {
+                  "type": "heading",
+                  "level": 2,
+                  "style": "title",
+                  "text": "{{state.project}}",
+                  "if": "{{state.project}}",
+                  "grow": 1
+                },
+                {
+                  "type": "search-field",
+                  "bind": "state.q",
+                  "label": "Search notes",
+                  "label_hidden": true,
+                  "placeholder": "Search notes",
+                  "basis": 220
+                },
+                {
+                  "type": "menu",
+                  "label": "View actions",
+                  "icon": "more",
+                  "align": "end",
+                  "items": [
+                    {
+                      "label": "Select notes",
+                      "icon": "check",
+                      "action": {
+                        "set": {
+                          "state.selecting": "yes"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "query": "list",
+              "group": "section",
+              "params": {
+                "q": "{{state.q}}",
+                "project": "{{state.project}}",
+                "utc_offset_ms": "{{$utc_offset_ms}}",
+                "today": "{{$today}}",
+                "view": "{{state.view}}"
+              },
+              "select": {
+                "label": "Select notes",
+                "actions": [
+                  {
+                    "label": "Move",
+                    "icon": "folder",
+                    "op": "update",
+                    "ask": {
+                      "name": "project",
+                      "label": "Project",
+                      "title": "Move {{count}} notes to a project"
+                    },
+                    "success": "Moved {{count}} notes"
+                  },
+                  {
+                    "label": "Pin",
+                    "icon": "pin",
+                    "op": "update",
+                    "args": {
+                      "pinned": true
+                    },
+                    "success": "Pinned {{count}} notes"
+                  },
+                  {
+                    "label": "Delete",
+                    "icon": "trash",
+                    "variant": "danger",
+                    "op": "delete",
+                    "confirm": "Move {{count}} notes to the trash?",
+                    "success": "Moved {{count}} notes to the trash",
+                    "undo": {
+                      "op": "restore",
+                      "success": "Restored {{count}} notes"
+                    }
+                  }
+                ],
+                "bind": "state.selecting"
+              },
+              "empty": "{{state.empty}}",
+              "item": {
+                "type": "item",
+                "layout": "line",
+                "calm": true,
+                "title": "{{row.title}}",
+                "done": "{{state.view == trash}}",
+                "action": {
+                  "set": {
+                    "state.open": "{{row.id}}"
+                  }
+                },
+                "meta": [
+                  {
+                    "text": "{{row.snippet}}"
+                  }
+                ],
+                "slots": [
+                  {
+                    "name": "state",
+                    "width": 30
+                  },
+                  {
+                    "name": "check",
+                    "width": 56
+                  },
+                  {
+                    "name": "project",
+                    "width": 96,
+                    "if": "{{!state.project && state.view != tasks}}"
+                  },
+                  {
+                    "name": "date",
+                    "width": 72
+                  }
+                ],
+                "chips": [
+                  {
+                    "text": "Pinned",
+                    "icon": "pin",
+                    "icon_only": true,
+                    "label": "Pinned",
+                    "slot": "state",
+                    "if": "{{row.pinned}}"
+                  },
+                  {
+                    "text": "{{row.checklist}}",
+                    "icon": "steps",
+                    "label": "Checklist done",
+                    "slot": "check"
+                  },
+                  {
+                    "text": "{{row.project}}",
+                    "icon": "folder",
+                    "style": "source",
+                    "slot": "project",
+                    "if": "{{!state.project && state.view != tasks}}"
+                  },
+                  {
+                    "text": "{{row.edited}}",
+                    "slot": "date"
+                  }
+                ],
+                "actions": [
+                  {
+                    "type": "menu",
+                    "label": "More for {{row.title}}",
+                    "icon": "more",
+                    "align": "end",
+                    "focus_key": "menu-{{row.id}}",
+                    "items": [
+                      {
+                        "label": "Pin",
+                        "icon": "pin",
+                        "if": "{{!row.pinned && state.view != trash}}",
+                        "action": {
+                          "op": "update",
+                          "args": {
+                            "id": "{{row.id}}",
+                            "pinned": true
+                          },
+                          "success": "Pinned",
+                          "undo": {
+                            "op": "update",
+                            "args": {
+                              "id": "{{row.id}}",
+                              "pinned": false
+                            },
+                            "success": "Unpinned"
+                          }
+                        }
+                      },
+                      {
+                        "label": "Unpin",
+                        "icon": "pin",
+                        "if": "{{row.pinned && state.view != trash}}",
+                        "action": {
+                          "op": "update",
+                          "args": {
+                            "id": "{{row.id}}",
+                            "pinned": false
+                          },
+                          "success": "Unpinned",
+                          "undo": {
+                            "op": "update",
+                            "args": {
+                              "id": "{{row.id}}",
+                              "pinned": true
+                            },
+                            "success": "Pinned again"
+                          }
+                        }
+                      },
+                      {
+                        "label": "Make a task",
+                        "icon": "check",
+                        "if": "{{state.view != trash}}",
+                        "action": {
+                          "op": "to_task",
+                          "args": {
+                            "text": "{{row.title}}"
+                          },
+                          "success": "Added to To-do"
+                        }
+                      },
+                      {
+                        "label": "Delete",
+                        "icon": "trash",
+                        "variant": "danger",
+                        "if": "{{state.view != trash}}",
+                        "action": {
+                          "op": "delete",
+                          "args": {
+                            "id": "{{row.id}}"
+                          },
+                          "success": "Moved to trash",
+                          "undo": {
+                            "op": "restore",
+                            "args": {
+                              "id": "{{row.id}}"
+                            },
+                            "success": "Restored from trash"
+                          }
+                        }
+                      },
+                      {
+                        "label": "Restore",
+                        "icon": "undo",
+                        "if": "{{state.view == trash}}",
+                        "action": {
+                          "op": "restore",
+                          "args": {
+                            "id": "{{row.id}}"
+                          },
+                          "success": "Restored",
+                          "undo": {
+                            "op": "delete",
+                            "args": {
+                              "id": "{{row.id}}"
+                            },
+                            "success": "Moved back to trash"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "if": "{{state.view != trash}}",
+              "density": "comfortable",
+              "group_count": true,
+              "empty_action": {
+                "label": "New note",
+                "if": "{{state.view != trash && state.view != tasks}}",
+                "op": "create",
+                "args": {
+                  "project": "{{state.project}}"
+                },
+                "then": {
+                  "state.open": "{{result.id}}"
+                }
+              }
+            },
+            {
+              "type": "list",
+              "query": "list",
+              "if": "{{state.view == trash}}",
+              "params": {
+                "q": "{{state.q}}",
+                "project": "{{state.project}}",
+                "utc_offset_ms": "{{$utc_offset_ms}}",
+                "today": "{{$today}}",
+                "view": "{{state.view}}"
+              },
+              "empty": "{{state.empty}}",
+              "density": "comfortable",
+              "select": {
+                "label": "Select notes",
+                "actions": [
+                  {
+                    "label": "Restore",
+                    "icon": "undo",
+                    "op": "restore",
+                    "success": "Restored {{count}} notes"
+                  }
+                ],
+                "bind": "state.selecting"
+              },
+              "item": {
+                "type": "item",
+                "layout": "line",
+                "calm": true,
+                "title": "{{row.title}}",
+                "done": "{{state.view == trash}}",
+                "action": {
+                  "set": {
+                    "state.open": "{{row.id}}"
+                  }
+                },
+                "meta": [
+                  {
+                    "text": "{{row.snippet}}"
+                  }
+                ],
+                "slots": [
+                  {
+                    "name": "state",
+                    "width": 30
+                  },
+                  {
+                    "name": "check",
+                    "width": 56
+                  },
+                  {
+                    "name": "project",
+                    "width": 96,
+                    "if": "{{!state.project && state.view != tasks}}"
+                  },
+                  {
+                    "name": "date",
+                    "width": 72
+                  }
+                ],
+                "chips": [
+                  {
+                    "text": "Pinned",
+                    "icon": "pin",
+                    "icon_only": true,
+                    "label": "Pinned",
+                    "slot": "state",
+                    "if": "{{row.pinned}}"
+                  },
+                  {
+                    "text": "{{row.checklist}}",
+                    "icon": "steps",
+                    "label": "Checklist done",
+                    "slot": "check"
+                  },
+                  {
+                    "text": "{{row.project}}",
+                    "icon": "folder",
+                    "style": "source",
+                    "slot": "project",
+                    "if": "{{!state.project && state.view != tasks}}"
+                  },
+                  {
+                    "text": "{{row.edited}}",
+                    "slot": "date"
+                  }
+                ],
+                "actions": [
+                  {
+                    "type": "menu",
+                    "label": "More for {{row.title}}",
+                    "icon": "more",
+                    "align": "end",
+                    "focus_key": "menu-{{row.id}}",
+                    "items": [
+                      {
+                        "label": "Pin",
+                        "icon": "pin",
+                        "if": "{{!row.pinned && state.view != trash}}",
+                        "action": {
+                          "op": "update",
+                          "args": {
+                            "id": "{{row.id}}",
+                            "pinned": true
+                          },
+                          "success": "Pinned",
+                          "undo": {
+                            "op": "update",
+                            "args": {
+                              "id": "{{row.id}}",
+                              "pinned": false
+                            },
+                            "success": "Unpinned"
+                          }
+                        }
+                      },
+                      {
+                        "label": "Unpin",
+                        "icon": "pin",
+                        "if": "{{row.pinned && state.view != trash}}",
+                        "action": {
+                          "op": "update",
+                          "args": {
+                            "id": "{{row.id}}",
+                            "pinned": false
+                          },
+                          "success": "Unpinned",
+                          "undo": {
+                            "op": "update",
+                            "args": {
+                              "id": "{{row.id}}",
+                              "pinned": true
+                            },
+                            "success": "Pinned again"
+                          }
+                        }
+                      },
+                      {
+                        "label": "Make a task",
+                        "icon": "check",
+                        "if": "{{state.view != trash}}",
+                        "action": {
+                          "op": "to_task",
+                          "args": {
+                            "text": "{{row.title}}"
+                          },
+                          "success": "Added to To-do"
+                        }
+                      },
+                      {
+                        "label": "Delete",
+                        "icon": "trash",
+                        "variant": "danger",
+                        "if": "{{state.view != trash}}",
+                        "action": {
+                          "op": "delete",
+                          "args": {
+                            "id": "{{row.id}}"
+                          },
+                          "success": "Moved to trash",
+                          "undo": {
+                            "op": "restore",
+                            "args": {
+                              "id": "{{row.id}}"
+                            },
+                            "success": "Restored from trash"
+                          }
+                        }
+                      },
+                      {
+                        "label": "Restore",
+                        "icon": "undo",
+                        "if": "{{state.view == trash}}",
+                        "action": {
+                          "op": "restore",
+                          "args": {
+                            "id": "{{row.id}}"
+                          },
+                          "success": "Restored",
+                          "undo": {
+                            "op": "delete",
+                            "args": {
+                              "id": "{{row.id}}"
+                            },
+                            "success": "Moved back to trash"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
       },
       {
-        "type": "sheet", "bind": "state.open", "size": "large", "title": "Note", "table": "notes", "query": "note", "params": { "id": "{{state.open}}" },
-        "on_close": { "op": "tidy", "args": { "id": "{{row.id}}" } },
+        "type": "sheet",
+        "bind": "state.open",
+        "size": "large",
+        "title": "Note",
+        "table": "notes",
+        "query": "note",
+        "refresh": true,
+        "params": {
+          "id": "{{state.open}}",
+          "utc_offset_ms": "{{$utc_offset_ms}}",
+          "today": "{{$today}}"
+        },
+        "on_close": {
+          "op": "tidy",
+          "args": {
+            "id": "{{row.id}}"
+          }
+        },
+        "menu": {
+          "label": "Note actions",
+          "items": [
+            {
+              "label": "History",
+              "icon": "clock",
+              "action": {
+                "history": {
+                  "table": "notes",
+                  "id": "{{row.id}}",
+                  "title": "{{row.title}}"
+                }
+              }
+            },
+            {
+              "label": "Pin",
+              "icon": "pin",
+              "if": "{{!row.pinned}}",
+              "action": {
+                "op": "update",
+                "args": {
+                  "id": "{{row.id}}",
+                  "pinned": true
+                },
+                "success": "Pinned",
+                "undo": {
+                  "op": "update",
+                  "args": {
+                    "id": "{{row.id}}",
+                    "pinned": false
+                  },
+                  "success": "Unpinned"
+                }
+              }
+            },
+            {
+              "label": "Unpin",
+              "icon": "pin",
+              "if": "{{row.pinned}}",
+              "action": {
+                "op": "update",
+                "args": {
+                  "id": "{{row.id}}",
+                  "pinned": false
+                },
+                "success": "Unpinned",
+                "undo": {
+                  "op": "update",
+                  "args": {
+                    "id": "{{row.id}}",
+                    "pinned": true
+                  },
+                  "success": "Pinned again"
+                }
+              }
+            },
+            {
+              "label": "Make a task",
+              "icon": "check",
+              "action": {
+                "op": "to_task",
+                "args": {
+                  "text": "{{row.name}}"
+                },
+                "success": "Added to To-do"
+              }
+            },
+            {
+              "type": "divider"
+            },
+            {
+              "label": "Delete note",
+              "icon": "trash",
+              "variant": "danger",
+              "action": {
+                "op": "delete",
+                "args": {
+                  "id": "{{row.id}}"
+                },
+                "success": "Moved to trash",
+                "undo": {
+                  "op": "restore",
+                  "args": {
+                    "id": "{{row.id}}"
+                  },
+                  "success": "Restored from trash"
+                },
+                "then": {
+                  "state.open": ""
+                }
+              }
+            }
+          ]
+        },
         "children": [
           {
-            "type": "form", "autosave": true,
+            "type": "form",
+            "autosave": true,
             "submit": {
               "op": "update",
-              "args": { "id": "{{row.id}}", "title": "{{form.title}}", "project": "{{form.project}}", "body": "{{form.body}}", "pinned": "{{form.pinned}}" }
+              "args": {
+                "id": "{{row.id}}",
+                "title": "{{form.title}}"
+              }
             },
             "children": [
-              { "type": "text-field", "name": "title", "label": "Title", "label_hidden": true, "placeholder": "Title (or the first line)", "value": "{{row.title}}" },
               {
-                "type": "stack", "direction": "row", "gap": 12, "wrap": true, "align": "end",
+                "type": "text-field",
+                "name": "title",
+                "label": "Title",
+                "label_hidden": true,
+                "style": "title",
+                "placeholder": "Title",
+                "value": "{{row.title}}"
+              }
+            ]
+          },
+          {
+            "type": "stack",
+            "direction": "row",
+            "gap": 8,
+            "wrap": true,
+            "align": "center",
+            "children": [
+              {
+                "type": "form",
+                "autosave": true,
+                "grow": 1,
+                "basis": 160,
+                "submit": {
+                  "op": "update",
+                  "args": {
+                    "id": "{{row.id}}",
+                    "project": "{{form.project}}"
+                  }
+                },
                 "children": [
                   {
-                    "type": "text-field", "name": "project", "label": "Project", "placeholder": "None", "value": "{{row.project}}",
-                    "grow": 1, "basis": 180, "suggestions": { "query": "project_names", "column": "project" }
-                  },
-                  { "type": "toggle", "name": "pinned", "label": "Pinned", "value": "{{row.pinned}}" }
+                    "type": "text-field",
+                    "name": "project",
+                    "label": "Project",
+                    "style": "compact",
+                    "placeholder": "No project",
+                    "value": "{{row.project}}",
+                    "suggestions": {
+                      "query": "project_names",
+                      "column": "project"
+                    }
+                  }
                 ]
               },
               {
-                "type": "markdown-editor", "name": "body", "label": "Note", "value": "{{row.body}}", "start": "preview",
-                "placeholder": "Write in Markdown. - [ ] makes a checklist.",
-                "actions": [ { "label": "To-do", "icon": "check", "op": "to_task", "arg": "text", "success": "Added to To-do" } ]
+                "type": "button",
+                "variant": "chip",
+                "icon": "pin",
+                "label": "Pinned",
+                "pressed": "{{row.pinned}}",
+                "aria_label": "Pinned",
+                "focus_key": "note-pin",
+                "action": {
+                  "op": "update",
+                  "args": {
+                    "id": "{{row.id}}",
+                    "pinned": "{{!row.pinned}}"
+                  },
+                  "success": "Updated"
+                }
+              },
+              {
+                "type": "text",
+                "tone": "muted",
+                "if": "{{row.edited}}",
+                "text": "Edited {{row.edited}}"
               }
             ]
           },
           {
-            "type": "stack", "direction": "row", "gap": 8,
+            "type": "form",
+            "autosave": true,
+            "submit": {
+              "op": "update",
+              "args": {
+                "id": "{{row.id}}",
+                "body": "{{form.body}}"
+              }
+            },
             "children": [
               {
-                "type": "button", "label": "History", "variant": "ghost",
-                "action": { "history": { "table": "notes", "id": "{{row.id}}", "title": "{{row.title}}" } }
-              },
-              {
-                "type": "button", "label": "Delete note", "icon": "trash", "variant": "danger",
-                "action": { "op": "delete", "args": { "id": "{{row.id}}" }, "success": "Moved to trash", "undo": { "op": "restore", "args": { "id": "{{row.id}}" }, "success": "Restored from trash" }, "then": { "state.open": "" } }
+                "type": "markdown-editor",
+                "name": "body",
+                "label": "Note",
+                "value": "{{row.body}}",
+                "start": "preview",
+                "placeholder": "Write…  - [ ] makes a checklist",
+                "actions": [
+                  {
+                    "label": "To-do",
+                    "icon": "check",
+                    "op": "to_task",
+                    "arg": "text",
+                    "success": "Added to To-do"
+                  }
+                ]
               }
             ]
           },
-          { "type": "ref-picker", "label": "Link to…", "action": { "link": { "from": "{{row.$ref}}", "to": "{{value.ref}}" }, "success": "Linked" } },
-          { "type": "backlinks", "ref": "{{row.$ref}}", "title": "Linked from", "empty": "Nothing links to this note yet." }
+          {
+            "type": "section",
+            "title": "Links",
+            "collapsible": true,
+            "remember": "notes-sec-links",
+            "children": [
+              {
+                "type": "ref-picker",
+                "label": "Link to…",
+                "action": {
+                  "link": {
+                    "from": "{{row.$ref}}",
+                    "to": "{{value.ref}}"
+                  },
+                  "success": "Linked"
+                }
+              },
+              {
+                "type": "backlinks",
+                "ref": "{{row.$ref}}",
+                "title": "Linked from",
+                "empty": "Nothing links to this note yet."
+              }
+            ]
+          }
         ]
       },
       {
@@ -123,13 +916,16 @@
                 "type": "text-field",
                 "name": "title",
                 "label": "Title",
-                "placeholder": "Optional title"
+                "placeholder": "Title",
+                "label_hidden": true,
+                "style": "title"
               },
               {
                 "type": "text-field",
                 "name": "project",
                 "label": "Project",
-                "placeholder": "Optional project"
+                "placeholder": "No project",
+                "style": "compact"
               },
               {
                 "type": "text-area",
@@ -138,7 +934,9 @@
                 "rows": 8,
                 "required": true,
                 "value": "{{state.newText}}",
-                "placeholder": "Write your note\u2026"
+                "placeholder": "Write…",
+                "style": "bare",
+                "label_hidden": true
               }
             ],
             "submit": {
@@ -168,5 +966,7 @@
       }
     ]
   },
-  "entry": {"bind": "state.open"}
+  "entry": {
+    "bind": "state.open"
+  }
 }

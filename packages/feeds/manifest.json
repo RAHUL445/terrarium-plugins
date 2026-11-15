@@ -1,8 +1,12 @@
 {
   "id": "feeds",
   "name": "Feeds",
-  "version": "0.1.2",
+  "version": "0.2.1",
   "api": "terrarium:plugin@0.1.0",
+  "requires": [
+    "data-views-v1",
+    "today-v1"
+  ],
   "description": "Read RSS and Atom feeds. Can send data it can read to any public website, including sites you have not added.",
   "permissions": [
     "http"
@@ -192,6 +196,88 @@
         }
       },
       "cli": false
+    },
+    "host_unread": {
+      "sql": "SELECT i.id, i.title, i.summary, i.link, f.title AS feed_title, i.published_ms FROM items i JOIN feeds f ON f.id = i.feed_id WHERE i._deleted IS NULL AND f._deleted IS NULL AND (?1 IS NULL OR ?1 = 0 OR i.read = 0) ORDER BY i.published_ms DESC, i.id DESC LIMIT ?2 OFFSET ?3",
+      "params": [
+        "unread",
+        "page_size",
+        "offset"
+      ],
+      "types": {
+        "unread": {
+          "type": "boolean"
+        },
+        "page_size": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        }
+      },
+      "description": "Unread feed items, newest first, with query-side pagination.",
+      "cli": false,
+      "view": {
+        "version": 1,
+        "title": "Unread feeds",
+        "params": {
+          "unread": true
+        },
+        "columns": [
+          {
+            "key": "title",
+            "label": "Article",
+            "type": "string"
+          },
+          {
+            "key": "feed_title",
+            "label": "Feed",
+            "type": "string"
+          },
+          {
+            "key": "published_ms",
+            "label": "Published",
+            "type": "date"
+          },
+          {
+            "key": "summary",
+            "label": "Summary",
+            "type": "string"
+          }
+        ],
+        "pagination": {
+          "page_size_param": "page_size",
+          "offset_param": "offset",
+          "default_page_size": 50,
+          "max_page_size": 1000
+        },
+        "row_action": {
+          "label": "Mark read",
+          "action": {
+            "op": "mark_read",
+            "args": {
+              "id": "{{row.id}}",
+              "read": true
+            }
+          },
+          "success": "Marked read"
+        },
+        "filters": [
+          {
+            "param": "unread",
+            "label": "Unread only",
+            "type": "boolean"
+          }
+        ]
+      }
+    },
+    "today_unread": {
+      "description": "Today view: the newest three unread items.",
+      "params": [
+        "now_ms"
+      ],
+      "cli": false,
+      "sql": "SELECT i.id, i.title, i.link, f.title AS feed_title, COALESCE(f.title, 'Feed') || COALESCE(' · ' || CASE WHEN i.published_ms IS NULL OR i.published_ms > ?1 THEN NULL WHEN ?1 - i.published_ms >= 86400000 THEN ((?1 - i.published_ms) / 86400000) || 'd' WHEN ?1 - i.published_ms >= 3600000 THEN ((?1 - i.published_ms) / 3600000) || 'h' ELSE 'now' END, '') AS source_label FROM items i JOIN feeds f ON f.id = i.feed_id WHERE i._deleted IS NULL AND f._deleted IS NULL AND i.read = 0 ORDER BY i.published_ms DESC, i.id DESC LIMIT 3"
     }
   },
   "jobs": {
@@ -215,6 +301,11 @@
       "id": "unread",
       "title": "Unread feeds",
       "template": "ui/widget-unread.json"
+    },
+    {
+      "id": "host-view",
+      "title": "Unread feeds list",
+      "template": "ui/widget-host-view.json"
     }
   ],
   "icon": "inbox",
@@ -224,5 +315,63 @@
     "fuel": 200000000,
     "memory_mb": 64,
     "timeout_ms": 5000
-  }
+  },
+  "today": [
+    {
+      "id": "unread",
+      "section": "catch_up",
+      "query": "today_unread",
+      "limit": 3,
+      "count_query": "unread_count",
+      "link": {
+        "label": "Open Feeds",
+        "action": {
+          "navigate": {
+            "state": {
+              "unread": true
+            }
+          }
+        }
+      },
+      "row": {
+        "key": "{{row.id}}",
+        "kind": "article",
+        "title": "{{row.title}}",
+        "chips": [
+          {
+            "text": "{{row.source_label}}"
+          }
+        ],
+        "actions": [
+          {
+            "label": "Mark read",
+            "action": {
+              "op": "mark_read",
+              "args": {
+                "id": "{{row.id}}",
+                "read": true
+              },
+              "success": "Marked read",
+              "undo": {
+                "op": "mark_read",
+                "args": {
+                  "id": "{{row.id}}",
+                  "read": false
+                },
+                "success": "Marked unread"
+              }
+            }
+          }
+        ],
+        "open": {
+          "url": "{{row.link}}",
+          "op": "mark_read",
+          "args": {
+            "id": "{{row.id}}",
+            "read": true
+          }
+        }
+      }
+    }
+  ]
 }

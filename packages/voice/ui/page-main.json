@@ -132,7 +132,7 @@
               "utc_offset_ms": "{{$utc_offset_ms}}",
               "today": "{{$today}}"
             },
-            "empty": "Nothing to review. Record or type a thought above, then send it to To-do or Notes.",
+            "empty": "Nothing to review. Record or type a thought above, then send it to Task manager or Notes.",
             "item": {
               "type": "item",
               "title": "{{row.title}}",
@@ -162,7 +162,7 @@
                   "if": "{{row.is_ready}}",
                   "icon": "check",
                   "variant": "ghost",
-                  "aria_label": "Send “{{row.title}}” to To-do",
+                  "aria_label": "Send “{{row.title}}” to Task manager",
                   "action": {
                     "op": "send",
                     "args": {
@@ -174,13 +174,13 @@
                       "label": "Open",
                       "action": {
                         "navigate": {
-                          "plugin": "todo",
+                          "plugin": "tasks",
                           "item": "{{result.id}}"
                         }
                       }
                     }
                   },
-                  "label": "To-do"
+                  "label": "Task"
                 },
                 {
                   "type": "button",
@@ -401,7 +401,7 @@
                   {
                     "type": "button",
                     "variant": "primary",
-                    "label": "To-do",
+                    "label": "Task",
                     "icon": "check",
                     "action": {
                       "op": "send",
@@ -417,7 +417,7 @@
                         "label": "Open",
                         "action": {
                           "navigate": {
-                            "plugin": "todo",
+                            "plugin": "tasks",
                             "item": "{{result.id}}"
                           }
                         }
@@ -427,7 +427,7 @@
                   {
                     "type": "button",
                     "if": "{{row.multi}}",
-                    "label": "To-do",
+                    "label": "Tasks",
                     "icon": "steps",
                     "action": {
                       "op": "send",
@@ -444,7 +444,7 @@
                         "label": "Open",
                         "action": {
                           "navigate": {
-                            "plugin": "todo",
+                            "plugin": "tasks",
                             "item": "{{result.id}}"
                           }
                         }
@@ -496,7 +496,7 @@
               {
                 "type": "text",
                 "tone": "muted",
-                "text": "To-do reads dates, times, #tags and !priority from the text, e.g. “Call Sam tomorrow 6pm #work”. The first line becomes the task."
+                "text": "Task manager reads dates, times, #tags and !priority from the text, e.g. “Call Sam tomorrow 6pm #work”. The first line becomes the task."
               }
             ]
           },

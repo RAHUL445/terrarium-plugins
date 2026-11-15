@@ -1,0 +1,91 @@
+{
+  "state": {},
+  "body": {
+    "type": "data-view",
+    "query": "host_notes",
+    "config": {
+      "layout": "{{$config.layout}}",
+      "density": "{{$config.density}}",
+      "fields": "{{$config.fields}}",
+      "filters": {
+        "q": "{{$config.q}}",
+        "project": "{{$config.project}}"
+      }
+    }
+  },
+  "home": {
+    "hidden": true
+  },
+  "rail": {
+    "default": false
+  },
+  "page": {
+    "size": {
+      "default": [
+        6,
+        4
+      ],
+      "min": [
+        3,
+        2
+      ],
+      "max": [
+        12,
+        8
+      ]
+    },
+    "config": {
+      "layout": {
+        "type": "enum",
+        "label": "Layout",
+        "values": [
+          "list",
+          "table"
+        ],
+        "labels": [
+          "List",
+          "Table"
+        ],
+        "default": "list"
+      },
+      "density": {
+        "type": "enum",
+        "label": "Density",
+        "values": [
+          "comfortable",
+          "compact"
+        ],
+        "labels": [
+          "Comfortable",
+          "Compact"
+        ],
+        "default": "comfortable"
+      },
+      "fields": {
+        "type": "enum",
+        "label": "Visible fields",
+        "values": [
+          "title,updated_at,project,pinned",
+          "title,updated_at,project",
+          "title,updated_at"
+        ],
+        "labels": [
+          "Full details",
+          "Title, date, and project",
+          "Title and date"
+        ],
+        "default": "title,updated_at,project,pinned"
+      },
+      "q": {
+        "type": "text",
+        "label": "Search notes",
+        "default": ""
+      },
+      "project": {
+        "type": "text",
+        "label": "Project",
+        "default": ""
+      }
+    }
+  }
+}

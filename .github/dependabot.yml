@@ -13,7 +13,7 @@ updates:
       - /packages/habits
       - /packages/notes
       - /packages/reports
-      - /packages/todo
+      - /packages/tasks
       - /packages/voice
     schedule:
       interval: weekly

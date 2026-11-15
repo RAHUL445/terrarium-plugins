@@ -1,8 +1,11 @@
 {
   "id": "notes",
   "name": "Notes",
-  "version": "0.3.4",
+  "version": "0.5.3",
   "api": "terrarium:plugin@0.1.0",
+  "requires": [
+    "data-views-v1"
+  ],
   "description": "Markdown notes in projects, with checklists and autosave; edits on different devices merge. Notes saved from finished tasks live in the Tasks project.",
   "history": [
     "notes"
@@ -230,6 +233,88 @@
     }
   },
   "queries": {
+    "review_notes": {
+      "sql": "SELECT id, title, project, COALESCE(updated_at, created_at) AS updated_at FROM notes WHERE _deleted IS NULL AND COALESCE(updated_at, created_at) IS NOT NULL AND (?1 IS NULL OR COALESCE(updated_at, created_at) >= ?1) AND (?2 IS NULL OR COALESCE(updated_at, created_at) < ?2) ORDER BY CASE WHEN ?5 = 'title' AND ?6 = 'asc' THEN title END COLLATE NOCASE ASC, CASE WHEN ?5 = 'title' AND ?6 = 'desc' THEN title END COLLATE NOCASE DESC, CASE WHEN ?5 = 'updated_at' AND ?6 = 'asc' THEN COALESCE(updated_at, created_at) END ASC, CASE WHEN ?5 = 'updated_at' AND ?6 = 'desc' THEN COALESCE(updated_at, created_at) END DESC, id ASC LIMIT ?3 OFFSET ?4",
+      "params": [
+        "start_ms",
+        "end_ms",
+        "page_size",
+        "offset",
+        "sort",
+        "direction"
+      ],
+      "types": {
+        "start_ms": {
+          "type": "integer"
+        },
+        "end_ms": {
+          "type": "integer"
+        },
+        "page_size": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "sort": {
+          "type": "string"
+        },
+        "direction": {
+          "type": "string"
+        }
+      },
+      "description": "Created or edited notes in a half-open activity-time range; notes are not completion records.",
+      "cli": false,
+      "view": {
+        "version": 1,
+        "title": "Created or edited notes",
+        "columns": [
+          {
+            "key": "title",
+            "label": "Note",
+            "type": "string"
+          },
+          {
+            "key": "updated_at",
+            "label": "Edited",
+            "type": "date"
+          },
+          {
+            "key": "project",
+            "label": "Project",
+            "type": "string"
+          }
+        ],
+        "temporal": {
+          "start_param": "start_ms",
+          "end_param": "end_ms"
+        },
+        "pagination": {
+          "page_size_param": "page_size",
+          "offset_param": "offset",
+          "default_page_size": 100,
+          "max_page_size": 1000
+        },
+        "sorts": [
+          {
+            "param": "sort",
+            "values": [
+              "title",
+              "updated_at"
+            ],
+            "direction_param": "direction",
+            "directions": [
+              "asc",
+              "desc"
+            ]
+          }
+        ],
+        "params": {
+          "sort": "updated_at",
+          "direction": "desc"
+        }
+      }
+    },
     "focus_suggestions": {
       "sql": "SELECT project AS value, COUNT(*) AS count FROM notes WHERE _deleted IS NULL AND project IS NOT NULL AND project <> '' AND project <> 'Tasks' GROUP BY project ORDER BY count DESC, project LIMIT 30",
       "params": [],
@@ -237,14 +322,15 @@
       "cli": false
     },
     "list": {
-      "sql": "SELECT id, title, project, pinned, trim(substr(replace(replace(replace(replace(replace(replace(replace(char(10) || substr(body, instr(body || char(10), char(10)) + 1), char(10) || '- [', char(10) || '['), char(10) || '- ', char(10)), char(10), ' '), '[ ] ', '☐ '), '[x] ', '☑ '), '**', ''), '#', ''), 1, 160)) AS snippet, CASE WHEN COALESCE(updated_at, created_at) IS NULL THEN NULL WHEN date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') = ?4 THEN strftime('%H:%M', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') WHEN date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') = date(?4, '-1 day') THEN 'Yesterday' WHEN date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') > date(?4, '-7 day') THEN CASE strftime('%w', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END ELSE CAST(strftime('%d', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch'), 1, 4) <> substr(?4, 1, 4) THEN ' ' || substr(date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch'), 1, 4) ELSE '' END END AS edited, (WITH RECURSIVE split(raw, rest, n) AS (SELECT '', body || char(10), 0 UNION ALL SELECT substr(rest, 1, instr(rest, char(10)) - 1), substr(rest, instr(rest, char(10)) + 1), n + 1 FROM split WHERE rest <> ''), lines AS (SELECT rtrim(raw, char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8232,8233,8239,8287,12288,65279)) AS raw, n FROM split WHERE n > 0), parsed AS (SELECT ltrim(raw, char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8232,8233,8239,8287,12288,65279)) AS line, SUM(substr(ltrim(raw, char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8232,8233,8239,8287,12288,65279)), 1, 3) = '```') OVER (ORDER BY n) AS fences FROM lines), tasks AS (SELECT ltrim(substr(line, 2), char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8232,8233,8239,8287,12288,65279)) AS task FROM parsed WHERE fences % 2 = 0 AND substr(line, 1, 1) IN ('-', '*') AND length(line) > 1 AND instr(char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8232,8233,8239,8287,12288,65279), substr(line, 2, 1)) > 0) SELECT SUM(substr(task, 2, 1) IN ('x', 'X')) || '/' || COUNT(*) FROM tasks WHERE substr(task, 1, 3) IN ('[ ]', '[x]', '[X]') AND length(task) > 4 AND instr(char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8232,8233,8239,8287,12288,65279), substr(task, 4, 1)) > 0 HAVING COUNT(*) > 0) AS checklist, CASE WHEN (SELECT COUNT(*) FROM notes p WHERE p._deleted IS NULL AND p.pinned = 1) = 0 THEN NULL WHEN pinned = 1 THEN 'Pinned' ELSE 'Notes' END AS section FROM (SELECT * FROM notes WHERE _deleted IS NULL AND (?1 IS NULL OR ?1 = '' OR title LIKE '%' || ?1 || '%' OR body LIKE '%' || ?1 || '%' OR project LIKE '%' || ?1 || '%') AND ((COALESCE(?2, '') = '' AND COALESCE(project, '') <> 'Tasks') OR project = ?2) ORDER BY pinned DESC, COALESCE(updated_at, created_at) DESC LIMIT 300) AS notes ORDER BY pinned DESC, COALESCE(updated_at, created_at) DESC",
+      "sql": "SELECT id, title, project, pinned, (WITH RECURSIVE st(t, n) AS (SELECT substr(replace(replace(replace(replace(replace(replace(replace(char(10) || substr(body, instr(body || char(10), char(10)) + 1), char(10) || '- [', char(10) || '['), char(10) || '- ', char(10)), char(10), ' '), '[ ] ', '☐ '), '[x] ', '☑ '), '**', ''), '#', ''), 1, 800), 0 UNION ALL SELECT substr(t, 1, instr(t, '](') - 1) || substr(t, instr(t, '](') + instr(substr(t, instr(t, '](')), ')')), n + 1 FROM st WHERE n < 40 AND instr(t, '](') > 0 AND instr(substr(t, instr(t, '](')), ')') > 0) SELECT trim(substr(replace(replace(replace(t, '![', ''), '[', ''), ']', ''), 1, 160)) FROM st ORDER BY n DESC LIMIT 1) AS snippet, CASE WHEN COALESCE(updated_at, created_at) IS NULL THEN NULL WHEN date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') = ?4 THEN strftime('%H:%M', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') WHEN date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') = date(?4, '-1 day') THEN 'Yesterday' WHEN date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') > date(?4, '-7 day') THEN CASE strftime('%w', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END ELSE CAST(strftime('%d', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch'), 1, 4) <> substr(?4, 1, 4) THEN ' ' || substr(date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch'), 1, 4) ELSE '' END END AS edited, (WITH RECURSIVE split(raw, rest, n) AS (SELECT '', body || char(10), 0 UNION ALL SELECT substr(rest, 1, instr(rest, char(10)) - 1), substr(rest, instr(rest, char(10)) + 1), n + 1 FROM split WHERE rest <> ''), lines AS (SELECT rtrim(raw, char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8232,8233,8239,8287,12288,65279)) AS raw, n FROM split WHERE n > 0), parsed AS (SELECT ltrim(raw, char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8232,8233,8239,8287,12288,65279)) AS line, SUM(substr(ltrim(raw, char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8232,8233,8239,8287,12288,65279)), 1, 3) = '```') OVER (ORDER BY n) AS fences FROM lines), tasks AS (SELECT ltrim(substr(line, 2), char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8232,8233,8239,8287,12288,65279)) AS task FROM parsed WHERE fences % 2 = 0 AND substr(line, 1, 1) IN ('-', '*') AND length(line) > 1 AND instr(char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8232,8233,8239,8287,12288,65279), substr(line, 2, 1)) > 0) SELECT SUM(substr(task, 2, 1) IN ('x', 'X')) || '/' || COUNT(*) FROM tasks WHERE substr(task, 1, 3) IN ('[ ]', '[x]', '[X]') AND length(task) > 4 AND instr(char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8232,8233,8239,8287,12288,65279), substr(task, 4, 1)) > 0 HAVING COUNT(*) > 0) AS checklist, CASE WHEN COALESCE(?5, '') IN ('pinned', 'recent', 'trash') THEN NULL WHEN (SELECT COUNT(*) FROM notes p WHERE p._deleted IS NULL AND p.pinned = 1) = 0 THEN NULL WHEN pinned = 1 THEN 'Pinned' ELSE 'Notes' END AS section FROM (SELECT * FROM notes WHERE (CASE WHEN COALESCE(?5, '') = 'trash' THEN _deleted IS NOT NULL AND NOT (title = 'Untitled' AND trim(COALESCE(body, '')) = '') ELSE _deleted IS NULL END) AND (?1 IS NULL OR ?1 = '' OR title LIKE '%' || ?1 || '%' OR body LIKE '%' || ?1 || '%' OR project LIKE '%' || ?1 || '%') AND (CASE WHEN COALESCE(?5, '') = 'tasks' THEN project = 'Tasks' WHEN COALESCE(?5, '') = 'trash' THEN 1 ELSE ((COALESCE(?2, '') = '' AND COALESCE(project, '') <> 'Tasks') OR project = ?2) END) AND (COALESCE(?5, '') <> 'pinned' OR pinned = 1) AND (COALESCE(?5, '') <> 'recent' OR date((COALESCE(updated_at, created_at) + ?3) / 1000, 'unixepoch') > date(?4, '-7 day')) ORDER BY CASE WHEN COALESCE(?5, '') IN ('recent', 'trash') THEN 0 ELSE pinned END DESC, CASE WHEN COALESCE(?5, '') = 'trash' THEN _deleted END DESC, COALESCE(updated_at, created_at) DESC LIMIT 300) AS notes ORDER BY CASE WHEN COALESCE(?5, '') IN ('recent', 'trash') THEN 0 ELSE pinned END DESC, CASE WHEN COALESCE(?5, '') = 'trash' THEN _deleted END DESC, COALESCE(updated_at, created_at) DESC",
       "params": [
         "q",
         "project",
         "utc_offset_ms",
-        "today"
+        "today",
+        "view"
       ],
-      "description": "Notes newest first, pinned on top, with a snippet, edit time and checklist progress.",
+      "description": "Notes newest first, pinned on top, with a snippet (Markdown links and images reduced to their text), edit time and checklist progress.",
       "types": {
         "q": {
           "type": "string",
@@ -253,13 +339,18 @@
         "project": {
           "type": "string",
           "description": "Only this project (exact name); empty shows all projects except Tasks, 'Tasks' shows task notes."
+        },
+        "view": {
+          "type": "string",
+          "description": "Which notes: empty or 'all' for the usual list; 'pinned', 'recent' (edited in the last 7 days), 'tasks' (the Tasks project) or 'trash'."
         }
       },
       "view": {
         "title": "Notes",
         "params": {
           "q": "",
-          "project": ""
+          "project": "",
+          "view": ""
         },
         "columns": [
           {
@@ -286,11 +377,13 @@
       }
     },
     "note": {
-      "sql": "SELECT id, CASE WHEN title = 'Untitled' OR title = trim(ltrim(trim(substr(body, 1, instr(body || char(10), char(10)) - 1)), '#')) THEN '' ELSE title END AS title, body, COALESCE(project, '') AS project, pinned FROM notes WHERE id = ?1 AND _deleted IS NULL",
+      "sql": "SELECT id, CASE WHEN title = 'Untitled' OR title = trim(ltrim(trim(substr(body, 1, instr(body || char(10), char(10)) - 1)), '#')) THEN '' ELSE title END AS title, body, COALESCE(project, '') AS project, pinned, title AS name, CASE WHEN COALESCE(updated_at, created_at) IS NULL THEN NULL WHEN date((COALESCE(updated_at, created_at) + ?2) / 1000, 'unixepoch') = ?3 THEN strftime('%H:%M', (COALESCE(updated_at, created_at) + ?2) / 1000, 'unixepoch') WHEN date((COALESCE(updated_at, created_at) + ?2) / 1000, 'unixepoch') = date(?3, '-1 day') THEN 'Yesterday' WHEN date((COALESCE(updated_at, created_at) + ?2) / 1000, 'unixepoch') > date(?3, '-7 day') THEN CASE strftime('%w', (COALESCE(updated_at, created_at) + ?2) / 1000, 'unixepoch') WHEN '0' THEN 'Sun' WHEN '1' THEN 'Mon' WHEN '2' THEN 'Tue' WHEN '3' THEN 'Wed' WHEN '4' THEN 'Thu' WHEN '5' THEN 'Fri' ELSE 'Sat' END ELSE CAST(strftime('%d', (COALESCE(updated_at, created_at) + ?2) / 1000, 'unixepoch') AS INTEGER) || ' ' || substr('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', (COALESCE(updated_at, created_at) + ?2) / 1000, 'unixepoch') AS INTEGER) - 1) * 3 + 1, 3) || CASE WHEN substr(date((COALESCE(updated_at, created_at) + ?2) / 1000, 'unixepoch'), 1, 4) <> substr(?3, 1, 4) THEN ' ' || substr(date((COALESCE(updated_at, created_at) + ?2) / 1000, 'unixepoch'), 1, 4) ELSE '' END END AS edited FROM notes WHERE id = ?1 AND _deleted IS NULL",
       "params": [
-        "id"
+        "id",
+        "utc_offset_ms",
+        "today"
       ],
-      "description": "One note with its title (blank when it just follows the first line), body, project and pinned flag.",
+      "description": "One note with its title (blank when it just follows the first line), body, project, pinned flag, stored title as name, and an edited label.",
       "types": {
         "id": {
           "type": "id",
@@ -309,6 +402,29 @@
         "project": {
           "type": "string",
           "description": "The currently selected project; empty selects All."
+        }
+      }
+    },
+    "nav_counts": {
+      "sql": "SELECT (SELECT COUNT(*) FROM notes WHERE _deleted IS NULL AND COALESCE(project, '') <> 'Tasks') AS all_count, (SELECT COUNT(*) FROM notes WHERE _deleted IS NULL AND COALESCE(project, '') <> 'Tasks' AND pinned = 1) AS pinned, (SELECT COUNT(*) FROM notes WHERE _deleted IS NULL AND COALESCE(project, '') <> 'Tasks' AND date((COALESCE(updated_at, created_at) + ?1) / 1000, 'unixepoch') > date(?2, '-7 day')) AS recent, (SELECT COUNT(*) FROM notes WHERE _deleted IS NULL AND project = 'Tasks') AS tasks, (SELECT COUNT(*) FROM notes WHERE _deleted IS NOT NULL AND NOT (title = 'Untitled' AND trim(COALESCE(body, '')) = '')) AS trash",
+      "params": [
+        "utc_offset_ms",
+        "today"
+      ],
+      "description": "Sidebar counts: all notes, pinned, edited in the last 7 days, task notes and trash. Each equals the rows its Notes view shows (up to the list's 300-row cap).",
+      "cli": false
+    },
+    "nav_projects": {
+      "sql": "SELECT project, COUNT(*) AS count, (project = ?1) AS selected FROM notes WHERE _deleted IS NULL AND project IS NOT NULL AND project <> '' AND project <> 'Tasks' GROUP BY project ORDER BY project COLLATE NOCASE, project",
+      "params": [
+        "project"
+      ],
+      "description": "Projects (except Tasks) with note counts; the given project is marked selected.",
+      "cli": false,
+      "types": {
+        "project": {
+          "type": "string",
+          "description": "The currently selected project; empty selects none."
         }
       }
     },
@@ -380,6 +496,103 @@
       "params": [],
       "description": "Every note, for exports.",
       "cli": false
+    },
+    "host_notes": {
+      "sql": "SELECT id, title, project, pinned, COALESCE(updated_at, created_at) AS updated_at FROM notes WHERE _deleted IS NULL AND (?1 IS NULL OR ?1 = '' OR title LIKE '%' || ?1 || '%' OR body LIKE '%' || ?1 || '%' OR project LIKE '%' || ?1 || '%') AND ((COALESCE(?2, '') = '' AND COALESCE(project, '') <> 'Tasks') OR project = ?2) ORDER BY pinned DESC, CASE WHEN ?3 = 'title' AND ?4 = 'asc' THEN title END COLLATE NOCASE ASC, CASE WHEN ?3 = 'title' AND ?4 = 'desc' THEN title END COLLATE NOCASE DESC, CASE WHEN ?3 = 'updated_at' AND ?4 = 'asc' THEN COALESCE(updated_at, created_at) END ASC, CASE WHEN ?3 = 'updated_at' AND ?4 = 'desc' THEN COALESCE(updated_at, created_at) END DESC, id ASC LIMIT ?5 OFFSET ?6",
+      "params": [
+        "q",
+        "project",
+        "sort",
+        "direction",
+        "page_size",
+        "offset"
+      ],
+      "types": {
+        "q": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "string"
+        },
+        "direction": {
+          "type": "string"
+        },
+        "page_size": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        }
+      },
+      "description": "All active notes in pinned and edit-time order, with query-side pagination.",
+      "cli": false,
+      "view": {
+        "version": 1,
+        "title": "Notes",
+        "params": {
+          "q": "",
+          "project": "",
+          "sort": "updated_at",
+          "direction": "desc"
+        },
+        "columns": [
+          {
+            "key": "title",
+            "label": "Title",
+            "type": "string"
+          },
+          {
+            "key": "updated_at",
+            "label": "Edited",
+            "type": "date"
+          },
+          {
+            "key": "project",
+            "label": "Project",
+            "type": "string"
+          },
+          {
+            "key": "pinned",
+            "label": "Pinned",
+            "type": "boolean"
+          }
+        ],
+        "filters": [
+          {
+            "param": "q",
+            "label": "Search",
+            "type": "string"
+          },
+          {
+            "param": "project",
+            "label": "Project",
+            "type": "string"
+          }
+        ],
+        "pagination": {
+          "page_size_param": "page_size",
+          "offset_param": "offset",
+          "default_page_size": 100,
+          "max_page_size": 1000
+        },
+        "sorts": [
+          {
+            "param": "sort",
+            "values": [
+              "title",
+              "updated_at"
+            ],
+            "direction_param": "direction",
+            "directions": [
+              "asc",
+              "desc"
+            ]
+          }
+        ]
+      }
     }
   },
   "pages": [
@@ -399,6 +612,11 @@
       "id": "capture",
       "title": "Quick note",
       "template": "ui/widget-capture.json"
+    },
+    {
+      "id": "host-view",
+      "title": "Notes list",
+      "template": "ui/widget-host-view.json"
     }
   ],
   "icon": "note",

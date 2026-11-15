@@ -31,3 +31,10 @@ cargo test --locked --manifest-path packages/feeds/Cargo.toml
 cargo run --locked -p terra -- build ../terrarium-plugins/packages/feeds
 cargo run --locked -p terra -- preview ../terrarium-plugins/packages/feeds --port 8767 --data /tmp/terrarium-feeds-preview
 ```
+
+## Host data-view widget compatibility
+
+The existing `unread` widget retains its ID and template, including its current
+row actions. The new `host-view` widget is an additional paged, host-styled
+choice with an Unread only control and named visible-field presets; it does not
+automatically replace or migrate existing placements.

@@ -1,8 +1,11 @@
 {
   "id": "habits",
   "name": "Habits",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "api": "terrarium:plugin@0.1.0",
+  "requires": [
+    "today-v1"
+  ],
   "description": "Scheduled habits with check-ins, reminders and sleep logs.",
   "storage": {
     "version": 2,
@@ -478,6 +481,14 @@
       "sql": "SELECT id, title FROM habits WHERE _deleted IS NULL ORDER BY title COLLATE NOCASE",
       "params": [],
       "description": "Habits available for the automation picker."
+    },
+    "today_sleep_prompt": {
+      "description": "Today view: a prompt to log last night's sleep, only while today has no entry.",
+      "params": [
+        "today"
+      ],
+      "cli": false,
+      "sql": "SELECT 'sleep-' || ?1 AS id, 'Log last night\u2019s sleep' AS title WHERE NOT EXISTS (SELECT 1 FROM sleep s WHERE s.day = ?1 AND s._deleted IS NULL)"
     }
   },
   "reminders": {
@@ -561,5 +572,70 @@
         }
       }
     }
-  }
+  },
+  "today": [
+    {
+      "id": "habits",
+      "section": "habits",
+      "query": "due_today",
+      "params": {
+        "today": "{{$today}}"
+      },
+      "limit": 30,
+      "row": {
+        "key": "{{row.id}}",
+        "kind": "habit",
+        "title": "{{row.title}}",
+        "note": "\ud83d\udd25 {{row.streak}}",
+        "done": "{{row.is_done}}",
+        "check": {
+          "action": {
+            "op": "checkin",
+            "args": {
+              "id": "{{row.id}}",
+              "done": "{{value}}"
+            }
+          }
+        },
+        "open": {
+          "navigate": {
+            "item": "{{row.id}}"
+          }
+        }
+      }
+    },
+    {
+      "id": "sleep",
+      "section": "wrap_up",
+      "query": "today_sleep_prompt",
+      "params": {
+        "today": "{{$today}}"
+      },
+      "limit": 1,
+      "row": {
+        "key": "{{row.id}}",
+        "kind": "sleep",
+        "title": "{{row.title}}",
+        "actions": [
+          {
+            "label": "Log",
+            "action": {
+              "navigate": {
+                "state": {
+                  "tab": "sleep"
+                }
+              }
+            }
+          }
+        ],
+        "open": {
+          "navigate": {
+            "state": {
+              "tab": "sleep"
+            }
+          }
+        }
+      }
+    }
+  ]
 }

@@ -183,20 +183,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "tasks"
+version = "0.12.4"
+dependencies = [
+ "serde_json",
+ "terrarium-guest",
+]
+
+[[package]]
 name = "terrarium-guest"
 version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
  "wit-bindgen",
-]
-
-[[package]]
-name = "todo"
-version = "0.6.0"
-dependencies = [
- "serde_json",
- "terrarium-guest",
 ]
 
 [[package]]

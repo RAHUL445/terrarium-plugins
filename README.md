@@ -29,11 +29,11 @@ syncs their data between devices.
 
 | Plugin | What it does |
 | --- | --- |
-| [To-do](packages/todo) | Tasks, repeats, reminders and steps; board/matrix moves, bulk tags, CSV import/export, links and History |
+| [Task manager](packages/tasks) | Plugin id `tasks` (formerly `todo`; its data keeps the `todo` storage id). Tasks, repeats, reminders and steps; board/matrix moves, bulk tags, CSV import/export, links and History |
 | [Notes](packages/notes) | Markdown notes with merging, mentions, backlinks and attachments; custom views, bulk changes, Android sharing, import/export and History |
 | [Habits](packages/habits) | Scheduled habits, check-ins, streaks, reminders and sleep logs; search, references and check-in events |
 | [Bookmarks](packages/bookmarks) | Links with projects, tags and notes; indexed search, references, views, bulk pin/trash and Android sharing |
-| [Voice](packages/voice) | Record or type quick captures, transcribe locally, search and link them, then send them to To-do or Notes |
+| [Voice](packages/voice) | Record or type quick captures, transcribe locally, search and link them, then send them to Task manager or Notes |
 | [Feeds](packages/feeds) | HTTPS RSS/Atom reader with text summaries, read/unread controls, hourly desktop refresh and an unread widget; asks to reach any website |
 | [Reports](packages/reports) | AI-written reviews on demand or on a schedule; search and link saved reports |
 

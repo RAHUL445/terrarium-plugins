@@ -78,7 +78,7 @@
               "if": "{{row.is_ready}}",
               "icon": "check",
               "variant": "ghost",
-              "aria_label": "Send “{{row.title}}” to To-do",
+              "aria_label": "Send “{{row.title}}” to Task manager",
               "action": {
                 "op": "send",
                 "args": {

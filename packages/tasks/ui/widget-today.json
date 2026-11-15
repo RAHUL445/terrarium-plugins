@@ -7,7 +7,8 @@
       "today": "{{$today}}",
       "filter": "{{$config.filter}}",
       "q": "{{$page.focus}}",
-      "tags": "{{$config.tags}}"
+      "tags": "{{$config.tags}}",
+      "now": "{{$now}}"
     },
     "limit": 6,
     "empty": "Nothing due today. Use Quick add to plan your next task.",
@@ -29,9 +30,28 @@
       },
       "chips": [
         {
+          "text": "{{row.blocked_label}}",
+          "icon": "lock",
+          "label": "Waiting on {{row.blocked_by}}"
+        },
+        {
+          "text": "{{row.running_label}}",
+          "tone": "accent"
+        },
+        {
+          "text": "{{row.time_label}}",
+          "tone": "{{row.time_tone}}",
+          "icon": "clock",
+          "label": "{{row.time_title}}"
+        },
+        {
+          "text": "{{row.parent_label}}"
+        },
+        {
           "text": "{{row.due_label}}",
           "tone": "{{row.due_tone}}",
-          "icon": "calendar"
+          "icon": "calendar",
+          "format": "short-time"
         },
         {
           "text": "{{row.steps_label}}",

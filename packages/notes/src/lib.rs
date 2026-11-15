@@ -66,6 +66,12 @@ fn title_from(body: &str) -> String {
     line.chars().take(120).collect()
 }
 
+/// True when a note's title is not its own: empty, "Untitled", or the
+/// first line of the body as it stands.
+fn follows_first_line(title: &str, body: &str) -> bool {
+    matches!(title, "" | "Untitled") || title == title_from(body)
+}
+
 fn create(args: &Args) -> Result<Value> {
     let body = body(args)?.unwrap_or_default();
     let title = short(args, "title", 200, "Title")?
@@ -139,6 +145,17 @@ fn update(args: &Args) -> Result<Value> {
         values.insert("title".into(), json!(title));
     }
     if let Some(body) = body {
+        // Saving only the body (the editor is its own autosave form): a
+        // title that just follows the first line keeps following it.
+        if !values.contains_key("title") {
+            let rows = storage::query("SELECT title, body FROM notes WHERE id = ?1", &[json!(id)])?;
+            if let Some(row) = rows.first() {
+                let old_body = row["body"].as_str().unwrap_or("");
+                if follows_first_line(row["title"].as_str().unwrap_or(""), old_body) {
+                    values.insert("title".into(), json!(title_from(&body)));
+                }
+            }
+        }
         values.insert("body".into(), json!(body));
     }
     if let Some(project) = short(args, "project", 60, "Project")? {
@@ -307,3 +324,22 @@ fn summary(args: &Args) -> Result<Value> {
 }
 
 terrarium_guest::plugin!(Notes);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn untitled_and_first_line_titles_follow_the_body() {
+        assert!(follows_first_line("", "Anything"));
+        assert!(follows_first_line("Untitled", ""));
+        assert!(follows_first_line("Plan", "# Plan\n- [ ] one"));
+        assert!(!follows_first_line("My title", "# Plan\n- [ ] one"));
+    }
+
+    #[test]
+    fn an_empty_body_gets_the_untitled_title() {
+        assert_eq!(title_from(""), "Untitled");
+        assert_eq!(title_from("\n  \n"), "Untitled");
+    }
+}
